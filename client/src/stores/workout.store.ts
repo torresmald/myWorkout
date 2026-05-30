@@ -10,7 +10,6 @@ import type {
   WorkoutExercisePublic,
   WorkoutPublic,
 } from '@/interfaces/workout.interface'
-import { sortByDateDesc, sortExercises } from '@/utils/date.util'
 
 export const useWorkoutStore = defineStore('workout', () => {
   const workouts = ref<WorkoutPublic[]>([])
@@ -27,13 +26,17 @@ export const useWorkoutStore = defineStore('workout', () => {
   const updatingExerciseId = ref<number | null>(null)
   const deletingExerciseId = ref<number | null>(null)
 
-  async function fetchAll() {
-    loading.value = true
+  async function fetchAll(silent = false) {
+    if (!silent) {
+      loading.value = true
+    }
 
     try {
       workouts.value = await workoutApi.getWorkouts()
     } finally {
-      loading.value = false
+      if (!silent) {
+        loading.value = false
+      }
     }
   }
 
@@ -42,7 +45,7 @@ export const useWorkoutStore = defineStore('workout', () => {
 
     try {
       const created = await workoutApi.createWorkout(body)
-      workouts.value = sortByDateDesc([...workouts.value, created])
+      await fetchAll(true)
       return created
     } finally {
       creating.value = false
@@ -54,9 +57,7 @@ export const useWorkoutStore = defineStore('workout', () => {
 
     try {
       const updated = await workoutApi.updateWorkout(id, body)
-      workouts.value = sortByDateDesc(
-        workouts.value.map((item) => (item.id === id ? updated : item)),
-      )
+      await fetchAll(true)
       return updated
     } finally {
       updating.value = false
@@ -78,14 +79,19 @@ export const useWorkoutStore = defineStore('workout', () => {
     }
   }
 
-  async function fetchExercises(workoutId: number) {
-    loadingExercises.value = true
+  async function fetchExercises(workoutId: number, silent = false) {
+    if (!silent) {
+      loadingExercises.value = true
+    }
+
     activeWorkoutId.value = workoutId
 
     try {
       exercises.value = await workoutApi.getWorkoutExercises(workoutId)
     } finally {
-      loadingExercises.value = false
+      if (!silent) {
+        loadingExercises.value = false
+      }
     }
   }
 
@@ -99,7 +105,7 @@ export const useWorkoutStore = defineStore('workout', () => {
 
     try {
       const created = await workoutApi.createWorkoutExercise(workoutId, body)
-      exercises.value = sortExercises(exercises.value.concat(created))
+      await fetchExercises(workoutId, true)
       return created
     } finally {
       creatingExercise.value = false
@@ -115,9 +121,7 @@ export const useWorkoutStore = defineStore('workout', () => {
 
     try {
       const updated = await workoutApi.updateWorkoutExercise(workoutId, exerciseId, body)
-      exercises.value = sortExercises(
-        exercises.value.map((item) => (item.id === exerciseId ? updated : item)),
-      )
+      await fetchExercises(workoutId, true)
       return updated
     } finally {
       updatingExerciseId.value = null

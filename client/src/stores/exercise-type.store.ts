@@ -8,10 +8,6 @@ import type {
   UpdateExerciseTypeBody,
 } from '@/interfaces/exercise-type.interface'
 
-function sortByName(items: ExerciseTypePublic[]) {
-  return [...items].sort((a, b) => a.name.localeCompare(b.name))
-}
-
 export const useExerciseTypeStore = defineStore('exerciseType', () => {
   const exerciseTypes = ref<ExerciseTypePublic[]>([])
   const loading = ref(false)
@@ -19,13 +15,17 @@ export const useExerciseTypeStore = defineStore('exerciseType', () => {
   const updating = ref(false)
   const deletingId = ref<number | null>(null)
 
-  async function fetchAll() {
-    loading.value = true
+  async function fetchAll(silent = false) {
+    if (!silent) {
+      loading.value = true
+    }
 
     try {
       exerciseTypes.value = await exerciseTypeApi.getExerciseTypes()
     } finally {
-      loading.value = false
+      if (!silent) {
+        loading.value = false
+      }
     }
   }
 
@@ -34,7 +34,7 @@ export const useExerciseTypeStore = defineStore('exerciseType', () => {
 
     try {
       const created = await exerciseTypeApi.createExerciseType(body)
-      exerciseTypes.value = sortByName([...exerciseTypes.value, created])
+      await fetchAll(true)
       return created
     } finally {
       creating.value = false
@@ -46,9 +46,7 @@ export const useExerciseTypeStore = defineStore('exerciseType', () => {
 
     try {
       const updated = await exerciseTypeApi.updateExerciseType(id, body)
-      exerciseTypes.value = sortByName(
-        exerciseTypes.value.map((item) => (item.id === id ? updated : item)),
-      )
+      await fetchAll(true)
       return updated
     } finally {
       updating.value = false

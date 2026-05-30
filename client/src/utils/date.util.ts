@@ -1,5 +1,3 @@
-import type { WorkoutExercisePublic, WorkoutPublic } from '@/interfaces/workout.interface'
-
 export function isoToDateInputValue(iso: string): string {
   return new Date(iso).toISOString().slice(0, 10)
 }
@@ -18,15 +16,4 @@ export function formatWorkoutDate(iso: string): string {
     month: 'short',
     year: 'numeric',
   })
-}
-
-export function sortByDateDesc(items: WorkoutPublic[]) {
-  return [...items].sort(
-    (a, b) =>
-      new Date(b.date).getTime() - new Date(a.date).getTime() || a.name.localeCompare(b.name),
-  )
-}
-
-export function sortExercises(items: WorkoutExercisePublic[]) {
-  return [...items].sort((a, b) => a.sortOrder - b.sortOrder || a.id - b.id)
 }

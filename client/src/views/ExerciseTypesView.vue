@@ -3,7 +3,19 @@ import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { storeToRefs } from 'pinia'
 
+import PageContainer from '@/components/layout/PageContainer.vue'
+import RoutePageHeader from '@/components/layout/RoutePageHeader.vue'
 import type { ExerciseTypePublic } from '@/interfaces/exercise-type.interface'
+import {
+  BTN_DANGER_OUTLINE_CLASS,
+  BTN_GHOST_CLASS,
+  BTN_PRIMARY_CLASS,
+  BTN_SECONDARY_CLASS,
+  CARD_BODY_CLASS,
+  INPUT_CLASS,
+  LABEL_CLASS,
+  SECTION_TITLE_CLASS,
+} from '@/constants/ui.constants'
 import { useExerciseTypeStore } from '@/stores/exercise-type.store'
 import { useModalStore } from '@/stores/modal.store'
 import { useToastStore } from '@/stores/toast.store'
@@ -97,67 +109,51 @@ async function handleDelete(exercise: ExerciseTypePublic) {
 </script>
 
 <template>
-  <main class="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 p-8">
-    <header class="flex items-center justify-between">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900">Tipos de ejercicio</h1>
-        <p class="mt-1 text-sm text-gray-600">Gestiona tu biblioteca de ejercicios</p>
-      </div>
-      <RouterLink to="/" class="text-sm font-medium text-blue-600 hover:text-blue-700">
-        ← Inicio
-      </RouterLink>
-    </header>
+  <PageContainer>
+    <RoutePageHeader />
 
-    <section class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-      <h2 class="mb-4 text-lg font-semibold text-gray-800">
+    <section :class="CARD_BODY_CLASS">
+      <h2 :class="SECTION_TITLE_CLASS">
         {{ isEditing ? 'Editar ejercicio' : 'Nuevo ejercicio' }}
       </h2>
 
       <form class="space-y-4" @submit.prevent="handleSubmit">
         <div>
-          <label for="name" class="mb-1 block text-sm font-medium text-gray-700">Nombre</label>
+          <label for="name" :class="LABEL_CLASS">Nombre</label>
           <input
             id="name"
             v-model="name"
             type="text"
             required
-            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            :class="INPUT_CLASS"
             placeholder="Press banca"
           />
         </div>
 
         <div>
-          <label for="description" class="mb-1 block text-sm font-medium text-gray-700">
-            Descripción
-          </label>
+          <label for="description" :class="LABEL_CLASS">Descripción</label>
           <input
             id="description"
             v-model="description"
             type="text"
-            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            :class="INPUT_CLASS"
             placeholder="Opcional"
           />
         </div>
 
         <div>
-          <label for="muscleGroup" class="mb-1 block text-sm font-medium text-gray-700">
-            Grupo muscular
-          </label>
+          <label for="muscleGroup" :class="LABEL_CLASS">Grupo muscular</label>
           <input
             id="muscleGroup"
             v-model="muscleGroup"
             type="text"
-            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            :class="INPUT_CLASS"
             placeholder="Pecho, pierna..."
           />
         </div>
 
         <div class="flex gap-3">
-          <button
-            type="submit"
-            :disabled="saving"
-            class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-          >
+          <button type="submit" :disabled="saving" :class="BTN_PRIMARY_CLASS">
             {{
               saving
                 ? isEditing
@@ -172,7 +168,7 @@ async function handleDelete(exercise: ExerciseTypePublic) {
           <button
             v-if="isEditing"
             type="button"
-            class="rounded-lg border border-gray-300 px-4 py-2 font-medium text-gray-700 transition hover:bg-gray-50"
+            :class="BTN_SECONDARY_CLASS"
             @click="resetForm"
           >
             Cancelar
@@ -181,8 +177,8 @@ async function handleDelete(exercise: ExerciseTypePublic) {
       </form>
     </section>
 
-    <section class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-      <h2 class="mb-4 text-lg font-semibold text-gray-800">Mis ejercicios</h2>
+    <section :class="CARD_BODY_CLASS">
+      <h2 :class="SECTION_TITLE_CLASS">Mis ejercicios</h2>
 
       <p v-if="loading" class="text-sm text-gray-500">Cargando ejercicios...</p>
 
@@ -213,7 +209,7 @@ async function handleDelete(exercise: ExerciseTypePublic) {
           <div class="flex shrink-0 gap-2">
             <button
               type="button"
-              class="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+              :class="BTN_GHOST_CLASS"
               :disabled="deletingId === exercise.id"
               @click="startEdit(exercise)"
             >
@@ -221,7 +217,7 @@ async function handleDelete(exercise: ExerciseTypePublic) {
             </button>
             <button
               type="button"
-              class="rounded-lg border border-red-200 px-3 py-1.5 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+              :class="BTN_DANGER_OUTLINE_CLASS"
               :disabled="deletingId === exercise.id"
               @click="handleDelete(exercise)"
             >
@@ -231,5 +227,5 @@ async function handleDelete(exercise: ExerciseTypePublic) {
         </li>
       </ul>
     </section>
-  </main>
+  </PageContainer>
 </template>

@@ -2,6 +2,12 @@
 import { ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 
+import AuthCard from '@/components/layout/AuthCard.vue'
+import {
+  BTN_PRIMARY_FULL_CLASS,
+  INPUT_CLASS,
+  LABEL_CLASS,
+} from '@/constants/ui.constants'
 import { useAuthStore } from '@/stores/auth.store'
 import { useToastStore } from '@/stores/toast.store'
 import { getErrorMessage } from '@/utils/error.util'
@@ -39,68 +45,62 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <main class="flex min-h-screen items-center justify-center p-8">
-    <div class="w-full max-w-md rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
-      <h1 class="mb-2 text-2xl font-bold text-gray-900">Crear cuenta</h1>
-      <p class="mb-6 text-sm text-gray-600">Regístrate para empezar a gestionar tus entrenamientos</p>
+  <AuthCard
+    title="Crear cuenta"
+    description="Regístrate para empezar a gestionar tus entrenamientos"
+  >
+    <form class="space-y-4" @submit.prevent="handleSubmit">
+      <div>
+        <label for="name" :class="LABEL_CLASS">Nombre</label>
+        <input
+          id="name"
+          v-model="name"
+          type="text"
+          autocomplete="name"
+          :class="INPUT_CLASS"
+          placeholder="Tu nombre"
+        />
+      </div>
 
-      <form class="space-y-4" @submit.prevent="handleSubmit">
-        <div>
-          <label for="name" class="mb-1 block text-sm font-medium text-gray-700">Nombre</label>
-          <input
-            id="name"
-            v-model="name"
-            type="text"
-            autocomplete="name"
-            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            placeholder="Tu nombre"
-          />
-        </div>
+      <div>
+        <label for="email" :class="LABEL_CLASS">Email</label>
+        <input
+          id="email"
+          v-model="email"
+          type="email"
+          required
+          autocomplete="email"
+          :class="INPUT_CLASS"
+          placeholder="tu@email.com"
+        />
+      </div>
 
-        <div>
-          <label for="email" class="mb-1 block text-sm font-medium text-gray-700">Email</label>
-          <input
-            id="email"
-            v-model="email"
-            type="email"
-            required
-            autocomplete="email"
-            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            placeholder="tu@email.com"
-          />
-        </div>
+      <div>
+        <label for="password" :class="LABEL_CLASS">
+          Contraseña
+        </label>
+        <input
+          id="password"
+          v-model="password"
+          type="password"
+          required
+          minlength="6"
+          autocomplete="new-password"
+          :class="INPUT_CLASS"
+          placeholder="Mínimo 6 caracteres"
+        />
+      </div>
 
-        <div>
-          <label for="password" class="mb-1 block text-sm font-medium text-gray-700">
-            Contraseña
-          </label>
-          <input
-            id="password"
-            v-model="password"
-            type="password"
-            required
-            minlength="6"
-            autocomplete="new-password"
-            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            placeholder="Mínimo 6 caracteres"
-          />
-        </div>
+      <button type="submit" :disabled="loading" :class="BTN_PRIMARY_FULL_CLASS">
+        {{ loading ? 'Creando cuenta...' : 'Registrarse' }}
+      </button>
+    </form>
 
-        <button
-          type="submit"
-          :disabled="loading"
-          class="w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {{ loading ? 'Creando cuenta...' : 'Registrarse' }}
-        </button>
-      </form>
-
-      <p class="mt-6 text-center text-sm text-gray-600">
-        ¿Ya tienes cuenta?
-        <RouterLink to="/login" class="font-medium text-blue-600 hover:text-blue-700">
-          Inicia sesión
-        </RouterLink>
-      </p>
-    </div>
-  </main>
+    <p class="mt-6 text-center text-sm text-gray-600">
+      ¿Ya tienes cuenta?
+      <RouterLink to="/login" class="font-medium text-blue-600 hover:text-blue-700">
+        Inicia sesión
+      </RouterLink>
+    </p>
+  </AuthCard>
 </template>

@@ -1,21 +1,24 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
+import { RouterLink } from 'vue-router'
 import { storeToRefs } from 'pinia'
 
+import PageContainer from '@/components/layout/PageContainer.vue'
+import PageHeader from '@/components/layout/PageHeader.vue'
 import { getHealth } from '@/api/health.api'
+import { HOME_QUICK_LINKS } from '@/constants/home.constants'
+import { CARD_COMPACT_CLASS, CARD_INTERACTIVE_CLASS } from '@/constants/ui.constants'
 import type { HealthData } from '@/interfaces/health.interface'
 import { useAuthStore } from '@/stores/auth.store'
 import { useToastStore } from '@/stores/toast.store'
 import { getErrorMessage } from '@/utils/error.util'
 
-const router = useRouter()
 const authStore = useAuthStore()
 const toastStore = useToastStore()
 const { user } = storeToRefs(authStore)
 
 const health = ref<HealthData | null>(null)
-const loading = ref(true)
+const loadingHealth = ref(true)
 
 onMounted(async () => {
   try {
@@ -23,75 +26,53 @@ onMounted(async () => {
   } catch (e) {
     toastStore.error(getErrorMessage(e, 'Error al comprobar el estado del sistema'))
   } finally {
-    loading.value = false
+    loadingHealth.value = false
   }
 })
-
-async function handleLogout() {
-  authStore.logout()
-  toastStore.success('Sesión cerrada')
-  await router.push('/login')
-}
 </script>
 
 <template>
-  <main class="flex min-h-screen flex-col items-center justify-center gap-6 p-8">
-    <h1 class="text-3xl font-bold text-gray-900">My Workout</h1>
-    <p class="text-gray-600">Gestor de entrenamientos</p>
+  <PageContainer max-width="3xl">
+    <PageHeader
+      :title="`Hola, ${user?.name ?? user?.email}`"
+      description="¿Qué quieres hacer hoy?"
+    />
 
-    <section class="w-full max-w-md rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-      <h2 class="mb-4 text-lg font-semibold text-gray-800">Sesión</h2>
-      <p class="text-sm text-green-600">Conectado como {{ user?.email }} ({{ user?.role }})</p>
-      <button
-        type="button"
-        class="mt-4 text-sm font-medium text-red-600 hover:text-red-700"
-        @click="handleLogout"
-      >
-        Cerrar sesión
-      </button>
-    </section>
-
-    <section class="w-full max-w-md rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-      <h2 class="mb-4 text-lg font-semibold text-gray-800">Entrenamientos</h2>
-      <RouterLink to="/workouts" class="text-sm font-medium text-blue-600 hover:text-blue-700">
-        Gestionar entrenamientos →
-      </RouterLink>
-    </section>
-
-    <section class="w-full max-w-md rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-      <h2 class="mb-4 text-lg font-semibold text-gray-800">Ejercicios</h2>
+    <div class="grid gap-4 sm:grid-cols-2">
       <RouterLink
-        to="/exercise-types"
-        class="text-sm font-medium text-blue-600 hover:text-blue-700"
+        v-for="link in HOME_QUICK_LINKS"
+        :key="link.to"
+        :to="link.to"
+        :class="CARD_INTERACTIVE_CLASS"
       >
-        Gestionar tipos de ejercicio →
+        <h2 class="text-lg font-semibold text-gray-900">{{ link.label }}</h2>
+        <p class="mt-2 text-sm text-gray-600">{{ link.description }}</p>
+        <span class="mt-4 inline-block text-sm font-medium text-blue-600">Ir →</span>
       </RouterLink>
+    </div>
+
+    <section :class="CARD_COMPACT_CLASS">
+      <div class="flex flex-wrap items-center justify-between gap-2 text-sm">
+        <span class="font-medium text-gray-700">Estado del sistema</span>
+
+        <p v-if="loadingHealth" class="text-gray-500">Comprobando...</p>
+
+        <div v-else-if="health" class="flex flex-wrap items-center gap-x-4 gap-y-1 text-gray-600">
+          <span>
+            API:
+            <span class="font-medium text-green-600">ok</span>
+          </span>
+          <span>
+            BD:
+            <span
+              class="font-medium"
+              :class="health.database === 'connected' ? 'text-green-600' : 'text-amber-600'"
+            >
+              {{ health.database === 'connected' ? 'Conectada' : 'Desconectada' }}
+            </span>
+          </span>
+        </div>
+      </div>
     </section>
-
-    <section class="w-full max-w-md rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-      <h2 class="mb-4 text-lg font-semibold text-gray-800">Estado del sistema</h2>
-
-      <p v-if="loading" class="text-gray-500">Comprobando API...</p>
-
-      <dl v-else-if="health" class="space-y-2 text-sm">
-        <div class="flex justify-between">
-          <dt class="text-gray-500">API</dt>
-          <dd class="font-medium text-green-600">ok</dd>
-        </div>
-        <div class="flex justify-between">
-          <dt class="text-gray-500">Base de datos</dt>
-          <dd
-            class="font-medium"
-            :class="health.database === 'connected' ? 'text-green-600' : 'text-amber-600'"
-          >
-            {{ health.database === 'connected' ? 'Conectada' : 'Desconectada' }}
-          </dd>
-        </div>
-        <div class="flex justify-between">
-          <dt class="text-gray-500">Timestamp</dt>
-          <dd class="font-mono text-xs text-gray-700">{{ health.timestamp }}</dd>
-        </div>
-      </dl>
-    </section>
-  </main>
+  </PageContainer>
 </template>
