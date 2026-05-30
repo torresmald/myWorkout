@@ -1,0 +1,24 @@
+{
+  "name": "myworkout",
+  "version": "0.0.0",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev": "run-p dev:client dev:server",
+    "dev:client": "npm run dev --workspace=client",
+    "dev:server": "npm run dev --workspace=server",
+    "build": "npm run build --workspace=client",
+    "db:migrate": "npm run migrate --workspace=server",
+    "db:studio": "npm run studio --workspace=server",
+    "db:generate": "npm run generate --workspace=server"
+  },
+  "devDependencies": {
+    "npm-run-all2": "^8.0.4"
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  }
+}
