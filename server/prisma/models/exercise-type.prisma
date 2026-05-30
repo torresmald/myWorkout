@@ -9,5 +9,7 @@ model ExerciseType {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  workoutExercises WorkoutExercise[]
+
   @@unique([userId, name])
 }

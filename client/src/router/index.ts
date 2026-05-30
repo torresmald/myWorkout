@@ -1,10 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 import { useAuthStore } from '@/stores/auth.store'
-import HomeView from '@/views/HomeView.vue'
 import ExerciseTypesView from '@/views/ExerciseTypesView.vue'
+import HomeView from '@/views/HomeView.vue'
 import LoginView from '@/views/LoginView.vue'
 import RegisterView from '@/views/RegisterView.vue'
+import WorkoutsView from '@/views/WorkoutsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -19,6 +20,12 @@ const router = createRouter({
       path: '/exercise-types',
       name: 'exercise-types',
       component: ExerciseTypesView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/workouts',
+      name: 'workouts',
+      component: WorkoutsView,
       meta: { requiresAuth: true },
     },
     {

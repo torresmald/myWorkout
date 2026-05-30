@@ -52,6 +52,13 @@ async function handleLogout() {
     </section>
 
     <section class="w-full max-w-md rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+      <h2 class="mb-4 text-lg font-semibold text-gray-800">Entrenamientos</h2>
+      <RouterLink to="/workouts" class="text-sm font-medium text-blue-600 hover:text-blue-700">
+        Gestionar entrenamientos →
+      </RouterLink>
+    </section>
+
+    <section class="w-full max-w-md rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
       <h2 class="mb-4 text-lg font-semibold text-gray-800">Ejercicios</h2>
       <RouterLink
         to="/exercise-types"
