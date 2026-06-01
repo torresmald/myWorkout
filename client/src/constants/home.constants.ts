@@ -15,4 +15,9 @@ export const HOME_QUICK_LINKS: HomeQuickLink[] = [
     description: 'Administra tu catálogo de ejercicios reutilizables.',
     to: '/exercise-types',
   },
+  {
+    label: 'Mi perfil',
+    description: 'Actualiza tus datos, peso, altura e IMC.',
+    to: '/profile',
+  },
 ]

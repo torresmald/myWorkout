@@ -16,7 +16,7 @@ const maxWidthClass = {
 
 <template>
   <div
-    class="mx-auto flex flex-col gap-6 p-4 sm:p-6"
+    class="mx-auto flex flex-col gap-4 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 sm:gap-6 sm:p-6"
     :class="maxWidthClass[maxWidth]"
   >
     <slot />

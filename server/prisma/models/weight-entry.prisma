@@ -1,0 +1,9 @@
+model WeightEntry {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  weightKg   Decimal  @db.Decimal(5, 2)
+  recordedAt DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, recordedAt])
+}

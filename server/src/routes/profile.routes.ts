@@ -1,0 +1,147 @@
+import { Router } from 'express'
+
+import type { AuthenticatedRequest } from '../interfaces/express.interface.js'
+import type { AddWeightBody, UpdateProfileBody, UpdateWeightBody } from '../interfaces/profile.interface.js'
+import { authenticate } from '../middleware/auth.middleware.js'
+import { handleAvatarUpload } from '../middleware/upload.middleware.js'
+import {
+  addWeightEntry,
+  deleteWeightEntry,
+  getUserProfile,
+  updateUserProfile,
+  updateWeightEntry,
+} from '../services/profile.service.js'
+import {
+  deleteProfileAvatar,
+  uploadProfileAvatar,
+} from '../services/profile-avatar.service.js'
+import { AppError } from '../interfaces/app-error.interface.js'
+import { handleServiceError } from '../utils/app-error.util.js'
+import { sendSuccess } from '../utils/api-response.util.js'
+
+const router = Router()
+
+router.use(authenticate)
+
+router.get('/', async (req, res) => {
+  const { userId } = (req as AuthenticatedRequest).user
+
+  try {
+    const profile = await getUserProfile(userId)
+    sendSuccess(res, profile)
+  } catch (error) {
+    if (handleServiceError(error, res)) {
+      return
+    }
+
+    throw error
+  }
+})
+
+router.patch('/', async (req, res) => {
+  const { userId } = (req as AuthenticatedRequest).user
+
+  try {
+    const profile = await updateUserProfile(userId, req.body as UpdateProfileBody)
+    sendSuccess(res, profile)
+  } catch (error) {
+    if (handleServiceError(error, res)) {
+      return
+    }
+
+    throw error
+  }
+})
+
+router.post('/weight', async (req, res) => {
+  const { userId } = (req as AuthenticatedRequest).user
+
+  try {
+    const result = await addWeightEntry(userId, req.body as AddWeightBody)
+    sendSuccess(res, result, 201)
+  } catch (error) {
+    if (handleServiceError(error, res)) {
+      return
+    }
+
+    throw error
+  }
+})
+
+router.put('/weight/:id', async (req, res) => {
+  const { userId } = (req as unknown as AuthenticatedRequest).user
+
+  try {
+    const entryId = Number(req.params.id)
+
+    if (!Number.isInteger(entryId) || entryId <= 0) {
+      throw new AppError('Registro de peso inválido', 400)
+    }
+
+    const result = await updateWeightEntry(userId, entryId, req.body as UpdateWeightBody)
+    sendSuccess(res, result)
+  } catch (error) {
+    if (handleServiceError(error, res)) {
+      return
+    }
+
+    throw error
+  }
+})
+
+router.delete('/weight/:id', async (req, res) => {
+  const { userId } = (req as unknown as AuthenticatedRequest).user
+
+  try {
+    const entryId = Number(req.params.id)
+
+    if (!Number.isInteger(entryId) || entryId <= 0) {
+      throw new AppError('Registro de peso inválido', 400)
+    }
+
+    const result = await deleteWeightEntry(userId, entryId)
+    sendSuccess(res, result)
+  } catch (error) {
+    if (handleServiceError(error, res)) {
+      return
+    }
+
+    throw error
+  }
+})
+
+router.post('/avatar', handleAvatarUpload, async (req, res) => {
+  const { userId } = (req as AuthenticatedRequest).user
+
+  try {
+    if (!req.file) {
+      throw new AppError('No se recibió ninguna imagen', 400)
+    }
+
+    const profile = await uploadProfileAvatar(userId, req.file)
+    sendSuccess(res, profile)
+  } catch (error) {
+    if (handleServiceError(error, res)) {
+      return
+    }
+
+    throw error
+  }
+})
+
+router.delete('/avatar', async (req, res) => {
+  const { userId } = (req as AuthenticatedRequest).user
+
+  try {
+    const profile = await deleteProfileAvatar(userId)
+    sendSuccess(res, profile)
+  } catch (error) {
+    if (handleServiceError(error, res)) {
+      return
+    }
+
+    throw error
+  }
+})
+
+export default router

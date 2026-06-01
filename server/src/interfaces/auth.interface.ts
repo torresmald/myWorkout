@@ -17,10 +17,49 @@ export interface UserPublic {
   name: string | null
   role: UserRole
   createdAt: Date
+  heightCm: number | null
+  profileImageUrl: string | null
+  latestWeightKg: number | null
+  bmi: number | null
+  bmiCategory: string | null
 }
 
 export interface LoginResponse {
   token: string
   refreshToken: string
   user: UserPublic
+}
+
+export interface RegisterResponse {
+  message: string
+  email: string
+}
+
+export interface VerifyEmailBody {
+  token?: string
+}
+
+export interface VerifyEmailResponse {
+  message: string
+}
+
+export interface ResendVerificationBody {
+  email?: string
+}
+
+export interface ResendVerificationResponse {
+  message: string
+}
+
+export interface ForgotPasswordBody {
+  email?: string
+}
+
+export interface ResetPasswordBody {
+  token?: string
+  password?: string
+}
+
+export interface PasswordResetResponse {
+  message: string
 }

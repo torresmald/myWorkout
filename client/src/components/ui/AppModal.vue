@@ -49,31 +49,31 @@ onUnmounted(() => {
     >
       <div
         v-if="open"
-        class="fixed inset-0 z-50 flex items-center justify-center p-4"
+        class="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4"
         role="presentation"
       >
         <div class="absolute inset-0 bg-black/50" @click="handleBackdropClick" />
 
         <Transition
           enter-active-class="transition duration-200 ease-out"
-          enter-from-class="scale-95 opacity-0"
-          enter-to-class="scale-100 opacity-100"
+          enter-from-class="translate-y-4 opacity-0 sm:translate-y-0 sm:scale-95"
+          enter-to-class="translate-y-0 opacity-100 sm:scale-100"
           leave-active-class="transition duration-150 ease-in"
-          leave-from-class="scale-100 opacity-100"
-          leave-to-class="scale-95 opacity-0"
+          leave-from-class="translate-y-0 opacity-100 sm:scale-100"
+          leave-to-class="translate-y-4 opacity-0 sm:translate-y-0 sm:scale-95"
         >
           <div
             v-if="open"
             role="dialog"
             aria-modal="true"
             :aria-labelledby="title ? 'app-modal-title' : undefined"
-            class="relative z-10 w-full max-w-md rounded-xl border border-gray-200 bg-white p-6 shadow-xl"
+            class="relative z-10 max-h-[85dvh] w-full overflow-y-auto rounded-t-2xl border border-gray-200 bg-white p-4 shadow-xl sm:max-w-md sm:rounded-xl sm:p-6"
             @click.stop
           >
             <h2
               v-if="title"
               id="app-modal-title"
-              class="mb-4 text-lg font-semibold text-gray-900"
+              class="mb-4 text-base font-semibold text-gray-900 sm:text-lg"
             >
               {{ title }}
             </h2>

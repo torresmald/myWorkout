@@ -5,9 +5,13 @@ import GuestLayout from '@/components/layout/GuestLayout.vue'
 import { useAuthStore } from '@/stores/auth.store'
 import { buildDocumentTitle } from '@/utils/document-title.util'
 import ExerciseTypesView from '@/views/ExerciseTypesView.vue'
+import ForgotPasswordView from '@/views/ForgotPasswordView.vue'
 import HomeView from '@/views/HomeView.vue'
 import LoginView from '@/views/LoginView.vue'
+import ProfileView from '@/views/ProfileView.vue'
 import RegisterView from '@/views/RegisterView.vue'
+import ResetPasswordView from '@/views/ResetPasswordView.vue'
+import VerifyEmailView from '@/views/VerifyEmailView.vue'
 import WorkoutsView from '@/views/WorkoutsView.vue'
 
 const router = createRouter({
@@ -45,6 +49,15 @@ const router = createRouter({
             pageDescription: 'Registra y consulta tus sesiones',
           },
         },
+        {
+          path: 'profile',
+          name: 'profile',
+          component: ProfileView,
+          meta: {
+            title: 'Mi perfil',
+            pageDescription: 'Gestiona tus datos personales y tu evolución',
+          },
+        },
       ],
     },
     {
@@ -73,6 +86,49 @@ const router = createRouter({
           component: RegisterView,
           meta: {
             title: 'Crear cuenta',
+          },
+        },
+      ],
+    },
+    {
+      path: '/verify-email',
+      component: GuestLayout,
+      children: [
+        {
+          path: '',
+          name: 'verify-email',
+          component: VerifyEmailView,
+          meta: {
+            title: 'Verificar cuenta',
+          },
+        },
+      ],
+    },
+    {
+      path: '/forgot-password',
+      component: GuestLayout,
+      meta: { requiresGuest: true },
+      children: [
+        {
+          path: '',
+          name: 'forgot-password',
+          component: ForgotPasswordView,
+          meta: {
+            title: 'Recuperar contraseña',
+          },
+        },
+      ],
+    },
+    {
+      path: '/reset-password',
+      component: GuestLayout,
+      children: [
+        {
+          path: '',
+          name: 'reset-password',
+          component: ResetPasswordView,
+          meta: {
+            title: 'Nueva contraseña',
           },
         },
       ],

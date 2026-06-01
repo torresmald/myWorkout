@@ -40,3 +40,7 @@ __screenshots__/
 
 # Vite
 *.timestamp-*-*.mjs
+
+# User uploads
+server/uploads/*
+!server/uploads/.gitkeep

@@ -1,13 +1,16 @@
 <script setup lang="ts">
+import AppFooter from '@/components/layout/AppFooter.vue'
 import AppHeader from '@/components/layout/AppHeader.vue'
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="flex min-h-dvh flex-col bg-gray-50">
     <AppHeader />
 
-    <main class="mx-auto max-w-5xl">
+    <main class="mx-auto w-full max-w-5xl flex-1">
       <RouterView />
     </main>
+
+    <AppFooter />
   </div>
 </template>

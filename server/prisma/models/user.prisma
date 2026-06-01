@@ -4,15 +4,22 @@ enum Role {
 }
 
 model User {
-  id               Int            @id @default(autoincrement())
-  email            String         @unique
-  password         String
-  name             String?
-  role             Role           @default(USER)
-  refreshTokenHash String?        @unique
-  lastLoginAt      DateTime?
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
-  exerciseTypes    ExerciseType[]
-  workouts         Workout[]
+  id                      Int                       @id @default(autoincrement())
+  email                   String                    @unique
+  password                String?
+  googleId                String?                   @unique
+  name                    String?
+  heightCm                Decimal?                  @db.Decimal(5, 2)
+  profileImagePath        String?
+  role                    Role                      @default(USER)
+  refreshTokenHash        String?                   @unique
+  emailVerifiedAt         DateTime?
+  lastLoginAt             DateTime?
+  createdAt               DateTime                  @default(now())
+  updatedAt               DateTime                  @updatedAt
+  exerciseTypes           ExerciseType[]
+  workouts                Workout[]
+  emailVerificationTokens EmailVerificationToken[]
+  passwordResetTokens     PasswordResetToken[]
+  weightEntries           WeightEntry[]
 }

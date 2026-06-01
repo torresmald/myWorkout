@@ -5,7 +5,7 @@ import { APP_NAME } from '@/constants/app.constants'
 </script>
 
 <template>
-  <div class="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4 py-8">
+  <div class="flex min-h-dvh flex-col items-center justify-center bg-gray-50 px-4 py-8 pb-[max(2rem,env(safe-area-inset-bottom))] pt-[max(2rem,env(safe-area-inset-top))]">
     <RouterLink
       to="/login"
       class="mb-8 text-2xl font-bold text-gray-900 transition hover:text-blue-700"

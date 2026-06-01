@@ -19,7 +19,7 @@ export const useToastStore = defineStore('toast', () => {
 
     toasts.value.push({ id, message, type })
 
-    window.setTimeout(() => {
+    setTimeout(() => {
       remove(id)
     }, duration)
 

@@ -32,14 +32,28 @@ export const useAuthStore = defineStore('auth', () => {
     return data.user
   }
 
+  async function loginWithGoogle(idToken: string) {
+    const data = await authApi.loginWithGoogle(idToken)
+    setSession(data.token, data.refreshToken, data.user)
+    return data.user
+  }
+
   async function register(body: RegisterBody) {
     return authApi.register(body)
+  }
+
+  async function resendVerification(email: string) {
+    return authApi.resendVerification(email)
   }
 
   async function fetchMe() {
     const currentUser = await authApi.getMe()
     user.value = currentUser
     return currentUser
+  }
+
+  function setUser(currentUser: UserPublic) {
+    user.value = currentUser
   }
 
   async function initAuth() {
@@ -71,8 +85,11 @@ export const useAuthStore = defineStore('auth', () => {
     refreshToken,
     isAuthenticated,
     login,
+    loginWithGoogle,
     register,
+    resendVerification,
     fetchMe,
+    setUser,
     initAuth,
     ensureAuthReady,
     logout,

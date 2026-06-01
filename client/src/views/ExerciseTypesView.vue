@@ -1,19 +1,21 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { RouterLink } from 'vue-router'
 import { storeToRefs } from 'pinia'
 
 import PageContainer from '@/components/layout/PageContainer.vue'
 import RoutePageHeader from '@/components/layout/RoutePageHeader.vue'
+import ListItemIconActions from '@/components/ui/ListItemIconActions.vue'
 import type { ExerciseTypePublic } from '@/interfaces/exercise-type.interface'
 import {
-  BTN_DANGER_OUTLINE_CLASS,
-  BTN_GHOST_CLASS,
+  BTN_ACTIONS_CLASS,
+  BTN_MOBILE_FULL_CLASS,
   BTN_PRIMARY_CLASS,
   BTN_SECONDARY_CLASS,
   CARD_BODY_CLASS,
   INPUT_CLASS,
   LABEL_CLASS,
+  LIST_ITEM_CONTENT_CLASS,
+  LIST_ITEM_ROW_CLASS,
   SECTION_TITLE_CLASS,
 } from '@/constants/ui.constants'
 import { useExerciseTypeStore } from '@/stores/exercise-type.store'
@@ -152,8 +154,12 @@ async function handleDelete(exercise: ExerciseTypePublic) {
           />
         </div>
 
-        <div class="flex gap-3">
-          <button type="submit" :disabled="saving" :class="BTN_PRIMARY_CLASS">
+        <div :class="BTN_ACTIONS_CLASS">
+          <button
+            type="submit"
+            :disabled="saving"
+            :class="[BTN_PRIMARY_CLASS, BTN_MOBILE_FULL_CLASS]"
+          >
             {{
               saving
                 ? isEditing
@@ -168,7 +174,7 @@ async function handleDelete(exercise: ExerciseTypePublic) {
           <button
             v-if="isEditing"
             type="button"
-            :class="BTN_SECONDARY_CLASS"
+            :class="[BTN_SECONDARY_CLASS, BTN_MOBILE_FULL_CLASS]"
             @click="resetForm"
           >
             Cancelar
@@ -190,10 +196,12 @@ async function handleDelete(exercise: ExerciseTypePublic) {
         <li
           v-for="exercise in exerciseTypes"
           :key="exercise.id"
-          class="flex flex-col gap-3 py-3 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between"
-          :class="{ 'rounded-lg bg-blue-50 px-3 -mx-3': editingId === exercise.id }"
+          :class="[
+            LIST_ITEM_ROW_CLASS,
+            { 'rounded-lg bg-blue-50 px-3 -mx-3': editingId === exercise.id },
+          ]"
         >
-          <div>
+          <div :class="LIST_ITEM_CONTENT_CLASS">
             <p class="font-medium text-gray-900">{{ exercise.name }}</p>
             <p v-if="exercise.description" class="text-sm text-gray-500">
               {{ exercise.description }}
@@ -206,24 +214,11 @@ async function handleDelete(exercise: ExerciseTypePublic) {
             </span>
           </div>
 
-          <div class="flex shrink-0 gap-2">
-            <button
-              type="button"
-              :class="BTN_GHOST_CLASS"
-              :disabled="deletingId === exercise.id"
-              @click="startEdit(exercise)"
-            >
-              Editar
-            </button>
-            <button
-              type="button"
-              :class="BTN_DANGER_OUTLINE_CLASS"
-              :disabled="deletingId === exercise.id"
-              @click="handleDelete(exercise)"
-            >
-              {{ deletingId === exercise.id ? 'Eliminando...' : 'Eliminar' }}
-            </button>
-          </div>
+          <ListItemIconActions
+            :deleting="deletingId === exercise.id"
+            @edit="startEdit(exercise)"
+            @delete="handleDelete(exercise)"
+          />
         </li>
       </ul>
     </section>
