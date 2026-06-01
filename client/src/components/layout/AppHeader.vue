@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 
 import UserAvatar from '@/components/profile/UserAvatar.vue'
 import ThemeToggle from '@/components/ui/ThemeToggle.vue'
 import { NAV_ITEMS } from '@/constants/nav.constants'
+import type { NavItem } from '@/interfaces/nav.interface'
 import { APP_NAME } from '@/constants/app.constants'
 import { BTN_DANGER_CLASS } from '@/constants/ui.constants'
 import { useAuthStore } from '@/stores/auth.store'
@@ -18,6 +19,16 @@ const toastStore = useToastStore()
 const { user } = storeToRefs(authStore)
 
 const isMenuOpen = ref(false)
+
+const visibleNavItems = computed<NavItem[]>(() => {
+  const items = [...NAV_ITEMS]
+
+  if (user.value?.role === 'ADMIN') {
+    items.push({ label: 'Admin', routeName: 'admin', to: '/admin' })
+  }
+
+  return items
+})
 
 function isActive(routeName: string): boolean {
   return route.name === routeName
@@ -87,7 +98,7 @@ onUnmounted(() => {
 
       <nav class="hidden items-center gap-1 sm:flex">
         <RouterLink
-          v-for="item in NAV_ITEMS"
+          v-for="item in visibleNavItems"
           :key="item.routeName"
           :to="item.to"
           class="shrink-0 rounded-lg px-3 py-2.5 text-sm font-medium transition"
@@ -165,7 +176,7 @@ onUnmounted(() => {
 
         <nav class="flex flex-col gap-1">
           <RouterLink
-            v-for="item in NAV_ITEMS"
+            v-for="item in visibleNavItems"
             :key="item.routeName"
             :to="item.to"
             class="min-h-11 rounded-lg px-3 py-2.5 text-base font-medium transition"

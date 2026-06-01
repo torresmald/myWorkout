@@ -13,6 +13,7 @@ import RegisterView from '@/views/RegisterView.vue'
 import ResetPasswordView from '@/views/ResetPasswordView.vue'
 import VerifyEmailView from '@/views/VerifyEmailView.vue'
 import WorkoutsView from '@/views/WorkoutsView.vue'
+import AdminView from '@/views/AdminView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -56,6 +57,16 @@ const router = createRouter({
           meta: {
             title: 'Mi perfil',
             pageDescription: 'Gestiona tus datos personales y tu evolución',
+          },
+        },
+        {
+          path: 'admin',
+          name: 'admin',
+          component: AdminView,
+          meta: {
+            requiresAdmin: true,
+            title: 'Administración',
+            pageDescription: 'Métricas y gestión de usuarios',
           },
         },
       ],
@@ -148,6 +159,11 @@ router.beforeEach(async (to) => {
   }
 
   if (requiresGuest && authStore.isAuthenticated) {
+    return { name: 'home' }
+  }
+
+  const requiresAdmin = to.matched.some((record) => record.meta.requiresAdmin)
+  if (requiresAdmin && authStore.user?.role !== 'ADMIN') {
     return { name: 'home' }
   }
 })

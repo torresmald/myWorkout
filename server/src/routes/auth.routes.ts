@@ -4,6 +4,7 @@ import type { ForgotPasswordBody, LoginBody, RegisterBody, ResendVerificationBod
 import type { GoogleLoginBody } from '../interfaces/google.interface.js'
 import type { AuthenticatedRequest } from '../interfaces/express.interface.js'
 import { authenticate } from '../middleware/auth.middleware.js'
+import { authActionLimiter, authEmailLimiter } from '../middleware/rate-limit.middleware.js'
 import { getUserById, loginUser, loginWithGoogle, registerUser } from '../services/auth.service.js'
 import { resendVerificationEmail, verifyEmailWithToken } from '../services/email-verification.service.js'
 import { requestPasswordReset, resetPassword } from '../services/password-reset.service.js'
@@ -12,7 +13,7 @@ import { sendSuccess } from '../utils/api-response.util.js'
 
 const router = Router()
 
-router.post('/register', async (req, res) => {
+router.post('/register', authActionLimiter, async (req, res) => {
   try {
     const result = await registerUser(req.body as RegisterBody)
     sendSuccess(res, result, 201)
@@ -25,7 +26,7 @@ router.post('/register', async (req, res) => {
   }
 })
 
-router.post('/login', async (req, res) => {
+router.post('/login', authActionLimiter, async (req, res) => {
   try {
     const loginResponse = await loginUser(req.body as LoginBody)
     sendSuccess(res, loginResponse)
@@ -38,7 +39,7 @@ router.post('/login', async (req, res) => {
   }
 })
 
-router.post('/google', async (req, res) => {
+router.post('/google', authActionLimiter, async (req, res) => {
   try {
     const { idToken } = req.body as GoogleLoginBody
     const loginResponse = await loginWithGoogle(idToken ?? '')
@@ -66,7 +67,7 @@ router.post('/verify-email', async (req, res) => {
   }
 })
 
-router.post('/resend-verification', async (req, res) => {
+router.post('/resend-verification', authEmailLimiter, async (req, res) => {
   try {
     const { email } = req.body as ResendVerificationBody
     const result = await resendVerificationEmail(email ?? '')
@@ -80,7 +81,7 @@ router.post('/resend-verification', async (req, res) => {
   }
 })
 
-router.post('/forgot-password', async (req, res) => {
+router.post('/forgot-password', authEmailLimiter, async (req, res) => {
   try {
     const { email } = req.body as ForgotPasswordBody
     const result = await requestPasswordReset(email ?? '')

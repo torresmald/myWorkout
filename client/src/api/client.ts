@@ -1,5 +1,14 @@
+import * as Sentry from '@sentry/vue'
+
 import type { ApiResponse } from '@/interfaces/api-response.interface'
+import { isSentryEnabled } from '@/config/sentry'
 import { getAccessToken } from '@/utils/storage.util'
+
+function reportApiError(error: unknown): void {
+  if (isSentryEnabled()) {
+    Sentry.captureException(error)
+  }
+}
 
 function buildHeaders(init?: RequestInit): Headers {
   const headers = new Headers(init?.headers)
@@ -24,7 +33,11 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
   const body = (await response.json()) as ApiResponse<T>
 
   if (!response.ok || body.status === 'error') {
-    throw new Error(body.error ?? `API error: ${response.status}`)
+    const error = new Error(body.error ?? `API error: ${response.status}`)
+    if (response.status >= 500) {
+      reportApiError(error)
+    }
+    throw error
   }
 
   return body.data as T
