@@ -1,3 +1,4 @@
+import { ErrorCode } from '../constants/error-codes.constants.js'
 import { workoutExerciseSelect } from '../constants/workout.constants.js'
 import { prisma } from '../config/prisma.js'
 import { AppError } from '../interfaces/app-error.interface.js'
@@ -16,7 +17,7 @@ import {
 
 function requirePositiveInteger(value: number | undefined, field: string): number {
   if (value === undefined || !Number.isInteger(value) || value <= 0) {
-    throw new AppError(`${field} debe ser un entero positivo`, 400)
+    throw new AppError(ErrorCode.POSITIVE_INTEGER_REQUIRED, 400, { field })
   }
 
   return value
@@ -28,7 +29,7 @@ function requireNonNegativeInteger(value: number | undefined, field: string, def
   }
 
   if (!Number.isInteger(value) || value < 0) {
-    throw new AppError(`${field} debe ser un entero mayor o igual a 0`, 400)
+    throw new AppError(ErrorCode.NON_NEGATIVE_INTEGER_REQUIRED, 400, { field })
   }
 
   return value
@@ -40,7 +41,7 @@ function parseOptionalWeight(weight?: number | null): number | null {
   }
 
   if (typeof weight !== 'number' || weight <= 0) {
-    throw new AppError('El peso debe ser un número positivo', 400)
+    throw new AppError(ErrorCode.WEIGHT_MUST_BE_POSITIVE, 400)
   }
 
   return weight
@@ -72,7 +73,7 @@ async function requireUserWorkout(userId: number, workoutId: string) {
   const workout = await findUserWorkout(userId, workoutId)
 
   if (!workout) {
-    throw new AppError('Entrenamiento no encontrado', 404)
+    throw new AppError(ErrorCode.WORKOUT_NOT_FOUND, 404)
   }
 
   return workout
@@ -82,7 +83,7 @@ async function requireUserExerciseType(userId: number, exerciseTypeId: number) {
   const exerciseType = await findUserExerciseType(userId, String(exerciseTypeId))
 
   if (!exerciseType) {
-    throw new AppError('Tipo de ejercicio no encontrado', 404)
+    throw new AppError(ErrorCode.EXERCISE_TYPE_NOT_FOUND, 404)
   }
 
   return exerciseType
@@ -91,11 +92,11 @@ async function requireUserExerciseType(userId: number, exerciseTypeId: number) {
 function buildWorkoutExerciseData(body: CreateWorkoutExerciseBody, exerciseTypeId: number) {
   return {
     exerciseTypeId,
-    sets: requirePositiveInteger(body.sets, 'Las series'),
-    reps: requirePositiveInteger(body.reps, 'Las repeticiones'),
-    restSeconds: requireNonNegativeInteger(body.restSeconds, 'El descanso', 0),
+    sets: requirePositiveInteger(body.sets, 'sets'),
+    reps: requirePositiveInteger(body.reps, 'reps'),
+    restSeconds: requireNonNegativeInteger(body.restSeconds, 'restSeconds', 0),
     weight: parseOptionalWeight(body.weight),
-    sortOrder: requireNonNegativeInteger(body.sortOrder, 'El orden', 0),
+    sortOrder: requireNonNegativeInteger(body.sortOrder, 'sortOrder', 0),
   }
 }
 
@@ -104,7 +105,7 @@ async function handleForeignKeyViolation<T>(operation: () => Promise<T>): Promis
     return await operation()
   } catch (error) {
     if (isPrismaForeignKeyViolation(error)) {
-      throw new AppError('Tipo de ejercicio no encontrado', 404)
+      throw new AppError(ErrorCode.EXERCISE_TYPE_NOT_FOUND, 404)
     }
 
     throw error
@@ -132,7 +133,7 @@ export async function createWorkoutExercise(
   body: CreateWorkoutExerciseBody,
 ): Promise<WorkoutExercisePublic> {
   const workout = await requireUserWorkout(userId, workoutId)
-  const exerciseTypeId = requirePositiveInteger(body.exerciseTypeId, 'El tipo de ejercicio')
+  const exerciseTypeId = requirePositiveInteger(body.exerciseTypeId, 'exerciseTypeId')
 
   await requireUserExerciseType(userId, exerciseTypeId)
 
@@ -156,12 +157,12 @@ export async function updateWorkoutExercise(
   const existing = await findUserWorkoutExercise(userId, workoutId, exerciseId)
 
   if (!existing) {
-    throw new AppError('Ejercicio del entrenamiento no encontrado', 404)
+    throw new AppError(ErrorCode.WORKOUT_EXERCISE_NOT_FOUND, 404)
   }
 
   const exerciseTypeId =
     body.exerciseTypeId !== undefined
-      ? requirePositiveInteger(body.exerciseTypeId, 'El tipo de ejercicio')
+      ? requirePositiveInteger(body.exerciseTypeId, 'exerciseTypeId')
       : existing.exerciseTypeId
 
   if (body.exerciseTypeId !== undefined) {
@@ -175,21 +176,21 @@ export async function updateWorkoutExercise(
         exerciseTypeId,
         sets:
           body.sets !== undefined
-            ? requirePositiveInteger(body.sets, 'Las series')
+            ? requirePositiveInteger(body.sets, 'sets')
             : existing.sets,
         reps:
           body.reps !== undefined
-            ? requirePositiveInteger(body.reps, 'Las repeticiones')
+            ? requirePositiveInteger(body.reps, 'reps')
             : existing.reps,
         restSeconds:
           body.restSeconds !== undefined
-            ? requireNonNegativeInteger(body.restSeconds, 'El descanso', 0)
+            ? requireNonNegativeInteger(body.restSeconds, 'restSeconds', 0)
             : existing.restSeconds,
         weight:
           body.weight !== undefined ? parseOptionalWeight(body.weight) : existing.weight,
         sortOrder:
           body.sortOrder !== undefined
-            ? requireNonNegativeInteger(body.sortOrder, 'El orden', 0)
+            ? requireNonNegativeInteger(body.sortOrder, 'sortOrder', 0)
             : existing.sortOrder,
       },
       select: workoutExerciseSelect,
@@ -205,7 +206,7 @@ export async function deleteWorkoutExercise(
   const existing = await findUserWorkoutExercise(userId, workoutId, exerciseId)
 
   if (!existing) {
-    throw new AppError('Ejercicio del entrenamiento no encontrado', 404)
+    throw new AppError(ErrorCode.WORKOUT_EXERCISE_NOT_FOUND, 404)
   }
 
   await prisma.workoutExercise.delete({

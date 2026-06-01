@@ -5,6 +5,8 @@ import {
 
 type AllowedAvatarMimeType = (typeof ALLOWED_AVATAR_MIME_TYPES)[number]
 
+export type AvatarValidationError = 'invalidFormat' | 'tooLarge'
+
 export function getUserInitials(name: string | null | undefined, email: string): string {
   const trimmedName = name?.trim()
 
@@ -23,13 +25,13 @@ export function getUserInitials(name: string | null | undefined, email: string):
   return email[0]?.toUpperCase() ?? '?'
 }
 
-export function validateAvatarFile(file: File): string | null {
+export function validateAvatarFile(file: File): AvatarValidationError | null {
   if (!ALLOWED_AVATAR_MIME_TYPES.includes(file.type as AllowedAvatarMimeType)) {
-    return 'Formato no permitido. Usa JPEG, PNG o WebP.'
+    return 'invalidFormat'
   }
 
   if (file.size > MAX_AVATAR_SIZE_BYTES) {
-    return 'La imagen supera el tamaño máximo de 2 MB.'
+    return 'tooLarge'
   }
 
   return null

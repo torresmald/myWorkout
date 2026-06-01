@@ -1,18 +1,15 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 
-import {
-  MODAL_DEFAULT_CANCEL_LABEL,
-  MODAL_DEFAULT_CONFIRM_LABEL,
-} from '@/constants/modal.constants'
+import { i18n } from '@/i18n'
 import type { ConfirmModalOptions, ModalOptions } from '@/interfaces/modal.interface'
 
 export const useModalStore = defineStore('modal', () => {
   const isOpen = ref(false)
   const title = ref<string | null>(null)
   const message = ref<string | null>(null)
-  const confirmLabel = ref(MODAL_DEFAULT_CONFIRM_LABEL)
-  const cancelLabel = ref(MODAL_DEFAULT_CANCEL_LABEL)
+  const confirmLabel = ref('')
+  const cancelLabel = ref('')
   const showDefaultFooter = ref(false)
   const confirmVariant = ref<'default' | 'danger'>('default')
 
@@ -21,8 +18,8 @@ export const useModalStore = defineStore('modal', () => {
   function resetState() {
     title.value = null
     message.value = null
-    confirmLabel.value = MODAL_DEFAULT_CONFIRM_LABEL
-    cancelLabel.value = MODAL_DEFAULT_CANCEL_LABEL
+    confirmLabel.value = i18n.global.t('common.confirm')
+    cancelLabel.value = i18n.global.t('common.cancel')
     showDefaultFooter.value = false
     confirmVariant.value = 'default'
   }
@@ -44,8 +41,8 @@ export const useModalStore = defineStore('modal', () => {
     resetState()
     title.value = options.title ?? null
     message.value = options.message
-    confirmLabel.value = options.confirmLabel ?? MODAL_DEFAULT_CONFIRM_LABEL
-    cancelLabel.value = options.cancelLabel ?? MODAL_DEFAULT_CANCEL_LABEL
+    confirmLabel.value = options.confirmLabel ?? i18n.global.t('common.confirm')
+    cancelLabel.value = options.cancelLabel ?? i18n.global.t('common.cancel')
     confirmVariant.value = options.variant ?? 'default'
     showDefaultFooter.value = true
     isOpen.value = true

@@ -1,4 +1,5 @@
-import type { UserRole } from './role.interface'
+import type { AppLocale } from '@/constants/locale.constants'
+import type { UserRole } from '@/interfaces/role.interface'
 
 export interface LoginBody {
   email: string
@@ -9,6 +10,7 @@ export interface RegisterBody {
   email: string
   password: string
   name?: string
+  locale?: AppLocale
 }
 
 export interface UserPublic {
@@ -16,6 +18,7 @@ export interface UserPublic {
   email: string
   name: string | null
   role: UserRole
+  locale: AppLocale
   createdAt: string
   heightCm: number | null
   profileImageUrl: string | null
@@ -31,18 +34,18 @@ export interface LoginData {
 }
 
 export interface RegisterData {
-  message: string
+  messageCode: string
   email: string
 }
 
 export interface VerifyEmailData {
-  message: string
+  messageCode: string
 }
 
 export interface ResendVerificationData {
-  message: string
+  messageCode: string
 }
 
 export interface PasswordResetData {
-  message: string
+  messageCode: string
 }

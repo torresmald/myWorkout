@@ -1,9 +1,11 @@
 import type { UserRole } from './role.interface.js'
+import type { AppLocale } from '../constants/locale.constants.js'
 
 export interface RegisterBody {
   email?: string
   password?: string
   name?: string
+  locale?: string
 }
 
 export interface LoginBody {
@@ -16,6 +18,7 @@ export interface UserPublic {
   email: string
   name: string | null
   role: UserRole
+  locale: AppLocale
   createdAt: Date
   heightCm: number | null
   profileImageUrl: string | null
@@ -31,7 +34,7 @@ export interface LoginResponse {
 }
 
 export interface RegisterResponse {
-  message: string
+  messageCode: string
   email: string
 }
 
@@ -40,19 +43,21 @@ export interface VerifyEmailBody {
 }
 
 export interface VerifyEmailResponse {
-  message: string
+  messageCode: string
 }
 
 export interface ResendVerificationBody {
   email?: string
+  locale?: string
 }
 
 export interface ResendVerificationResponse {
-  message: string
+  messageCode: string
 }
 
 export interface ForgotPasswordBody {
   email?: string
+  locale?: string
 }
 
 export interface ResetPasswordBody {
@@ -61,5 +66,5 @@ export interface ResetPasswordBody {
 }
 
 export interface PasswordResetResponse {
-  message: string
+  messageCode: string
 }

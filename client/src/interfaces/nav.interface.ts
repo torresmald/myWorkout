@@ -1,5 +1,5 @@
 export interface NavItem {
-  label: string
+  labelKey: string
   routeName: string
   to: string
 }

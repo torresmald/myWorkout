@@ -1,4 +1,5 @@
 import type { UserRole } from '../interfaces/role.interface.js'
+import { ErrorCode } from '../constants/error-codes.constants.js'
 import { prisma } from '../config/prisma.js'
 import { AppError } from '../interfaces/app-error.interface.js'
 
@@ -107,11 +108,11 @@ export async function updateUserRole(
   role: UserRole,
 ): Promise<AdminUserSummary> {
   if (targetUserId === actorUserId) {
-    throw new AppError('No puedes cambiar tu propio rol', 400)
+    throw new AppError(ErrorCode.CANNOT_CHANGE_OWN_ROLE, 400)
   }
 
   if (role !== 'USER' && role !== 'ADMIN') {
-    throw new AppError('Rol inválido', 400)
+    throw new AppError(ErrorCode.INVALID_ROLE, 400)
   }
 
   const user = await prisma.user.findUnique({
@@ -120,7 +121,7 @@ export async function updateUserRole(
   })
 
   if (!user) {
-    throw new AppError('Usuario no encontrado', 404)
+    throw new AppError(ErrorCode.USER_NOT_FOUND, 404)
   }
 
   const updated = await prisma.user.update({

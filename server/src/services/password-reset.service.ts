@@ -1,8 +1,8 @@
 import bcrypt from 'bcrypt'
 
+import { ErrorCode, MessageCode } from '../constants/error-codes.constants.js'
 import {
   EMAIL_REGEX,
-  FORGOT_PASSWORD_SUCCESS_MESSAGE,
   PASSWORD_RESET_TOKEN_TTL_MS,
   SALT_ROUNDS,
 } from '../constants/auth.constants.js'
@@ -10,6 +10,7 @@ import { isMailConfigured } from '../constants/mail.constants.js'
 import { prisma } from '../config/prisma.js'
 import { AppError } from '../interfaces/app-error.interface.js'
 import { normalizeEmail } from '../utils/auth.util.js'
+import { parseAppLocale } from '../utils/locale.util.js'
 import { generateVerificationToken, hashToken } from '../utils/token.util.js'
 import { sendPasswordResetEmail } from './mail.service.js'
 
@@ -45,11 +46,14 @@ async function createPasswordResetToken(userId: number): Promise<string> {
   return token
 }
 
-export async function requestPasswordReset(email: string): Promise<{ message: string }> {
+export async function requestPasswordReset(
+  email: string,
+  locale?: string,
+): Promise<{ messageCode: string }> {
   const normalizedEmail = normalizeEmail(email)
 
   if (!normalizedEmail || !EMAIL_REGEX.test(normalizedEmail)) {
-    throw new AppError('Email inválido', 400)
+    throw new AppError(ErrorCode.INVALID_EMAIL, 400)
   }
 
   const user = await prisma.user.findUnique({
@@ -57,7 +61,16 @@ export async function requestPasswordReset(email: string): Promise<{ message: st
   })
 
   if (!user?.password) {
-    return { message: FORGOT_PASSWORD_SUCCESS_MESSAGE }
+    return { messageCode: MessageCode.FORGOT_PASSWORD_SUCCESS }
+  }
+
+  const emailLocale = locale ? parseAppLocale(locale) : parseAppLocale(user.locale)
+
+  if (locale) {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { locale: emailLocale },
+    })
   }
 
   const token = await createPasswordResetToken(user.id)
@@ -65,28 +78,28 @@ export async function requestPasswordReset(email: string): Promise<{ message: st
 
   if (!isMailConfigured()) {
     logResetPasswordUrlInDev(token)
-    return { message: FORGOT_PASSWORD_SUCCESS_MESSAGE }
+    return { messageCode: MessageCode.FORGOT_PASSWORD_SUCCESS }
   }
 
   try {
-    await sendPasswordResetEmail(normalizedEmail, resetUrl)
+    await sendPasswordResetEmail(normalizedEmail, resetUrl, emailLocale)
   } catch (error) {
     console.error('Failed to send password reset email:', error)
-    throw new AppError('No se pudo enviar el email de recuperación', 500)
+    throw new AppError(ErrorCode.FORGOT_PASSWORD_EMAIL_SEND_FAILED, 500)
   }
 
-  return { message: FORGOT_PASSWORD_SUCCESS_MESSAGE }
+  return { messageCode: MessageCode.FORGOT_PASSWORD_SUCCESS }
 }
 
-export async function resetPassword(token: string, password: string): Promise<{ message: string }> {
+export async function resetPassword(token: string, password: string): Promise<{ messageCode: string }> {
   const trimmedToken = token.trim()
 
   if (!trimmedToken) {
-    throw new AppError('Enlace de recuperación inválido', 400)
+    throw new AppError(ErrorCode.INVALID_RESET_LINK, 400)
   }
 
   if (!password || password.length < 6) {
-    throw new AppError('La contraseña debe tener al menos 6 caracteres', 400)
+    throw new AppError(ErrorCode.PASSWORD_MIN_LENGTH, 400)
   }
 
   const resetToken = await prisma.passwordResetToken.findUnique({
@@ -95,14 +108,14 @@ export async function resetPassword(token: string, password: string): Promise<{ 
   })
 
   if (!resetToken) {
-    throw new AppError('Enlace de recuperación inválido o expirado', 400)
+    throw new AppError(ErrorCode.RESET_LINK_INVALID_OR_EXPIRED, 400)
   }
 
   if (resetToken.expiresAt < new Date()) {
     await prisma.passwordResetToken.delete({
       where: { id: resetToken.id },
     })
-    throw new AppError('El enlace de recuperación ha expirado', 400)
+    throw new AppError(ErrorCode.RESET_LINK_EXPIRED, 400)
   }
 
   const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS)
@@ -120,5 +133,5 @@ export async function resetPassword(token: string, password: string): Promise<{ 
     }),
   ])
 
-  return { message: 'Contraseña actualizada correctamente' }
+  return { messageCode: MessageCode.PASSWORD_RESET_SUCCESS }
 }

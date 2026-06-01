@@ -1,0 +1,26 @@
+export default {
+  loadError: 'No se pudo cargar el panel de administración',
+  roleUpdated: 'Rol actualizado',
+  roleUpdateError: 'No se pudo actualizar el rol',
+  pageLoadError: 'No se pudo cargar la página',
+  goToAdmin: 'Ir al panel de administración',
+  metrics: {
+    totalUsers: 'Usuarios',
+    verifiedUsers: 'Verificados',
+    adminUsers: 'Administradores',
+    totalWorkouts: 'Entrenamientos',
+    totalExerciseTypes: 'Tipos de ejercicio',
+    totalWeightEntries: 'Registros de peso',
+  },
+  users: {
+    title: 'Usuarios ({count})',
+    empty: 'No hay usuarios registrados.',
+    email: 'Email',
+    name: 'Nombre',
+    role: 'Rol',
+    workouts: 'Entrenamientos',
+    registered: 'Registro',
+    lastLogin: 'Último acceso',
+    page: 'Página {page} de {total}',
+  },
+} as const

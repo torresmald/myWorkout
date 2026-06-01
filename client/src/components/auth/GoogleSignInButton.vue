@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
 import { getGoogleClientId, loadGoogleIdentityScript } from '@/utils/google-auth.util'
@@ -12,6 +13,8 @@ const emit = defineEmits<{
   success: [idToken: string]
   error: [message: string]
 }>()
+
+const { t } = useI18n()
 
 const buttonContainer = ref<HTMLElement | null>(null)
 const isReady = ref(false)
@@ -27,14 +30,14 @@ onMounted(async () => {
 
     const clientId = getGoogleClientId()
     if (!clientId || !window.google?.accounts?.id) {
-      throw new Error('Google Sign-In no está disponible')
+      throw new Error(t('google.unavailable'))
     }
 
     window.google.accounts.id.initialize({
       client_id: clientId,
       callback: (response) => {
         if (!response.credential) {
-          emit('error', 'No se recibió credencial de Google')
+          emit('error', t('google.noCredential'))
           return
         }
 
@@ -52,7 +55,7 @@ onMounted(async () => {
 
     isReady.value = true
   } catch (error) {
-    emit('error', error instanceof Error ? error.message : 'Error al cargar Google Sign-In')
+    emit('error', error instanceof Error ? error.message : t('google.loadError'))
   }
 })
 </script>
@@ -65,7 +68,7 @@ onMounted(async () => {
       :class="{ invisible: !isReady || disabled }"
     />
     <p v-if="!isReady && !disabled" class="text-center text-sm text-text-muted">
-      Cargando Google...
+      {{ t('google.loadingGoogle') }}
     </p>
     <div
       v-if="disabled"
@@ -73,7 +76,7 @@ onMounted(async () => {
       aria-busy="true"
     >
       <LoadingSpinner size="sm" class="text-blue-600" />
-      Conectando con Google...
+      {{ t('google.connectingGoogle') }}
     </div>
   </div>
 </template>

@@ -7,6 +7,7 @@ import {
   isCloudinaryConfigured,
   isCloudinaryPublicId,
 } from '../constants/cloudinary.constants.js'
+import { ErrorCode } from '../constants/error-codes.constants.js'
 import { AppError } from '../interfaces/app-error.interface.js'
 
 export async function uploadAvatarImage(
@@ -15,7 +16,7 @@ export async function uploadAvatarImage(
   mimetype: string,
 ): Promise<string> {
   if (!isCloudinaryConfigured()) {
-    throw new AppError('Cloudinary no está configurado', 500)
+    throw new AppError(ErrorCode.CLOUDINARY_NOT_CONFIGURED, 500)
   }
 
   const dataUri = `data:${mimetype};base64,${buffer.toString('base64')}`

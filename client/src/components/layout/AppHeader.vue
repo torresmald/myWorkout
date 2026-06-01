@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
+import { useI18n } from 'vue-i18n'
 
+import { useNavItems } from '@/composables/useNavItems'
 import UserAvatar from '@/components/profile/UserAvatar.vue'
+import LanguageToggle from '@/components/ui/LanguageToggle.vue'
 import ThemeToggle from '@/components/ui/ThemeToggle.vue'
-import { NAV_ITEMS } from '@/constants/nav.constants'
-import type { NavItem } from '@/interfaces/nav.interface'
 import { APP_NAME } from '@/constants/app.constants'
 import { BTN_DANGER_CLASS } from '@/constants/ui.constants'
 import { useAuthStore } from '@/stores/auth.store'
@@ -16,19 +17,11 @@ const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 const toastStore = useToastStore()
+const { t } = useI18n()
 const { user } = storeToRefs(authStore)
 
 const isMenuOpen = ref(false)
-
-const visibleNavItems = computed<NavItem[]>(() => {
-  const items = [...NAV_ITEMS]
-
-  if (user.value?.role === 'ADMIN') {
-    items.push({ label: 'Admin', routeName: 'admin', to: '/admin' })
-  }
-
-  return items
-})
+const visibleNavItems = useNavItems()
 
 function isActive(routeName: string): boolean {
   return route.name === routeName
@@ -57,7 +50,7 @@ function toggleMenu() {
 async function handleLogout() {
   closeMenu()
   authStore.logout()
-  toastStore.success('Sesión cerrada')
+  toastStore.success(t('layout.logoutSuccess'))
   await router.push('/login')
 }
 
@@ -109,6 +102,7 @@ onUnmounted(() => {
       </nav>
 
       <div class="flex items-center gap-2 sm:gap-3 sm:shrink-0">
+        <LanguageToggle />
         <ThemeToggle />
 
         <button
@@ -117,7 +111,7 @@ onUnmounted(() => {
           :class="{ 'ring-2 ring-blue-500': isMenuOpen }"
           :aria-expanded="isMenuOpen"
           aria-controls="mobile-header-menu"
-          aria-label="Abrir menú de navegación"
+          :aria-label="t('layout.openNavMenu')"
           @click="toggleMenu"
         >
           <UserAvatar
@@ -133,7 +127,7 @@ onUnmounted(() => {
           v-if="user"
           to="/profile"
           class="hidden rounded-full transition hover:opacity-90 sm:block"
-          aria-label="Ir a mi perfil"
+          :aria-label="t('layout.goToProfile')"
         >
           <UserAvatar
             :name="user.name"
@@ -142,14 +136,6 @@ onUnmounted(() => {
             size="sm"
           />
         </RouterLink>
-
-        <button
-          type="button"
-          :class="[BTN_DANGER_CLASS, 'hidden sm:inline-flex']"
-          @click="handleLogout"
-        >
-          Salir
-        </button>
       </div>
     </div>
 
@@ -168,7 +154,7 @@ onUnmounted(() => {
           />
           <div class="min-w-0">
             <p class="truncate font-medium text-text-primary">
-              {{ user.name || 'Mi cuenta' }}
+              {{ user.name || t('layout.myAccount') }}
             </p>
             <p class="truncate text-sm text-text-muted">{{ user.email }}</p>
           </div>
@@ -188,7 +174,7 @@ onUnmounted(() => {
         </nav>
 
         <button type="button" :class="[BTN_DANGER_CLASS, 'mt-4 w-full']" @click="handleLogout">
-          Salir
+          {{ t('layout.logout') }}
         </button>
       </div>
     </div>

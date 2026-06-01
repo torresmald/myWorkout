@@ -1,3 +1,5 @@
+import { BmiCategoryCode } from '../constants/error-codes.constants.js'
+
 export interface BmiResult {
   bmi: number | null
   bmiCategory: string | null
@@ -19,16 +21,16 @@ export function calculateBmi(weightKg: number | null, heightCm: number | null): 
 
 function getBmiCategory(bmi: number): string {
   if (bmi < 18.5) {
-    return 'Bajo peso'
+    return BmiCategoryCode.UNDERWEIGHT
   }
 
   if (bmi < 25) {
-    return 'Peso normal'
+    return BmiCategoryCode.NORMAL
   }
 
   if (bmi < 30) {
-    return 'Sobrepeso'
+    return BmiCategoryCode.OVERWEIGHT
   }
 
-  return 'Obesidad'
+  return BmiCategoryCode.OBESITY
 }

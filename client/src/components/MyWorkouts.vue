@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+
 import ListItemIconActions from '@/components/ui/ListItemIconActions.vue'
 import {
   CARD_BODY_CLASS,
@@ -22,16 +24,18 @@ const emit = defineEmits<{
   edit: [workout: WorkoutPublic]
   delete: [workout: WorkoutPublic]
 }>()
+
+const { t } = useI18n()
 </script>
 
 <template>
   <section :class="CARD_BODY_CLASS">
-    <h2 :class="SECTION_TITLE_CLASS">Mis entrenamientos</h2>
+    <h2 :class="SECTION_TITLE_CLASS">{{ t('workouts.list.title') }}</h2>
 
-    <p v-if="props.loading" :class="TEXT_MUTED_CLASS">Cargando entrenamientos...</p>
+    <p v-if="props.loading" :class="TEXT_MUTED_CLASS">{{ t('workouts.list.loading') }}</p>
 
     <p v-else-if="props.workouts.length === 0" :class="TEXT_MUTED_CLASS">
-      Aún no tienes entrenamientos. Crea el primero arriba.
+      {{ t('workouts.list.empty') }}
     </p>
 
     <ul v-else class="divide-y divide-border-default">

@@ -1,20 +1,22 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { RouterLink } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 import AuthCard from '@/components/layout/AuthCard.vue'
 import GoogleSignInButton from '@/components/auth/GoogleSignInButton.vue'
 import LoadingButton from '@/components/ui/LoadingButton.vue'
-import { EMAIL_NOT_VERIFIED_MESSAGE } from '@/constants/auth.constants'
+import PasswordInput from '@/components/ui/PasswordInput.vue'
 import { useAuthRedirect } from '@/composables/useAuthRedirect'
 import { INPUT_CLASS, LABEL_CLASS } from '@/constants/ui.constants'
 import { useAuthStore } from '@/stores/auth.store'
 import { useToastStore } from '@/stores/toast.store'
-import { getErrorMessage } from '@/utils/error.util'
+import { getErrorMessage, isApiErrorCode, translateMessageCode } from '@/utils/error.util'
 
 const authStore = useAuthStore()
 const toastStore = useToastStore()
 const { redirectAfterAuth } = useAuthRedirect()
+const { t } = useI18n()
 
 const email = ref('')
 const password = ref('')
@@ -26,9 +28,9 @@ const needsVerification = ref(false)
 const isBusy = computed(() => loading.value || googleLoading.value)
 
 const loadingMessage = computed(() => {
-  if (googleLoading.value) return 'Conectando con Google...'
-  if (loading.value) return 'Iniciando sesión...'
-  return 'Procesando...'
+  if (googleLoading.value) return t('auth.login.loadingGoogle')
+  if (loading.value) return t('auth.login.loading')
+  return t('common.processing')
 })
 
 async function handleSubmit() {
@@ -40,11 +42,11 @@ async function handleSubmit() {
       email: email.value,
       password: password.value,
     })
-    toastStore.success('Sesión iniciada correctamente')
+    toastStore.success(t('auth.login.success'))
     await redirectAfterAuth()
   } catch (e) {
-    const message = getErrorMessage(e, 'Error al iniciar sesión')
-    needsVerification.value = message === EMAIL_NOT_VERIFIED_MESSAGE
+    const message = getErrorMessage(e, t('auth.login.error'))
+    needsVerification.value = isApiErrorCode(e, 'EMAIL_NOT_VERIFIED')
     toastStore.error(message)
   } finally {
     loading.value = false
@@ -53,7 +55,7 @@ async function handleSubmit() {
 
 async function handleResendVerification() {
   if (!email.value.trim()) {
-    toastStore.error('Introduce tu email para reenviar la verificación')
+    toastStore.error(t('auth.login.resendEmailRequired'))
     return
   }
 
@@ -61,9 +63,9 @@ async function handleResendVerification() {
 
   try {
     const result = await authStore.resendVerification(email.value)
-    toastStore.success(result.message)
+    toastStore.success(translateMessageCode(result.messageCode))
   } catch (e) {
-    toastStore.error(getErrorMessage(e, 'Error al reenviar el email de verificación'))
+    toastStore.error(getErrorMessage(e, t('auth.login.resendError')))
   } finally {
     resending.value = false
   }
@@ -74,10 +76,10 @@ async function handleGoogleSuccess(idToken: string) {
 
   try {
     await authStore.loginWithGoogle(idToken)
-    toastStore.success('Sesión iniciada correctamente')
+    toastStore.success(t('auth.login.success'))
     await redirectAfterAuth()
   } catch (e) {
-    toastStore.error(getErrorMessage(e, 'Error al iniciar sesión con Google'))
+    toastStore.error(getErrorMessage(e, t('auth.login.googleError')))
   } finally {
     googleLoading.value = false
   }
@@ -90,14 +92,14 @@ function handleGoogleError(message: string) {
 
 <template>
   <AuthCard
-    title="Iniciar sesión"
-    description="Accede a tu gestor de entrenamientos"
+    :title="t('auth.login.title')"
+    :description="t('auth.login.description')"
     :loading="isBusy"
     :loading-message="loadingMessage"
   >
     <form class="space-y-4" @submit.prevent="handleSubmit">
       <div>
-        <label for="email" :class="LABEL_CLASS">Email</label>
+        <label for="email" :class="LABEL_CLASS">{{ t('common.email') }}</label>
         <input
           id="email"
           v-model="email"
@@ -106,29 +108,27 @@ function handleGoogleError(message: string) {
           autocomplete="email"
           :disabled="isBusy"
           :class="INPUT_CLASS"
-          placeholder="tu@email.com"
+          :placeholder="t('common.emailPlaceholder')"
         />
       </div>
 
       <div>
-        <label for="password" :class="LABEL_CLASS">Contraseña</label>
-        <input
+        <label for="password" :class="LABEL_CLASS">{{ t('common.password') }}</label>
+        <PasswordInput
           id="password"
           v-model="password"
-          type="password"
           required
-          minlength="6"
+          :minlength="6"
           autocomplete="current-password"
           :disabled="isBusy"
-          :class="INPUT_CLASS"
-          placeholder="••••••••"
+          :placeholder="t('common.passwordPlaceholder')"
         />
         <RouterLink
           to="/forgot-password"
           class="mt-2 inline-block text-sm font-medium text-blue-600 hover:text-blue-700"
           :class="{ 'pointer-events-none opacity-50': isBusy }"
         >
-          ¿Olvidaste tu contraseña?
+          {{ t('auth.login.forgotPassword') }}
         </RouterLink>
       </div>
 
@@ -136,7 +136,7 @@ function handleGoogleError(message: string) {
         v-if="needsVerification"
         class="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800"
       >
-        <p>Tu cuenta aún no está verificada. Revisa tu bandeja de entrada o reenvía el email.</p>
+        <p>{{ t('auth.login.verificationNeeded') }}</p>
         <LoadingButton
           type="button"
           variant="secondary"
@@ -145,12 +145,12 @@ function handleGoogleError(message: string) {
           :disabled="isBusy"
           @click="handleResendVerification"
         >
-          Reenviar email de verificación
+          {{ t('auth.login.resendVerification') }}
         </LoadingButton>
       </div>
 
       <LoadingButton :loading="loading" :disabled="googleLoading">
-        Entrar
+        {{ t('auth.login.submit') }}
       </LoadingButton>
     </form>
 
@@ -159,7 +159,7 @@ function handleGoogleError(message: string) {
         <div class="w-full border-t border-border-default" />
       </div>
       <div class="relative flex justify-center text-sm">
-        <span class="bg-bg-elevated px-2 text-text-muted">o continúa con</span>
+        <span class="bg-bg-elevated px-2 text-text-muted">{{ t('common.orContinueWith') }}</span>
       </div>
     </div>
 
@@ -170,13 +170,13 @@ function handleGoogleError(message: string) {
     />
 
     <p class="mt-6 text-center text-sm text-text-secondary">
-      ¿No tienes cuenta?
+      {{ t('auth.login.noAccount') }}
       <RouterLink
         to="/register"
         class="font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
         :class="{ 'pointer-events-none opacity-50': isBusy }"
       >
-        Regístrate
+        {{ t('auth.login.registerLink') }}
       </RouterLink>
     </p>
   </AuthCard>

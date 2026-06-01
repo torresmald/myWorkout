@@ -15,6 +15,7 @@ import {
   deleteProfileAvatar,
   uploadProfileAvatar,
 } from '../services/profile-avatar.service.js'
+import { ErrorCode } from '../constants/error-codes.constants.js'
 import { AppError } from '../interfaces/app-error.interface.js'
 import { handleServiceError } from '../utils/app-error.util.js'
 import { sendSuccess } from '../utils/api-response.util.js'
@@ -75,7 +76,7 @@ router.put('/weight/:id', async (req, res) => {
     const entryId = Number(req.params.id)
 
     if (!Number.isInteger(entryId) || entryId <= 0) {
-      throw new AppError('Registro de peso inválido', 400)
+      throw new AppError(ErrorCode.INVALID_WEIGHT_ENTRY_ID, 400)
     }
 
     const result = await updateWeightEntry(userId, entryId, req.body as UpdateWeightBody)
@@ -96,7 +97,7 @@ router.delete('/weight/:id', async (req, res) => {
     const entryId = Number(req.params.id)
 
     if (!Number.isInteger(entryId) || entryId <= 0) {
-      throw new AppError('Registro de peso inválido', 400)
+      throw new AppError(ErrorCode.INVALID_WEIGHT_ENTRY_ID, 400)
     }
 
     const result = await deleteWeightEntry(userId, entryId)
@@ -115,7 +116,7 @@ router.post('/avatar', handleAvatarUpload, async (req, res) => {
 
   try {
     if (!req.file) {
-      throw new AppError('No se recibió ninguna imagen', 400)
+      throw new AppError(ErrorCode.NO_IMAGE_RECEIVED, 400)
     }
 
     const profile = await uploadProfileAvatar(userId, req.file)

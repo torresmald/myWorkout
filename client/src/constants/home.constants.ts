@@ -1,23 +1,28 @@
 export interface HomeQuickLink {
-  label: string
-  description: string
+  labelKey: string
+  descriptionKey: string
   to: string
 }
 
 export const HOME_QUICK_LINKS: HomeQuickLink[] = [
   {
-    label: 'Entrenamientos',
-    description: 'Crea sesiones y registra series, reps y descansos.',
+    labelKey: 'home.links.workouts.label',
+    descriptionKey: 'home.links.workouts.description',
     to: '/workouts',
   },
   {
-    label: 'Tipos de ejercicio',
-    description: 'Administra tu catálogo de ejercicios reutilizables.',
+    labelKey: 'home.links.stats.label',
+    descriptionKey: 'home.links.stats.description',
+    to: '/stats',
+  },
+  {
+    labelKey: 'home.links.exerciseTypes.label',
+    descriptionKey: 'home.links.exerciseTypes.description',
     to: '/exercise-types',
   },
   {
-    label: 'Mi perfil',
-    description: 'Actualiza tus datos, peso, altura e IMC.',
+    labelKey: 'home.links.profile.label',
+    descriptionKey: 'home.links.profile.description',
     to: '/profile',
   },
 ]

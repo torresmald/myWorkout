@@ -1,0 +1,26 @@
+export default {
+  loadError: 'Could not load admin dashboard',
+  roleUpdated: 'Role updated',
+  roleUpdateError: 'Could not update role',
+  pageLoadError: 'Could not load page',
+  goToAdmin: 'Go to admin panel',
+  metrics: {
+    totalUsers: 'Users',
+    verifiedUsers: 'Verified',
+    adminUsers: 'Admins',
+    totalWorkouts: 'Workouts',
+    totalExerciseTypes: 'Exercise types',
+    totalWeightEntries: 'Weight entries',
+  },
+  users: {
+    title: 'Users ({count})',
+    empty: 'No registered users.',
+    email: 'Email',
+    name: 'Name',
+    role: 'Role',
+    workouts: 'Workouts',
+    registered: 'Registered',
+    lastLogin: 'Last login',
+    page: 'Page {page} of {total}',
+  },
+} as const

@@ -1,4 +1,5 @@
 import { api } from '@/api/client'
+import type { AppLocale } from '@/constants/locale.constants'
 import type {
   LoginBody,
   LoginData,
@@ -17,10 +18,10 @@ export function login(body: LoginBody) {
   })
 }
 
-export function loginWithGoogle(idToken: string) {
+export function loginWithGoogle(idToken: string, locale: AppLocale) {
   return api<LoginData>('/auth/google', {
     method: 'POST',
-    body: JSON.stringify({ idToken }),
+    body: JSON.stringify({ idToken, locale }),
   })
 }
 
@@ -38,17 +39,17 @@ export function verifyEmail(token: string) {
   })
 }
 
-export function resendVerification(email: string) {
+export function resendVerification(email: string, locale: AppLocale) {
   return api<ResendVerificationData>('/auth/resend-verification', {
     method: 'POST',
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({ email, locale }),
   })
 }
 
-export function forgotPassword(email: string) {
+export function forgotPassword(email: string, locale: AppLocale) {
   return api<PasswordResetData>('/auth/forgot-password', {
     method: 'POST',
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({ email, locale }),
   })
 }
 

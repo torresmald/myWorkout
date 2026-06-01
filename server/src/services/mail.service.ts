@@ -1,7 +1,9 @@
 import nodemailer from 'nodemailer'
 import type Mail from 'nodemailer/lib/mailer/index.js'
 
+import type { AppLocale } from '../constants/locale.constants.js'
 import { APP_NAME, getSmtpConfig } from '../constants/mail.constants.js'
+import { formatEmailTemplate, getEmailTemplate } from '../locales/email-templates.js'
 
 let transporter: nodemailer.Transporter | null = null
 
@@ -23,59 +25,71 @@ function getTransporter(): nodemailer.Transporter {
   return transporter
 }
 
-function buildVerificationEmailContent(verificationUrl: string): Pick<Mail.Options, 'subject' | 'text' | 'html'> {
-  const subject = `Verifica tu cuenta en ${APP_NAME}`
+function buildVerificationEmailContent(
+  verificationUrl: string,
+  locale: AppLocale,
+): Pick<Mail.Options, 'subject' | 'text' | 'html'> {
+  const template = getEmailTemplate(locale)
+  const subject = formatEmailTemplate(locale, 'verificationSubject', APP_NAME)
 
   const text = [
-    `Gracias por registrarte en ${APP_NAME}.`,
+    formatEmailTemplate(locale, 'verificationIntro', APP_NAME),
     '',
-    'Para activar tu cuenta, abre este enlace:',
+    template.verificationInstruction,
     verificationUrl,
     '',
-    'El enlace caduca en 24 horas.',
+    template.verificationExpiry,
     '',
-    `Si no creaste esta cuenta, puedes ignorar este email.`,
+    template.verificationIgnore,
   ].join('\n')
 
   const html = `
-    <p>Gracias por registrarte en <strong>${APP_NAME}</strong>.</p>
-    <p>Para activar tu cuenta, haz clic en el siguiente enlace:</p>
-    <p><a href="${verificationUrl}">Verificar mi cuenta</a></p>
-    <p>El enlace caduca en 24 horas.</p>
-    <p>Si no creaste esta cuenta, puedes ignorar este email.</p>
+    <p>${formatEmailTemplate(locale, 'verificationIntro', APP_NAME)}</p>
+    <p>${template.verificationInstruction}</p>
+    <p><a href="${verificationUrl}">${template.verificationLinkLabel}</a></p>
+    <p>${template.verificationExpiry}</p>
+    <p>${template.verificationIgnore}</p>
   `.trim()
 
   return { subject, text, html }
 }
 
-function buildPasswordResetEmailContent(resetUrl: string): Pick<Mail.Options, 'subject' | 'text' | 'html'> {
-  const subject = `Restablece tu contraseña en ${APP_NAME}`
+function buildPasswordResetEmailContent(
+  resetUrl: string,
+  locale: AppLocale,
+): Pick<Mail.Options, 'subject' | 'text' | 'html'> {
+  const template = getEmailTemplate(locale)
+  const subject = formatEmailTemplate(locale, 'resetSubject', APP_NAME)
 
   const text = [
-    `Recibimos una solicitud para restablecer tu contraseña en ${APP_NAME}.`,
+    formatEmailTemplate(locale, 'resetIntro', APP_NAME),
     '',
-    'Para elegir una nueva contraseña, abre este enlace:',
+    template.resetInstruction,
     resetUrl,
     '',
-    'El enlace caduca en 1 hora.',
+    template.resetExpiry,
     '',
-    'Si no solicitaste este cambio, puedes ignorar este email.',
+    template.resetIgnore,
   ].join('\n')
 
   const html = `
-    <p>Recibimos una solicitud para restablecer tu contraseña en <strong>${APP_NAME}</strong>.</p>
-    <p>Para elegir una nueva contraseña, haz clic en el siguiente enlace:</p>
-    <p><a href="${resetUrl}">Restablecer contraseña</a></p>
-    <p>El enlace caduca en 1 hora.</p>
-    <p>Si no solicitaste este cambio, puedes ignorar este email.</p>
+    <p>${formatEmailTemplate(locale, 'resetIntro', APP_NAME)}</p>
+    <p>${template.resetInstruction}</p>
+    <p><a href="${resetUrl}">${template.resetLinkLabel}</a></p>
+    <p>${template.resetExpiry}</p>
+    <p>${template.resetIgnore}</p>
   `.trim()
 
   return { subject, text, html }
 }
 
-export async function sendVerificationEmail(to: string, verificationUrl: string): Promise<void> {
+export async function sendVerificationEmail(
+  to: string,
+  verificationUrl: string,
+  locale: AppLocale,
+): Promise<void> {
   const config = getSmtpConfig()
-  const content = buildVerificationEmailContent(verificationUrl)
+  const content = buildVerificationEmailContent(verificationUrl, locale)
 
   await getTransporter().sendMail({
     from: config.from,
@@ -84,9 +98,13 @@ export async function sendVerificationEmail(to: string, verificationUrl: string)
   })
 }
 
-export async function sendPasswordResetEmail(to: string, resetUrl: string): Promise<void> {
+export async function sendPasswordResetEmail(
+  to: string,
+  resetUrl: string,
+  locale: AppLocale,
+): Promise<void> {
   const config = getSmtpConfig()
-  const content = buildPasswordResetEmailContent(resetUrl)
+  const content = buildPasswordResetEmailContent(resetUrl, locale)
 
   await getTransporter().sendMail({
     from: config.from,

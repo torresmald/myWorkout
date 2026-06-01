@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
+import { useI18n } from 'vue-i18n'
 
 import MyWorkouts from '@/components/MyWorkouts.vue'
 import WorkoutForm from '@/components/WorkoutForm.vue'
@@ -15,6 +16,7 @@ import { getErrorMessage } from '@/utils/error.util'
 const workoutStore = useWorkoutStore()
 const modalStore = useModalStore()
 const toastStore = useToastStore()
+const { t } = useI18n()
 
 const { workouts, loading, deletingId } = storeToRefs(workoutStore)
 
@@ -26,7 +28,7 @@ onMounted(async () => {
   try {
     await workoutStore.fetchAll()
   } catch (e) {
-    toastStore.error(getErrorMessage(e, 'Error al cargar los entrenamientos'))
+    toastStore.error(getErrorMessage(e, t('workouts.loadError')))
   }
 })
 
@@ -36,9 +38,9 @@ function handleEdit(workout: WorkoutPublic) {
 
 async function handleDelete(workout: WorkoutPublic) {
   const confirmed = await modalStore.confirm({
-    title: 'Eliminar entrenamiento',
-    message: `¿Eliminar "${workout.name}"? Se borrarán también sus ejercicios.`,
-    confirmLabel: 'Eliminar',
+    title: t('modals.deleteWorkout.title'),
+    message: t('modals.deleteWorkout.message', { name: workout.name }),
+    confirmLabel: t('common.delete'),
     variant: 'danger',
   })
 
@@ -52,9 +54,9 @@ async function handleDelete(workout: WorkoutPublic) {
 
   try {
     await workoutStore.remove(workout.id)
-    toastStore.success('Entrenamiento eliminado correctamente')
+    toastStore.success(t('workouts.deleteSuccess'))
   } catch (e) {
-    toastStore.error(getErrorMessage(e, 'Error al eliminar el entrenamiento'))
+    toastStore.error(getErrorMessage(e, t('workouts.deleteError')))
   }
 }
 </script>

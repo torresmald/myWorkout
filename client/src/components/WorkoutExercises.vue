@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { storeToRefs } from 'pinia'
+import { useI18n } from 'vue-i18n'
 
 import ListItemIconActions from '@/components/ui/ListItemIconActions.vue'
 import RestTimerModal from '@/components/workout/RestTimerModal.vue'
@@ -33,6 +34,7 @@ const workoutStore = useWorkoutStore()
 const exerciseTypeStore = useExerciseTypeStore()
 const modalStore = useModalStore()
 const toastStore = useToastStore()
+const { t } = useI18n()
 
 const {
   isOpen: isRestTimerOpen,
@@ -87,7 +89,7 @@ function formatExerciseDetails(exercise: WorkoutExercisePublic): string {
   const parts = [`${exercise.sets} × ${exercise.reps}`]
 
   if (exercise.restSeconds > 0) {
-    parts.push(`${exercise.restSeconds}s descanso`)
+    parts.push(t('workouts.exercises.restLabel', { seconds: exercise.restSeconds }))
   }
 
   if (exercise.weight !== null) {
@@ -114,10 +116,10 @@ async function handleSubmit() {
   try {
     if (exerciseEditingId.value !== null) {
       await workoutStore.updateExercise(props.workoutId, exerciseEditingId.value, body)
-      toastStore.success('Ejercicio actualizado correctamente')
+      toastStore.success(t('workouts.exercises.updateSuccess'))
     } else {
       await workoutStore.createExercise(props.workoutId, body)
-      toastStore.success('Ejercicio añadido correctamente')
+      toastStore.success(t('workouts.exercises.createSuccess'))
     }
 
     resetForm()
@@ -127,8 +129,8 @@ async function handleSubmit() {
       getErrorMessage(
         e,
         exerciseEditingId.value !== null
-          ? 'Error al actualizar el ejercicio'
-          : 'Error al añadir el ejercicio',
+          ? t('workouts.exercises.updateError')
+          : t('workouts.exercises.createError'),
       ),
     )
   }
@@ -144,9 +146,9 @@ function startExerciseRestTimer(exercise: WorkoutExercisePublic) {
 
 async function handleDelete(exercise: WorkoutExercisePublic) {
   const confirmed = await modalStore.confirm({
-    title: 'Eliminar ejercicio',
-    message: `¿Eliminar "${exercise.exerciseType.name}" del entrenamiento?`,
-    confirmLabel: 'Eliminar',
+    title: t('modals.deleteWorkoutExercise.title'),
+    message: t('modals.deleteWorkoutExercise.message', { name: exercise.exerciseType.name }),
+    confirmLabel: t('common.delete'),
     variant: 'danger',
   })
 
@@ -160,10 +162,10 @@ async function handleDelete(exercise: WorkoutExercisePublic) {
 
   try {
     await workoutStore.removeExercise(props.workoutId, exercise.id)
-    toastStore.success('Ejercicio eliminado correctamente')
+    toastStore.success(t('workouts.exercises.deleteSuccess'))
     sortOrder.value = exercises.value.length
   } catch (e) {
-    toastStore.error(getErrorMessage(e, 'Error al eliminar el ejercicio'))
+    toastStore.error(getErrorMessage(e, t('workouts.exercises.deleteError')))
   }
 }
 
@@ -176,7 +178,7 @@ watch(
       await workoutStore.fetchExercises(workoutId)
       sortOrder.value = exercises.value.length
     } catch (e) {
-      toastStore.error(getErrorMessage(e, 'Error al cargar los ejercicios del entrenamiento'))
+      toastStore.error(getErrorMessage(e, t('workouts.exercises.loadError')))
     }
   },
   { immediate: true },
@@ -186,7 +188,7 @@ onMounted(async () => {
   try {
     await exerciseTypeStore.fetchAll()
   } catch (e) {
-    toastStore.error(getErrorMessage(e, 'Error al cargar los tipos de ejercicio'))
+    toastStore.error(getErrorMessage(e, t('workouts.exercises.loadTypesError')))
   }
 })
 
@@ -195,9 +197,11 @@ defineExpose({ resetForm })
 
 <template>
   <section :class="CARD_BODY_CLASS">
-    <h2 :class="SECTION_TITLE_CLASS">Ejercicios del entrenamiento</h2>
+    <h2 :class="SECTION_TITLE_CLASS">{{ t('workouts.exercises.title') }}</h2>
 
-    <p v-if="loadingExercises" class="text-sm text-text-muted">Cargando ejercicios...</p>
+    <p v-if="loadingExercises" class="text-sm text-text-muted">
+      {{ t('workouts.exercises.loading') }}
+    </p>
 
     <ul v-else-if="exercises.length > 0" class="mb-6 divide-y divide-border-default">
       <li
@@ -229,15 +233,15 @@ defineExpose({ resetForm })
       </li>
     </ul>
 
-    <p v-else class="mb-6 text-sm text-text-muted">Este entrenamiento aún no tiene ejercicios.</p>
+    <p v-else class="mb-6 text-sm text-text-muted">{{ t('workouts.exercises.empty') }}</p>
 
     <div
       v-if="exerciseTypes.length === 0"
       class="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200"
     >
-      Crea tipos de ejercicio antes de añadirlos al entrenamiento.
+      {{ t('workouts.exercises.noTypesWarning') }}
       <RouterLink to="/exercise-types" class="ml-1 font-medium underline">
-        Ir a tipos de ejercicio
+        {{ t('workouts.exercises.goToTypes') }}
       </RouterLink>
     </div>
 
@@ -247,13 +251,17 @@ defineExpose({ resetForm })
       @submit.prevent="handleSubmit"
     >
       <h3 class="text-sm font-semibold text-text-primary">
-        {{ exerciseEditingId !== null ? 'Editar ejercicio' : 'Añadir ejercicio' }}
+        {{
+          exerciseEditingId !== null
+            ? t('workouts.exercises.editTitle')
+            : t('workouts.exercises.addTitle')
+        }}
       </h3>
 
       <div>
-        <label for="exerciseTypeId" :class="LABEL_CLASS">Tipo de ejercicio</label>
+        <label for="exerciseTypeId" :class="LABEL_CLASS">{{ t('workouts.exercises.typeLabel') }}</label>
         <select id="exerciseTypeId" v-model="exerciseTypeId" required :class="INPUT_CLASS">
-          <option disabled value="">Selecciona un ejercicio</option>
+          <option disabled value="">{{ t('workouts.exercises.selectType') }}</option>
           <option v-for="type in exerciseTypes" :key="type.id" :value="type.id">
             {{ type.name }}
           </option>
@@ -262,7 +270,7 @@ defineExpose({ resetForm })
 
       <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <div>
-          <label for="sets" :class="LABEL_CLASS">Series</label>
+          <label for="sets" :class="LABEL_CLASS">{{ t('common.sets') }}</label>
           <input
             id="sets"
             v-model.number="sets"
@@ -274,7 +282,7 @@ defineExpose({ resetForm })
         </div>
 
         <div>
-          <label for="reps" :class="LABEL_CLASS">Reps</label>
+          <label for="reps" :class="LABEL_CLASS">{{ t('common.reps') }}</label>
           <input
             id="reps"
             v-model.number="reps"
@@ -286,7 +294,7 @@ defineExpose({ resetForm })
         </div>
 
         <div>
-          <label for="restSeconds" :class="LABEL_CLASS">Descanso (s)</label>
+          <label for="restSeconds" :class="LABEL_CLASS">{{ t('common.restSeconds') }}</label>
           <input
             id="restSeconds"
             v-model.number="restSeconds"
@@ -298,7 +306,7 @@ defineExpose({ resetForm })
         </div>
 
         <div>
-          <label for="weight" :class="LABEL_CLASS">Peso (kg)</label>
+          <label for="weight" :class="LABEL_CLASS">{{ t('common.weightKg') }}</label>
           <input
             id="weight"
             v-model.number="weight"
@@ -306,7 +314,7 @@ defineExpose({ resetForm })
             min="0"
             step="0.5"
             :class="INPUT_CLASS"
-            placeholder="Opcional"
+            :placeholder="t('common.optional')"
           />
         </div>
       </div>
@@ -320,11 +328,11 @@ defineExpose({ resetForm })
           {{
             savingExercise
               ? exerciseEditingId !== null
-                ? 'Guardando...'
-                : 'Añadiendo...'
+                ? t('common.saving')
+                : t('common.adding')
               : exerciseEditingId !== null
-                ? 'Guardar ejercicio'
-                : 'Añadir ejercicio'
+                ? t('workouts.exercises.saveButton')
+                : t('workouts.exercises.addButton')
           }}
         </button>
 
@@ -334,7 +342,7 @@ defineExpose({ resetForm })
           :class="[BTN_SECONDARY_CLASS, BTN_MOBILE_FULL_CLASS]"
           @click="resetForm"
         >
-          Cancelar
+          {{ t('common.cancel') }}
         </button>
       </div>
     </form>

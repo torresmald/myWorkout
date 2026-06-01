@@ -41,8 +41,8 @@ router.post('/login', authActionLimiter, async (req, res) => {
 
 router.post('/google', authActionLimiter, async (req, res) => {
   try {
-    const { idToken } = req.body as GoogleLoginBody
-    const loginResponse = await loginWithGoogle(idToken ?? '')
+    const { idToken, locale } = req.body as GoogleLoginBody
+    const loginResponse = await loginWithGoogle(idToken ?? '', locale)
     sendSuccess(res, loginResponse)
   } catch (error) {
     if (handleServiceError(error, res)) {
@@ -69,8 +69,8 @@ router.post('/verify-email', async (req, res) => {
 
 router.post('/resend-verification', authEmailLimiter, async (req, res) => {
   try {
-    const { email } = req.body as ResendVerificationBody
-    const result = await resendVerificationEmail(email ?? '')
+    const { email, locale } = req.body as ResendVerificationBody
+    const result = await resendVerificationEmail(email ?? '', locale)
     sendSuccess(res, result)
   } catch (error) {
     if (handleServiceError(error, res)) {
@@ -83,8 +83,8 @@ router.post('/resend-verification', authEmailLimiter, async (req, res) => {
 
 router.post('/forgot-password', authEmailLimiter, async (req, res) => {
   try {
-    const { email } = req.body as ForgotPasswordBody
-    const result = await requestPasswordReset(email ?? '')
+    const { email, locale } = req.body as ForgotPasswordBody
+    const result = await requestPasswordReset(email ?? '', locale)
     sendSuccess(res, result)
   } catch (error) {
     if (handleServiceError(error, res)) {

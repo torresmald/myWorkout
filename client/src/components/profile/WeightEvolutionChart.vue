@@ -14,6 +14,7 @@ import { Line } from 'vue-chartjs'
 import { storeToRefs } from 'pinia'
 
 import type { WeightEntryPublic } from '@/interfaces/profile.interface'
+import { useLocaleStore } from '@/stores/locale.store'
 import { useThemeStore } from '@/stores/theme.store'
 import { buildWeightChartData, buildWeightChartOptions } from '@/utils/weight-chart.util'
 
@@ -24,7 +25,9 @@ const props = defineProps<{
 }>()
 
 const themeStore = useThemeStore()
+const localeStore = useLocaleStore()
 const { preference } = storeToRefs(themeStore)
+const { locale } = storeToRefs(localeStore)
 
 const isDark = computed(() => preference.value === 'dark')
 const chartData = computed(() => buildWeightChartData(props.entries, isDark.value))
@@ -33,6 +36,6 @@ const chartOptions = computed(() => buildWeightChartOptions(props.entries, isDar
 
 <template>
   <div class="h-64 w-full sm:h-80">
-    <Line :key="preference" :data="chartData" :options="chartOptions" />
+    <Line :key="`${preference}-${locale}`" :data="chartData" :options="chartOptions" />
   </div>
 </template>

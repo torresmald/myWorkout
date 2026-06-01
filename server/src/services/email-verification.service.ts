@@ -1,8 +1,11 @@
-import { EMAIL_REGEX, EMAIL_VERIFICATION_TOKEN_TTL_MS, RESEND_VERIFICATION_SUCCESS_MESSAGE } from '../constants/auth.constants.js'
+import { ErrorCode, MessageCode } from '../constants/error-codes.constants.js'
+import { EMAIL_REGEX, EMAIL_VERIFICATION_TOKEN_TTL_MS } from '../constants/auth.constants.js'
+import type { AppLocale } from '../constants/locale.constants.js'
 import { isMailConfigured } from '../constants/mail.constants.js'
 import { prisma } from '../config/prisma.js'
 import { AppError } from '../interfaces/app-error.interface.js'
 import { normalizeEmail } from '../utils/auth.util.js'
+import { parseAppLocale } from '../utils/locale.util.js'
 import { generateVerificationToken, hashToken } from '../utils/token.util.js'
 import { sendVerificationEmail } from './mail.service.js'
 
@@ -42,11 +45,11 @@ export async function createEmailVerificationToken(userId: number): Promise<stri
   return token
 }
 
-export async function verifyEmailWithToken(token: string): Promise<{ message: string }> {
+export async function verifyEmailWithToken(token: string): Promise<{ messageCode: string }> {
   const trimmedToken = token.trim()
 
   if (!trimmedToken) {
-    throw new AppError('Token de verificación inválido', 400)
+    throw new AppError(ErrorCode.INVALID_VERIFICATION_TOKEN, 400)
   }
 
   const verificationToken = await prisma.emailVerificationToken.findUnique({
@@ -55,21 +58,21 @@ export async function verifyEmailWithToken(token: string): Promise<{ message: st
   })
 
   if (!verificationToken) {
-    throw new AppError('Token de verificación inválido o expirado', 400)
+    throw new AppError(ErrorCode.VERIFICATION_TOKEN_INVALID_OR_EXPIRED, 400)
   }
 
   if (verificationToken.expiresAt < new Date()) {
     await prisma.emailVerificationToken.delete({
       where: { id: verificationToken.id },
     })
-    throw new AppError('Token de verificación expirado', 400)
+    throw new AppError(ErrorCode.VERIFICATION_TOKEN_EXPIRED, 400)
   }
 
   if (verificationToken.user.emailVerifiedAt) {
     await prisma.emailVerificationToken.deleteMany({
       where: { userId: verificationToken.userId },
     })
-    return { message: 'La cuenta ya estaba verificada' }
+    return { messageCode: MessageCode.ACCOUNT_ALREADY_VERIFIED }
   }
 
   await prisma.$transaction([
@@ -82,14 +85,17 @@ export async function verifyEmailWithToken(token: string): Promise<{ message: st
     }),
   ])
 
-  return { message: 'Cuenta verificada correctamente' }
+  return { messageCode: MessageCode.ACCOUNT_VERIFIED }
 }
 
-export async function resendVerificationEmail(email: string): Promise<{ message: string }> {
+export async function resendVerificationEmail(
+  email: string,
+  locale?: string,
+): Promise<{ messageCode: string }> {
   const normalizedEmail = normalizeEmail(email)
 
   if (!normalizedEmail || !EMAIL_REGEX.test(normalizedEmail)) {
-    throw new AppError('Email inválido', 400)
+    throw new AppError(ErrorCode.INVALID_EMAIL, 400)
   }
 
   const user = await prisma.user.findUnique({
@@ -97,16 +103,29 @@ export async function resendVerificationEmail(email: string): Promise<{ message:
   })
 
   if (!user || !user.password || user.emailVerifiedAt) {
-    return { message: RESEND_VERIFICATION_SUCCESS_MESSAGE }
+    return { messageCode: MessageCode.RESEND_VERIFICATION_SUCCESS }
+  }
+
+  const emailLocale = locale ? parseAppLocale(locale) : parseAppLocale(user.locale)
+
+  if (locale) {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { locale: emailLocale },
+    })
   }
 
   const token = await createEmailVerificationToken(user.id)
-  await sendUserVerificationEmail(normalizedEmail, token)
+  await sendUserVerificationEmail(normalizedEmail, token, emailLocale)
 
-  return { message: RESEND_VERIFICATION_SUCCESS_MESSAGE }
+  return { messageCode: MessageCode.RESEND_VERIFICATION_SUCCESS }
 }
 
-export async function sendUserVerificationEmail(email: string, token: string): Promise<void> {
+export async function sendUserVerificationEmail(
+  email: string,
+  token: string,
+  locale: AppLocale,
+): Promise<void> {
   const verificationUrl = buildVerificationUrl(token)
 
   if (!isMailConfigured()) {
@@ -115,9 +134,9 @@ export async function sendUserVerificationEmail(email: string, token: string): P
   }
 
   try {
-    await sendVerificationEmail(email, verificationUrl)
+    await sendVerificationEmail(email, verificationUrl, locale)
   } catch (error) {
     console.error('Failed to send verification email:', error)
-    throw new AppError('No se pudo enviar el email de verificación', 500)
+    throw new AppError(ErrorCode.VERIFICATION_EMAIL_SEND_FAILED, 500)
   }
 }

@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
+import { useI18n } from 'vue-i18n'
 
 import PageContainer from '@/components/layout/PageContainer.vue'
 import RoutePageHeader from '@/components/layout/RoutePageHeader.vue'
@@ -21,32 +22,33 @@ import { getErrorMessage } from '@/utils/error.util'
 const adminStore = useAdminStore()
 const authStore = useAuthStore()
 const toastStore = useToastStore()
+const { t } = useI18n()
 
 const { metrics, users, page, totalPages, total, loading, updatingUserId } = storeToRefs(adminStore)
 
-const metricCards = [
-  { key: 'totalUsers', label: 'Usuarios' },
-  { key: 'verifiedUsers', label: 'Verificados' },
-  { key: 'adminUsers', label: 'Administradores' },
-  { key: 'totalWorkouts', label: 'Entrenamientos' },
-  { key: 'totalExerciseTypes', label: 'Tipos de ejercicio' },
-  { key: 'totalWeightEntries', label: 'Registros de peso' },
-] as const
+const metricCards = computed(() => [
+  { key: 'totalUsers' as const, label: t('admin.metrics.totalUsers') },
+  { key: 'verifiedUsers' as const, label: t('admin.metrics.verifiedUsers') },
+  { key: 'adminUsers' as const, label: t('admin.metrics.adminUsers') },
+  { key: 'totalWorkouts' as const, label: t('admin.metrics.totalWorkouts') },
+  { key: 'totalExerciseTypes' as const, label: t('admin.metrics.totalExerciseTypes') },
+  { key: 'totalWeightEntries' as const, label: t('admin.metrics.totalWeightEntries') },
+])
 
 onMounted(async () => {
   try {
     await adminStore.loadDashboard()
   } catch (error) {
-    toastStore.error(getErrorMessage(error, 'No se pudo cargar el panel de administración'))
+    toastStore.error(getErrorMessage(error, t('admin.loadError')))
   }
 })
 
 async function handleRoleChange(userId: number, role: UserRole) {
   try {
     await adminStore.changeUserRole(userId, role)
-    toastStore.success('Rol actualizado')
+    toastStore.success(t('admin.roleUpdated'))
   } catch (error) {
-    toastStore.error(getErrorMessage(error, 'No se pudo actualizar el rol'))
+    toastStore.error(getErrorMessage(error, t('admin.roleUpdateError')))
   }
 }
 
@@ -58,17 +60,14 @@ async function goToPage(nextPage: number) {
   try {
     await adminStore.fetchUsers(nextPage)
   } catch (error) {
-    toastStore.error(getErrorMessage(error, 'No se pudo cargar la página'))
+    toastStore.error(getErrorMessage(error, t('admin.pageLoadError')))
   }
 }
 </script>
 
 <template>
   <PageContainer>
-    <RoutePageHeader
-      title="Administración"
-      description="Métricas de la plataforma y gestión de usuarios"
-    />
+    <RoutePageHeader />
 
     <div v-if="metrics" class="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <div v-for="card in metricCards" :key="card.key" :class="CARD_COMPACT_CLASS">
@@ -79,24 +78,26 @@ async function goToPage(nextPage: number) {
 
     <section :class="CARD_COMPACT_CLASS">
       <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <h2 class="text-base font-semibold text-text-primary">Usuarios ({{ total }})</h2>
+        <h2 class="text-base font-semibold text-text-primary">
+          {{ t('admin.users.title', { count: total }) }}
+        </h2>
         <LoadingSpinner v-if="loading" size="sm" class="text-blue-600" />
       </div>
 
       <div v-if="users.length === 0 && !loading" :class="TEXT_MUTED_CLASS">
-        No hay usuarios registrados.
+        {{ t('admin.users.empty') }}
       </div>
 
       <div v-else class="overflow-x-auto">
         <table class="min-w-full text-left text-sm">
           <thead>
             <tr class="border-b border-border-default text-text-muted">
-              <th class="px-2 py-3 font-medium">Email</th>
-              <th class="px-2 py-3 font-medium">Nombre</th>
-              <th class="px-2 py-3 font-medium">Rol</th>
-              <th class="px-2 py-3 font-medium">Entrenamientos</th>
-              <th class="px-2 py-3 font-medium">Registro</th>
-              <th class="px-2 py-3 font-medium">Último acceso</th>
+              <th class="px-2 py-3 font-medium">{{ t('admin.users.email') }}</th>
+              <th class="px-2 py-3 font-medium">{{ t('admin.users.name') }}</th>
+              <th class="px-2 py-3 font-medium">{{ t('admin.users.role') }}</th>
+              <th class="px-2 py-3 font-medium">{{ t('admin.users.workouts') }}</th>
+              <th class="px-2 py-3 font-medium">{{ t('admin.users.registered') }}</th>
+              <th class="px-2 py-3 font-medium">{{ t('admin.users.lastLogin') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -106,23 +107,28 @@ async function goToPage(nextPage: number) {
               class="border-b border-border-default last:border-b-0"
             >
               <td class="px-2 py-3 text-text-primary">{{ user.email }}</td>
-              <td class="px-2 py-3 text-text-secondary">{{ user.name || '—' }}</td>
+              <td class="px-2 py-3 text-text-secondary">{{ user.name || t('common.noValue') }}</td>
               <td class="px-2 py-3">
                 <select
                   :class="INPUT_CLASS"
                   class="min-h-10 py-2"
                   :value="user.role"
                   :disabled="user.id === authStore.user?.id || updatingUserId === user.id"
-                  @change="handleRoleChange(user.id, ($event.target as HTMLSelectElement).value as UserRole)"
+                  @change="
+                    handleRoleChange(
+                      user.id,
+                      ($event.target as HTMLSelectElement).value as UserRole,
+                    )
+                  "
                 >
-                  <option value="USER">USER</option>
-                  <option value="ADMIN">ADMIN</option>
+                  <option value="USER">{{ t('common.user') }}</option>
+                  <option value="ADMIN">{{ t('common.admin') }}</option>
                 </select>
               </td>
               <td class="px-2 py-3 text-text-secondary">{{ user.workoutCount }}</td>
               <td class="px-2 py-3 text-text-muted">{{ formatWorkoutDate(user.createdAt) }}</td>
               <td class="px-2 py-3 text-text-muted">
-                {{ user.lastLoginAt ? formatWorkoutDate(user.lastLoginAt) : '—' }}
+                {{ user.lastLoginAt ? formatWorkoutDate(user.lastLoginAt) : t('common.noValue') }}
               </td>
             </tr>
           </tbody>
@@ -136,16 +142,18 @@ async function goToPage(nextPage: number) {
           :disabled="page <= 1 || loading"
           @click="goToPage(page - 1)"
         >
-          Anterior
+          {{ t('common.previous') }}
         </button>
-        <span :class="TEXT_MUTED_CLASS">Página {{ page }} de {{ totalPages }}</span>
+        <span :class="TEXT_MUTED_CLASS">
+          {{ t('admin.users.page', { page, total: totalPages }) }}
+        </span>
         <button
           type="button"
           :class="BTN_SECONDARY_CLASS"
           :disabled="page >= totalPages || loading"
           @click="goToPage(page + 1)"
         >
-          Siguiente
+          {{ t('common.next') }}
         </button>
       </div>
     </section>

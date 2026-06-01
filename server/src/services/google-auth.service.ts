@@ -1,5 +1,6 @@
 import { OAuth2Client } from 'google-auth-library'
 
+import { ErrorCode } from '../constants/error-codes.constants.js'
 import { GOOGLE_CLIENT_ID } from '../constants/google.constants.js'
 import { AppError } from '../interfaces/app-error.interface.js'
 import type { GoogleUserProfile } from '../interfaces/google.interface.js'
@@ -9,11 +10,11 @@ const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID)
 
 export async function verifyGoogleIdToken(idToken: string): Promise<GoogleUserProfile> {
   if (!GOOGLE_CLIENT_ID) {
-    throw new AppError('Google OAuth no está configurado', 500)
+    throw new AppError(ErrorCode.GOOGLE_OAUTH_NOT_CONFIGURED, 500)
   }
 
   if (!idToken.trim()) {
-    throw new AppError('Token de Google inválido', 400)
+    throw new AppError(ErrorCode.INVALID_GOOGLE_TOKEN, 400)
   }
 
   try {
@@ -25,7 +26,7 @@ export async function verifyGoogleIdToken(idToken: string): Promise<GoogleUserPr
     const payload = ticket.getPayload()
 
     if (!payload?.sub || !payload.email) {
-      throw new AppError('Token de Google inválido', 401)
+      throw new AppError(ErrorCode.INVALID_GOOGLE_TOKEN, 401)
     }
 
     return {
@@ -39,6 +40,6 @@ export async function verifyGoogleIdToken(idToken: string): Promise<GoogleUserPr
       throw error
     }
 
-    throw new AppError('Token de Google inválido', 401)
+    throw new AppError(ErrorCode.INVALID_GOOGLE_TOKEN, 401)
   }
 }

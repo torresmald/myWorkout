@@ -3,7 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import GuestLayout from '@/components/layout/GuestLayout.vue'
 import { useAuthStore } from '@/stores/auth.store'
-import { buildDocumentTitle } from '@/utils/document-title.util'
+import { updateDocumentTitle } from '@/utils/document-title.util'
 import ExerciseTypesView from '@/views/ExerciseTypesView.vue'
 import ForgotPasswordView from '@/views/ForgotPasswordView.vue'
 import HomeView from '@/views/HomeView.vue'
@@ -13,6 +13,7 @@ import RegisterView from '@/views/RegisterView.vue'
 import ResetPasswordView from '@/views/ResetPasswordView.vue'
 import VerifyEmailView from '@/views/VerifyEmailView.vue'
 import WorkoutsView from '@/views/WorkoutsView.vue'
+import StatsView from '@/views/StatsView.vue'
 import AdminView from '@/views/AdminView.vue'
 
 const router = createRouter({
@@ -28,8 +29,8 @@ const router = createRouter({
           name: 'home',
           component: HomeView,
           meta: {
-            title: 'Inicio',
-            pageDescription: '¿Qué quieres hacer hoy?',
+            titleKey: 'routes.home.title',
+            pageDescriptionKey: 'routes.home.description',
           },
         },
         {
@@ -37,8 +38,8 @@ const router = createRouter({
           name: 'exercise-types',
           component: ExerciseTypesView,
           meta: {
-            title: 'Tipos de ejercicio',
-            pageDescription: 'Gestiona tu biblioteca de ejercicios',
+            titleKey: 'routes.exerciseTypes.title',
+            pageDescriptionKey: 'routes.exerciseTypes.description',
           },
         },
         {
@@ -46,8 +47,17 @@ const router = createRouter({
           name: 'workouts',
           component: WorkoutsView,
           meta: {
-            title: 'Entrenamientos',
-            pageDescription: 'Registra y consulta tus sesiones',
+            titleKey: 'routes.workouts.title',
+            pageDescriptionKey: 'routes.workouts.description',
+          },
+        },
+        {
+          path: 'stats',
+          name: 'stats',
+          component: StatsView,
+          meta: {
+            titleKey: 'routes.stats.title',
+            pageDescriptionKey: 'routes.stats.description',
           },
         },
         {
@@ -55,8 +65,8 @@ const router = createRouter({
           name: 'profile',
           component: ProfileView,
           meta: {
-            title: 'Mi perfil',
-            pageDescription: 'Gestiona tus datos personales y tu evolución',
+            titleKey: 'routes.profile.title',
+            pageDescriptionKey: 'routes.profile.description',
           },
         },
         {
@@ -65,8 +75,8 @@ const router = createRouter({
           component: AdminView,
           meta: {
             requiresAdmin: true,
-            title: 'Administración',
-            pageDescription: 'Métricas y gestión de usuarios',
+            titleKey: 'routes.admin.title',
+            pageDescriptionKey: 'routes.admin.description',
           },
         },
       ],
@@ -81,7 +91,7 @@ const router = createRouter({
           name: 'login',
           component: LoginView,
           meta: {
-            title: 'Iniciar sesión',
+            titleKey: 'routes.login.title',
           },
         },
       ],
@@ -96,7 +106,7 @@ const router = createRouter({
           name: 'register',
           component: RegisterView,
           meta: {
-            title: 'Crear cuenta',
+            titleKey: 'routes.register.title',
           },
         },
       ],
@@ -110,7 +120,7 @@ const router = createRouter({
           name: 'verify-email',
           component: VerifyEmailView,
           meta: {
-            title: 'Verificar cuenta',
+            titleKey: 'routes.verifyEmail.title',
           },
         },
       ],
@@ -125,7 +135,7 @@ const router = createRouter({
           name: 'forgot-password',
           component: ForgotPasswordView,
           meta: {
-            title: 'Recuperar contraseña',
+            titleKey: 'routes.forgotPassword.title',
           },
         },
       ],
@@ -133,13 +143,14 @@ const router = createRouter({
     {
       path: '/reset-password',
       component: GuestLayout,
+      meta: { requiresGuest: true },
       children: [
         {
           path: '',
           name: 'reset-password',
           component: ResetPasswordView,
           meta: {
-            title: 'Nueva contraseña',
+            titleKey: 'routes.resetPassword.title',
           },
         },
       ],
@@ -169,7 +180,7 @@ router.beforeEach(async (to) => {
 })
 
 router.afterEach((to) => {
-  document.title = buildDocumentTitle(to.meta.title as string | undefined)
+  updateDocumentTitle(to)
 })
 
 export default router

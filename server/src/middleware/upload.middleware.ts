@@ -1,5 +1,6 @@
 import multer from 'multer'
 
+import { ErrorCode } from '../constants/error-codes.constants.js'
 import { ALLOWED_IMAGE_MIME_TYPES, MAX_AVATAR_SIZE_BYTES } from '../constants/profile.constants.js'
 import { AppError } from '../interfaces/app-error.interface.js'
 import { handleServiceError } from '../utils/app-error.util.js'
@@ -12,7 +13,7 @@ const avatarUpload = multer({
   },
   fileFilter(_req, file, cb) {
     if (!ALLOWED_IMAGE_MIME_TYPES.includes(file.mimetype as (typeof ALLOWED_IMAGE_MIME_TYPES)[number])) {
-      cb(new AppError('Formato de imagen no permitido. Usa JPEG, PNG o WebP', 400))
+      cb(new AppError(ErrorCode.IMAGE_FORMAT_NOT_ALLOWED, 400))
       return
     }
 
@@ -35,11 +36,11 @@ export function handleAvatarUpload(
 
     if (error instanceof multer.MulterError) {
       if (error.code === 'LIMIT_FILE_SIZE') {
-        handleServiceError(new AppError('La imagen supera el tamaño máximo de 2 MB', 400), res)
+        handleServiceError(new AppError(ErrorCode.IMAGE_TOO_LARGE, 400), res)
         return
       }
 
-      handleServiceError(new AppError('Error al subir la imagen', 400), res)
+      handleServiceError(new AppError(ErrorCode.IMAGE_UPLOAD_FAILED, 400), res)
       return
     }
 

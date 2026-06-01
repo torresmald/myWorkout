@@ -1,3 +1,4 @@
+import { ErrorCode } from '../constants/error-codes.constants.js'
 import { ALLOWED_IMAGE_MIME_TYPES } from '../constants/profile.constants.js'
 import { AppError } from '../interfaces/app-error.interface.js'
 
@@ -51,15 +52,15 @@ export function validateUploadedImage(buffer: Buffer, mimeType: string): ImageKi
   const detectedKind = detectImageKind(buffer)
 
   if (!detectedKind) {
-    throw new AppError('Formato de imagen no permitido. Usa JPEG, PNG o WebP', 400)
+    throw new AppError(ErrorCode.IMAGE_FORMAT_NOT_ALLOWED, 400)
   }
 
   if (!ALLOWED_IMAGE_MIME_TYPES.includes(mimeType as AllowedImageMimeType)) {
-    throw new AppError('Formato de imagen no permitido. Usa JPEG, PNG o WebP', 400)
+    throw new AppError(ErrorCode.IMAGE_FORMAT_NOT_ALLOWED, 400)
   }
 
   if (mimeType !== MIME_BY_KIND[detectedKind]) {
-    throw new AppError('El tipo de archivo no coincide con su contenido', 400)
+    throw new AppError(ErrorCode.IMAGE_MIME_MISMATCH, 400)
   }
 
   return detectedKind

@@ -1,8 +1,11 @@
+import type { AppLocale } from '../constants/locale.constants.js'
 import type { UserPublic } from './auth.interface.js'
 
 export interface UpdateProfileBody {
   name?: string
   heightCm?: number | null
+  weightKg?: number
+  locale?: string
 }
 
 export interface AddWeightBody {

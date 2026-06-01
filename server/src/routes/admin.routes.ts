@@ -9,6 +9,7 @@ import {
   listAdminUsers,
   updateUserRole,
 } from '../services/admin.service.js'
+import { ErrorCode } from '../constants/error-codes.constants.js'
 import { AppError } from '../interfaces/app-error.interface.js'
 import { handleServiceError } from '../utils/app-error.util.js'
 import { sendSuccess } from '../utils/api-response.util.js'
@@ -57,11 +58,11 @@ router.patch('/users/:id/role', async (req, res) => {
     const { role } = req.body as { role?: UserRole }
 
     if (!Number.isInteger(targetUserId) || targetUserId <= 0) {
-      throw new AppError('Usuario inválido', 400)
+      throw new AppError(ErrorCode.INVALID_USER_ID, 400)
     }
 
     if (!role) {
-      throw new AppError('Rol obligatorio', 400)
+      throw new AppError(ErrorCode.ROLE_REQUIRED, 400)
     }
 
     const user = await updateUserRole(userId, targetUserId, role)

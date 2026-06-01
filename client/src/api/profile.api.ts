@@ -2,14 +2,22 @@ import { api } from '@/api/client'
 import type { ApiResponse } from '@/interfaces/api-response.interface'
 import type { UserPublic } from '@/interfaces/auth.interface'
 import type { UserProfile, WeightEntryPublic } from '@/interfaces/profile.interface'
+import { throwIfApiError } from '@/utils/api-error.util'
 import { getAccessToken } from '@/utils/storage.util'
 
 export function getProfile() {
   return api<UserProfile>('/profile')
 }
 
-export function updateProfile(body: { name?: string; heightCm?: number | null }) {
-  return api<UserPublic>('/profile', {
+import type { AppLocale } from '@/constants/locale.constants'
+
+export function updateProfile(body: {
+  name?: string
+  heightCm?: number | null
+  weightKg?: number
+  locale?: AppLocale
+}) {
+  return api<UserProfile>('/profile', {
     method: 'PATCH',
     body: JSON.stringify(body),
   })
@@ -57,9 +65,7 @@ export async function uploadAvatar(file: File) {
 
   const body = (await response.json()) as ApiResponse<UserPublic>
 
-  if (!response.ok || body.status === 'error') {
-    throw new Error(body.error ?? `API error: ${response.status}`)
-  }
+  throwIfApiError(body, response.status)
 
   return body.data as UserPublic
 }

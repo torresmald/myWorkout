@@ -2,6 +2,7 @@ import * as Sentry from '@sentry/vue'
 
 import type { ApiResponse } from '@/interfaces/api-response.interface'
 import { isSentryEnabled } from '@/config/sentry'
+import { throwIfApiError } from '@/utils/api-error.util'
 import { getAccessToken } from '@/utils/storage.util'
 
 function reportApiError(error: unknown): void {
@@ -32,8 +33,9 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
   })
   const body = (await response.json()) as ApiResponse<T>
 
-  if (!response.ok || body.status === 'error') {
-    const error = new Error(body.error ?? `API error: ${response.status}`)
+  try {
+    throwIfApiError(body, response.status)
+  } catch (error) {
     if (response.status >= 500) {
       reportApiError(error)
     }

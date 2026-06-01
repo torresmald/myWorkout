@@ -1,8 +1,9 @@
 import type { NavItem } from '@/interfaces/nav.interface'
 
 export const NAV_ITEMS: NavItem[] = [
-  { label: 'Inicio', routeName: 'home', to: '/' },
-  { label: 'Entrenamientos', routeName: 'workouts', to: '/workouts' },
-  { label: 'Tipos de ejercicio', routeName: 'exercise-types', to: '/exercise-types' },
-  { label: 'Perfil', routeName: 'profile', to: '/profile' },
+  { routeName: 'home', labelKey: 'nav.home', to: '/' },
+  { routeName: 'workouts', labelKey: 'nav.workouts', to: '/workouts' },
+  { routeName: 'stats', labelKey: 'nav.stats', to: '/stats' },
+  { routeName: 'exercise-types', labelKey: 'nav.exerciseTypes', to: '/exercise-types' },
+  { routeName: 'profile', labelKey: 'nav.profile', to: '/profile' },
 ]

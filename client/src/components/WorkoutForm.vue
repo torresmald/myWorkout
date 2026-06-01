@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
+import { useI18n } from 'vue-i18n'
 
 import WorkoutExercises from '@/components/WorkoutExercises.vue'
 import type { WorkoutPublic } from '@/interfaces/workout.interface'
@@ -21,6 +22,7 @@ import { getErrorMessage } from '@/utils/error.util'
 
 const workoutStore = useWorkoutStore()
 const toastStore = useToastStore()
+const { t } = useI18n()
 
 const { creating, updating } = storeToRefs(workoutStore)
 
@@ -57,19 +59,17 @@ async function handleSubmit() {
   try {
     if (isEditing.value && editingId.value !== null) {
       await workoutStore.update(editingId.value, body)
-      toastStore.success('Entrenamiento actualizado correctamente')
+      toastStore.success(t('workouts.updateSuccess'))
     } else {
       await workoutStore.create(body)
-      toastStore.success('Entrenamiento creado correctamente')
+      toastStore.success(t('workouts.createSuccess'))
       resetForm()
     }
   } catch (e) {
     toastStore.error(
       getErrorMessage(
         e,
-        isEditing.value
-          ? 'Error al actualizar el entrenamiento'
-          : 'Error al crear el entrenamiento',
+        isEditing.value ? t('workouts.updateError') : t('workouts.createError'),
       ),
     )
   }
@@ -87,35 +87,35 @@ defineExpose({
 <template>
   <section :class="CARD_BODY_CLASS">
     <h2 :class="SECTION_TITLE_CLASS">
-      {{ isEditing ? 'Editar entrenamiento' : 'Nuevo entrenamiento' }}
+      {{ isEditing ? t('workouts.form.editTitle') : t('workouts.form.newTitle') }}
     </h2>
 
     <form class="space-y-4" @submit.prevent="handleSubmit">
       <div>
-        <label for="workout-name" :class="LABEL_CLASS">Nombre</label>
+        <label for="workout-name" :class="LABEL_CLASS">{{ t('common.name') }}</label>
         <input
           id="workout-name"
           v-model="name"
           type="text"
           required
           :class="INPUT_CLASS"
-          placeholder="Pecho y tríceps"
+          :placeholder="t('workouts.form.namePlaceholder')"
         />
       </div>
 
       <div>
-        <label for="workout-date" :class="LABEL_CLASS">Fecha</label>
+        <label for="workout-date" :class="LABEL_CLASS">{{ t('common.date') }}</label>
         <input id="workout-date" v-model="date" type="date" required :class="INPUT_CLASS" />
       </div>
 
       <div>
-        <label for="workout-notes" :class="LABEL_CLASS">Notas</label>
+        <label for="workout-notes" :class="LABEL_CLASS">{{ t('common.notes') }}</label>
         <textarea
           id="workout-notes"
           v-model="notes"
           rows="3"
           :class="INPUT_CLASS"
-          placeholder="Opcional"
+          :placeholder="t('common.optional')"
         />
       </div>
 
@@ -128,11 +128,11 @@ defineExpose({
           {{
             saving
               ? isEditing
-                ? 'Guardando...'
-                : 'Creando...'
+                ? t('common.saving')
+                : t('common.creating')
               : isEditing
-                ? 'Guardar cambios'
-                : 'Crear entrenamiento'
+                ? t('common.saveChanges')
+                : t('workouts.form.createButton')
           }}
         </button>
 
@@ -142,7 +142,7 @@ defineExpose({
           :class="[BTN_SECONDARY_CLASS, BTN_MOBILE_FULL_CLASS]"
           @click="resetForm"
         >
-          Cancelar
+          {{ t('common.cancel') }}
         </button>
       </div>
     </form>

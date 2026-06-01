@@ -1,12 +1,14 @@
 import bcrypt from 'bcrypt'
 
-import { EMAIL_NOT_VERIFIED_MESSAGE, EMAIL_REGEX, SALT_ROUNDS, userPublicSelect } from '../constants/auth.constants.js'
+import { ErrorCode, MessageCode } from '../constants/error-codes.constants.js'
+import { EMAIL_REGEX, SALT_ROUNDS, userPublicSelect } from '../constants/auth.constants.js'
 import { prisma } from '../config/prisma.js'
 import { AppError } from '../interfaces/app-error.interface.js'
 import type { LoginBody, LoginResponse, RegisterBody, RegisterResponse, UserPublic } from '../interfaces/auth.interface.js'
 import type { GoogleUserProfile } from '../interfaces/google.interface.js'
 import { normalizeEmail } from '../utils/auth.util.js'
 import { signAccessToken } from '../utils/jwt.util.js'
+import { parseAppLocale } from '../utils/locale.util.js'
 import { generateRefreshToken } from '../utils/token.util.js'
 import {
   createEmailVerificationToken,
@@ -16,21 +18,27 @@ import { verifyGoogleIdToken } from './google-auth.service.js'
 import { getLatestWeightKg } from './profile.service.js'
 import { mapUserToPublic } from '../utils/user-profile.util.js'
 
-function validateRegisterBody(body: RegisterBody): { email: string; password: string; name: string | null } {
-  const { email, password, name } = body
+function validateRegisterBody(body: RegisterBody): {
+  email: string
+  password: string
+  name: string | null
+  locale: ReturnType<typeof parseAppLocale>
+} {
+  const { email, password, name, locale } = body
 
   if (!email || !EMAIL_REGEX.test(email)) {
-    throw new AppError('Email inválido', 400)
+    throw new AppError(ErrorCode.INVALID_EMAIL, 400)
   }
 
   if (!password || password.length < 6) {
-    throw new AppError('La contraseña debe tener al menos 6 caracteres', 400)
+    throw new AppError(ErrorCode.PASSWORD_MIN_LENGTH, 400)
   }
 
   return {
     email: normalizeEmail(email),
     password,
     name: name?.trim() || null,
+    locale: parseAppLocale(locale),
   }
 }
 
@@ -38,7 +46,7 @@ function validateLoginBody(body: LoginBody): { email: string; password: string }
   const { email, password } = body
 
   if (!email || !password) {
-    throw new AppError('Email y contraseña son obligatorios', 400)
+    throw new AppError(ErrorCode.EMAIL_PASSWORD_REQUIRED, 400)
   }
 
   return {
@@ -78,9 +86,12 @@ async function createUserSession(user: {
   }
 }
 
-async function findOrCreateGoogleUser(profile: GoogleUserProfile) {
+async function findOrCreateGoogleUser(
+  profile: GoogleUserProfile,
+  locale: ReturnType<typeof parseAppLocale>,
+) {
   if (!profile.emailVerified) {
-    throw new AppError('El email de Google no está verificado', 401)
+    throw new AppError(ErrorCode.GOOGLE_EMAIL_NOT_VERIFIED, 401)
   }
 
   const existingByGoogleId = await prisma.user.findUnique({
@@ -97,7 +108,7 @@ async function findOrCreateGoogleUser(profile: GoogleUserProfile) {
 
   if (existingByEmail) {
     if (existingByEmail.googleId && existingByEmail.googleId !== profile.googleId) {
-      throw new AppError('Esta cuenta ya está vinculada a otro inicio de sesión de Google', 409)
+      throw new AppError(ErrorCode.GOOGLE_ACCOUNT_ALREADY_LINKED, 409)
     }
 
     return prisma.user.update({
@@ -115,26 +126,30 @@ async function findOrCreateGoogleUser(profile: GoogleUserProfile) {
       email: profile.email,
       googleId: profile.googleId,
       name: profile.name,
+      locale,
       emailVerifiedAt: new Date(),
     },
   })
 }
 
-export async function loginWithGoogle(idToken: string): Promise<LoginResponse> {
+export async function loginWithGoogle(
+  idToken: string,
+  locale?: string,
+): Promise<LoginResponse> {
   const profile = await verifyGoogleIdToken(idToken)
-  const user = await findOrCreateGoogleUser(profile)
+  const user = await findOrCreateGoogleUser(profile, parseAppLocale(locale))
   return createUserSession(user)
 }
 
 export async function registerUser(body: RegisterBody): Promise<RegisterResponse> {
-  const { email, password, name } = validateRegisterBody(body)
+  const { email, password, name, locale } = validateRegisterBody(body)
 
   const existingUser = await prisma.user.findUnique({
     where: { email },
   })
 
   if (existingUser) {
-    throw new AppError('El email ya está registrado', 409)
+    throw new AppError(ErrorCode.EMAIL_ALREADY_REGISTERED, 409)
   }
 
   const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS)
@@ -144,15 +159,16 @@ export async function registerUser(body: RegisterBody): Promise<RegisterResponse
       email,
       password: hashedPassword,
       name,
+      locale,
       emailVerifiedAt: null,
     },
   })
 
   const verificationToken = await createEmailVerificationToken(user.id)
-  await sendUserVerificationEmail(email, verificationToken)
+  await sendUserVerificationEmail(email, verificationToken, locale)
 
   return {
-    message: 'Revisa tu email para activar la cuenta',
+    messageCode: MessageCode.REGISTER_CHECK_EMAIL,
     email,
   }
 }
@@ -165,11 +181,11 @@ export async function loginUser(body: LoginBody): Promise<LoginResponse> {
   })
 
   if (!user || !user.password || !(await bcrypt.compare(password, user.password))) {
-    throw new AppError('Credenciales inválidas', 401)
+    throw new AppError(ErrorCode.INVALID_CREDENTIALS, 401)
   }
 
   if (!user.emailVerifiedAt) {
-    throw new AppError(EMAIL_NOT_VERIFIED_MESSAGE, 403)
+    throw new AppError(ErrorCode.EMAIL_NOT_VERIFIED, 403)
   }
 
   return createUserSession(user)
@@ -182,7 +198,7 @@ export async function getUserById(userId: number): Promise<UserPublic> {
   })
 
   if (!user) {
-    throw new AppError('Usuario no encontrado', 404)
+    throw new AppError(ErrorCode.USER_NOT_FOUND, 404)
   }
 
   const latestWeightKg = await getLatestWeightKg(userId)

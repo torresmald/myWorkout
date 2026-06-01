@@ -1,5 +1,6 @@
 import type { Express } from 'express'
 
+import { ErrorCode } from '../constants/error-codes.constants.js'
 import { userPublicSelect } from '../constants/auth.constants.js'
 import { prisma } from '../config/prisma.js'
 import { AppError } from '../interfaces/app-error.interface.js'
@@ -14,7 +15,7 @@ export async function uploadProfileAvatar(
   file: Express.Multer.File,
 ): Promise<UserPublic> {
   if (!file.buffer?.length) {
-    throw new AppError('No se recibió ninguna imagen', 400)
+    throw new AppError(ErrorCode.NO_IMAGE_RECEIVED, 400)
   }
 
   validateUploadedImage(file.buffer, file.mimetype)
@@ -27,7 +28,7 @@ export async function uploadProfileAvatar(
   })
 
   if (!user) {
-    throw new AppError('Usuario no encontrado', 404)
+    throw new AppError(ErrorCode.USER_NOT_FOUND, 404)
   }
 
   const publicId = await uploadAvatarImage(userId, file.buffer, file.mimetype)
@@ -51,7 +52,7 @@ export async function deleteProfileAvatar(userId: number): Promise<UserPublic> {
   })
 
   if (!user) {
-    throw new AppError('Usuario no encontrado', 404)
+    throw new AppError(ErrorCode.USER_NOT_FOUND, 404)
   }
 
   await deleteAvatarImage(user.profileImagePath)

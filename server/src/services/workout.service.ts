@@ -1,3 +1,4 @@
+import { ErrorCode } from '../constants/error-codes.constants.js'
 import { workoutSelect } from '../constants/workout.constants.js'
 import { prisma } from '../config/prisma.js'
 import { AppError } from '../interfaces/app-error.interface.js'
@@ -16,7 +17,7 @@ function requireName(name?: string): string {
   const trimmedName = name?.trim()
 
   if (!trimmedName) {
-    throw new AppError('El nombre es obligatorio', 400)
+    throw new AppError(ErrorCode.NAME_REQUIRED, 400)
   }
 
   return trimmedName
@@ -30,7 +31,7 @@ function parseWorkoutDate(date?: string): Date {
   const parsed = new Date(date)
 
   if (Number.isNaN(parsed.getTime())) {
-    throw new AppError('Fecha inválida', 400)
+    throw new AppError(ErrorCode.INVALID_DATE, 400)
   }
 
   return parsed
@@ -66,7 +67,7 @@ export async function updateWorkout(
   const existing = await findUserWorkout(userId, id)
 
   if (!existing) {
-    throw new AppError('Entrenamiento no encontrado', 404)
+    throw new AppError(ErrorCode.WORKOUT_NOT_FOUND, 404)
   }
 
   const trimmedName = requireName(body.name)
@@ -86,7 +87,7 @@ export async function deleteWorkout(userId: number, id: string): Promise<Workout
   const existing = await findUserWorkout(userId, id)
 
   if (!existing) {
-    throw new AppError('Entrenamiento no encontrado', 404)
+    throw new AppError(ErrorCode.WORKOUT_NOT_FOUND, 404)
   }
 
   await prisma.workout.delete({

@@ -4,4 +4,5 @@ export interface ApiResponse<T = unknown> {
   status: ApiStatus
   data: T | null
   error: string | null
+  errorParams?: Record<string, string | number> | null
 }

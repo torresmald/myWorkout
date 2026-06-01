@@ -1,3 +1,4 @@
+import { ErrorCode } from '../constants/error-codes.constants.js'
 import { prisma } from '../config/prisma.js'
 import type { Decimal } from '@prisma/client/runtime/library'
 import {
@@ -11,6 +12,7 @@ import { userPublicSelect } from '../constants/auth.constants.js'
 import { AppError } from '../interfaces/app-error.interface.js'
 import type { AddWeightBody, UpdateProfileBody, UpdateWeightBody, UserProfile, WeightEntryPublic } from '../interfaces/profile.interface.js'
 import { decimalToNumber } from '../utils/decimal.util.js'
+import { parseAppLocale } from '../utils/locale.util.js'
 import { mapUserToPublic } from '../utils/user-profile.util.js'
 
 async function getLatestWeightKg(userId: number): Promise<number | null> {
@@ -47,7 +49,7 @@ function validateName(name: string | undefined): string | null | undefined {
   }
 
   if (trimmed.length > MAX_NAME_LENGTH) {
-    throw new AppError(`El nombre no puede superar ${MAX_NAME_LENGTH} caracteres`, 400)
+    throw new AppError(ErrorCode.NAME_MAX_LENGTH, 400, { max: MAX_NAME_LENGTH })
   }
 
   return trimmed
@@ -63,7 +65,7 @@ function validateHeightCm(heightCm: number | null | undefined): number | null | 
   }
 
   if (!Number.isFinite(heightCm) || heightCm < MIN_HEIGHT_CM || heightCm > MAX_HEIGHT_CM) {
-    throw new AppError(`La altura debe estar entre ${MIN_HEIGHT_CM} y ${MAX_HEIGHT_CM} cm`, 400)
+    throw new AppError(ErrorCode.HEIGHT_OUT_OF_RANGE, 400, { min: MIN_HEIGHT_CM, max: MAX_HEIGHT_CM })
   }
 
   return Number(heightCm.toFixed(1))
@@ -71,11 +73,11 @@ function validateHeightCm(heightCm: number | null | undefined): number | null | 
 
 function validateWeightKg(weightKg: number | undefined): number {
   if (weightKg === undefined || !Number.isFinite(weightKg)) {
-    throw new AppError('El peso es obligatorio', 400)
+    throw new AppError(ErrorCode.WEIGHT_REQUIRED, 400)
   }
 
   if (weightKg < MIN_WEIGHT_KG || weightKg > MAX_WEIGHT_KG) {
-    throw new AppError(`El peso debe estar entre ${MIN_WEIGHT_KG} y ${MAX_WEIGHT_KG} kg`, 400)
+    throw new AppError(ErrorCode.WEIGHT_OUT_OF_RANGE, 400, { min: MIN_WEIGHT_KG, max: MAX_WEIGHT_KG })
   }
 
   return Number(weightKg.toFixed(2))
@@ -89,13 +91,13 @@ function validateRecordedAt(recordedAt: string | undefined): Date | undefined {
   const trimmed = recordedAt.trim()
 
   if (!trimmed) {
-    throw new AppError('La fecha es obligatoria', 400)
+    throw new AppError(ErrorCode.DATE_REQUIRED, 400)
   }
 
   const parsed = new Date(trimmed)
 
   if (Number.isNaN(parsed.getTime())) {
-    throw new AppError('Fecha inválida', 400)
+    throw new AppError(ErrorCode.INVALID_DATE, 400)
   }
 
   return parsed
@@ -138,7 +140,7 @@ async function findWeightEntryForUser(userId: number, entryId: number) {
   })
 
   if (!entry) {
-    throw new AppError('Registro de peso no encontrado', 404)
+    throw new AppError(ErrorCode.WEIGHT_ENTRY_NOT_FOUND, 404)
   }
 
   return entry
@@ -151,7 +153,7 @@ export async function getUserProfile(userId: number): Promise<UserProfile> {
   })
 
   if (!user) {
-    throw new AppError('Usuario no encontrado', 404)
+    throw new AppError(ErrorCode.USER_NOT_FOUND, 404)
   }
 
   const [latestWeightKg, weightEntries] = await Promise.all([
@@ -165,25 +167,50 @@ export async function getUserProfile(userId: number): Promise<UserProfile> {
   }
 }
 
-export async function updateUserProfile(userId: number, body: UpdateProfileBody) {
+export async function updateUserProfile(userId: number, body: UpdateProfileBody): Promise<UserProfile> {
   const name = validateName(body.name)
   const heightCm = validateHeightCm(body.heightCm)
+  const weightKg = body.weightKg !== undefined ? validateWeightKg(body.weightKg) : undefined
+  const locale = body.locale !== undefined ? parseAppLocale(body.locale) : undefined
 
-  if (name === undefined && heightCm === undefined) {
-    throw new AppError('No hay datos para actualizar', 400)
+  if (name === undefined && heightCm === undefined && weightKg === undefined && locale === undefined) {
+    throw new AppError(ErrorCode.NO_DATA_TO_UPDATE, 400)
   }
 
-  const user = await prisma.user.update({
+  const user = await prisma.user.findUnique({
     where: { id: userId },
-    data: {
-      ...(name !== undefined ? { name } : {}),
-      ...(heightCm !== undefined ? { heightCm } : {}),
-    },
-    select: userPublicSelect,
+    select: { id: true },
   })
 
-  const latestWeightKg = await getLatestWeightKg(userId)
-  return mapUserToPublic(user, latestWeightKg)
+  if (!user) {
+    throw new AppError(ErrorCode.USER_NOT_FOUND, 404)
+  }
+
+  if (name !== undefined || heightCm !== undefined || locale !== undefined) {
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        ...(name !== undefined ? { name } : {}),
+        ...(heightCm !== undefined ? { heightCm } : {}),
+        ...(locale !== undefined ? { locale } : {}),
+      },
+    })
+  }
+
+  if (weightKg !== undefined) {
+    const latestWeightKg = await getLatestWeightKg(userId)
+
+    if (latestWeightKg === null || latestWeightKg !== weightKg) {
+      await prisma.weightEntry.create({
+        data: {
+          userId,
+          weightKg,
+        },
+      })
+    }
+  }
+
+  return getUserProfile(userId)
 }
 
 export async function addWeightEntry(userId: number, body: AddWeightBody) {
@@ -195,7 +222,7 @@ export async function addWeightEntry(userId: number, body: AddWeightBody) {
   })
 
   if (!user) {
-    throw new AppError('Usuario no encontrado', 404)
+    throw new AppError(ErrorCode.USER_NOT_FOUND, 404)
   }
 
   const entry = await prisma.weightEntry.create({
@@ -225,7 +252,7 @@ export async function updateWeightEntry(userId: number, entryId: number, body: U
   const recordedAt = validateRecordedAt(body.recordedAt)
 
   if (weightKg === undefined && recordedAt === undefined) {
-    throw new AppError('No hay datos para actualizar', 400)
+    throw new AppError(ErrorCode.NO_DATA_TO_UPDATE, 400)
   }
 
   const entry = await prisma.weightEntry.update({

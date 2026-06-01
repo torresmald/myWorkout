@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
 import { BTN_ICON_GHOST_CLASS, BTN_ICON_DANGER_CLASS } from '@/constants/ui.constants'
 
@@ -13,6 +15,8 @@ const emit = defineEmits<{
   edit: []
   delete: []
 }>()
+
+const { t } = useI18n()
 </script>
 
 <template>
@@ -22,7 +26,7 @@ const emit = defineEmits<{
       type="button"
       :class="BTN_ICON_GHOST_CLASS"
       :disabled="disabled || deleting"
-      aria-label="Iniciar descanso"
+      :aria-label="t('workouts.restTimer.startRest')"
       @click="emit('timer')"
     >
       <svg
@@ -45,7 +49,7 @@ const emit = defineEmits<{
       type="button"
       :class="BTN_ICON_GHOST_CLASS"
       :disabled="disabled || deleting"
-      aria-label="Editar"
+      :aria-label="t('common.edit')"
       @click="emit('edit')"
     >
       <svg
@@ -68,7 +72,7 @@ const emit = defineEmits<{
       type="button"
       :class="BTN_ICON_DANGER_CLASS"
       :disabled="disabled || deleting"
-      aria-label="Eliminar"
+      :aria-label="t('common.delete')"
       @click="emit('delete')"
     >
       <LoadingSpinner v-if="deleting" size="sm" />

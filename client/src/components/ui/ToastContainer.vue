@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-
+import { useI18n } from 'vue-i18n'
 import { useToastStore } from '@/stores/toast.store'
 
 const toastStore = useToastStore()
 const { toasts } = storeToRefs(toastStore)
-
+const { t } = useI18n()
 function toastClasses(type: 'success' | 'error'): string {
   return type === 'success'
     ? 'border-green-200 bg-green-50 text-green-800 dark:border-green-900 dark:bg-green-950 dark:text-green-300'
@@ -39,7 +39,7 @@ function toastClasses(type: 'success' | 'error'): string {
         <button
           type="button"
           class="flex h-11 w-11 shrink-0 items-center justify-center text-current opacity-60 transition hover:opacity-100"
-          aria-label="Cerrar"
+          :aria-label="t('toast.close')"
           @click="toastStore.remove(toast.id)"
         >
           ✕

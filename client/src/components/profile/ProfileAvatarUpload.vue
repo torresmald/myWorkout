@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
+import { useI18n } from 'vue-i18n'
 
 import UserAvatar from '@/components/profile/UserAvatar.vue'
 import LoadingButton from '@/components/ui/LoadingButton.vue'
@@ -14,6 +15,7 @@ import { getErrorMessage } from '@/utils/error.util'
 const profileStore = useProfileStore()
 const modalStore = useModalStore()
 const toastStore = useToastStore()
+const { t } = useI18n()
 
 const { profile, uploadingAvatar, deletingAvatar } = storeToRefs(profileStore)
 
@@ -39,24 +41,24 @@ async function handleFileChange(event: Event) {
   const validationError = validateAvatarFile(file)
 
   if (validationError) {
-    toastStore.error(validationError)
+    toastStore.error(t(`profile.avatar.${validationError}`))
     return
   }
 
   try {
     await profileStore.uploadAvatar(file)
     avatarCacheKey.value = Date.now()
-    toastStore.success('Foto de perfil actualizada')
+    toastStore.success(t('profile.avatar.uploadSuccess'))
   } catch (error) {
-    toastStore.error(getErrorMessage(error, 'No se pudo subir la imagen'))
+    toastStore.error(getErrorMessage(error, t('profile.avatar.uploadError')))
   }
 }
 
 async function handleRemoveAvatar() {
   const confirmed = await modalStore.confirm({
-    title: 'Eliminar foto',
-    message: '¿Quieres quitar tu foto de perfil?',
-    confirmLabel: 'Eliminar',
+    title: t('modals.deleteAvatar.title'),
+    message: t('modals.deleteAvatar.message'),
+    confirmLabel: t('common.delete'),
     variant: 'danger',
   })
 
@@ -67,9 +69,9 @@ async function handleRemoveAvatar() {
   try {
     await profileStore.removeAvatar()
     avatarCacheKey.value = Date.now()
-    toastStore.success('Foto de perfil eliminada')
+    toastStore.success(t('profile.avatar.removeSuccess'))
   } catch (error) {
-    toastStore.error(getErrorMessage(error, 'No se pudo eliminar la imagen'))
+    toastStore.error(getErrorMessage(error, t('profile.avatar.removeError')))
   }
 }
 </script>
@@ -90,7 +92,7 @@ async function handleRemoveAvatar() {
         type="button"
         class="absolute right-0 top-0 flex h-7 w-7 translate-x-1/4 -translate-y-1/4 items-center justify-center rounded-full bg-red-600 text-white shadow-md transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
         :disabled="isAvatarBusy"
-        aria-label="Eliminar foto"
+        :aria-label="t('profile.avatar.remove')"
         @click="handleRemoveAvatar"
       >
         <LoadingSpinner v-if="deletingAvatar" size="sm" />
@@ -112,7 +114,7 @@ async function handleRemoveAvatar() {
     </div>
 
     <div class="flex flex-col gap-2 sm:flex-1">
-      <p class="text-sm text-text-secondary">JPEG, PNG o WebP. Máximo 2 MB.</p>
+      <p class="text-sm text-text-secondary">{{ t('profile.avatar.hint') }}</p>
 
       <LoadingButton
         type="button"
@@ -122,7 +124,7 @@ async function handleRemoveAvatar() {
         :disabled="isAvatarBusy"
         @click="openFilePicker"
       >
-        {{ profile?.profileImageUrl ? 'Cambiar foto' : 'Subir foto' }}
+        {{ profile?.profileImageUrl ? t('profile.avatar.change') : t('profile.avatar.upload') }}
       </LoadingButton>
 
       <input

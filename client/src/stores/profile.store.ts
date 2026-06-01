@@ -51,12 +51,12 @@ export const useProfileStore = defineStore('profile', () => {
     }
   }
 
-  async function saveProfile(body: { name?: string; heightCm?: number | null }) {
+  async function saveProfile(body: { name?: string; heightCm?: number | null; weightKg?: number }) {
     saving.value = true
 
     try {
       const updated = await profileApi.updateProfile(body)
-      applyProfile(updated)
+      profile.value = updated
       syncAuthUser(updated)
       return updated
     } finally {

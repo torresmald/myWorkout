@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, watch } from 'vue'
+import { computed, onMounted, onUnmounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import {
   BTN_DANGER_CLASS,
@@ -21,6 +22,12 @@ const emit = defineEmits<{
   togglePause: []
   close: []
 }>()
+
+const { t } = useI18n()
+
+const closeAriaLabel = computed(() =>
+  props.isFinished ? t('common.close') : t('workouts.restTimer.cancelRest'),
+)
 
 watch(
   () => props.open,
@@ -72,7 +79,7 @@ onUnmounted(() => {
       >
         <div class="flex items-center justify-between py-4">
           <div class="min-w-0 pr-4">
-            <p class="text-sm font-medium text-blue-100">Descanso</p>
+            <p class="text-sm font-medium text-blue-100">{{ t('workouts.restTimer.label') }}</p>
             <h2 id="rest-timer-title" class="truncate text-lg font-semibold sm:text-xl">
               {{ exerciseName }}
             </h2>
@@ -81,7 +88,7 @@ onUnmounted(() => {
           <button
             type="button"
             class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20"
-            :aria-label="isFinished ? 'Cerrar' : 'Cancelar descanso'"
+            :aria-label="closeAriaLabel"
             @click="isFinished ? emit('close') : emit('cancel')"
           >
             <svg
@@ -105,7 +112,7 @@ onUnmounted(() => {
             v-if="isFinished"
             class="text-center text-2xl font-semibold text-green-200 sm:text-3xl"
           >
-            ¡Descanso terminado!
+            {{ t('workouts.restTimer.finished') }}
           </p>
 
           <p
@@ -117,14 +124,14 @@ onUnmounted(() => {
           </p>
 
           <p v-if="isPaused && !isFinished" class="text-sm font-medium text-blue-100">
-            Temporizador en pausa
+            {{ t('workouts.restTimer.paused') }}
           </p>
         </div>
 
         <div class="flex flex-col gap-3 pb-4 sm:flex-row sm:justify-center">
           <template v-if="isFinished">
             <button type="button" :class="[BTN_PRIMARY_CLASS, 'w-full sm:w-auto']" @click="emit('close')">
-              Continuar
+              {{ t('workouts.restTimer.continue') }}
             </button>
           </template>
 
@@ -134,7 +141,7 @@ onUnmounted(() => {
               :class="[BTN_SECONDARY_CLASS, 'w-full border-white/20 bg-white/10 text-white hover:bg-white/20 sm:w-auto']"
               @click="emit('togglePause')"
             >
-              {{ isPaused ? 'Reanudar' : 'Pausar' }}
+              {{ isPaused ? t('workouts.restTimer.resume') : t('workouts.restTimer.pause') }}
             </button>
 
             <button
@@ -142,7 +149,7 @@ onUnmounted(() => {
               :class="[BTN_DANGER_CLASS, 'w-full border-white/20 bg-white/10 hover:bg-white/20 sm:w-auto']"
               @click="emit('cancel')"
             >
-              Cancelar
+              {{ t('common.cancel') }}
             </button>
           </template>
         </div>

@@ -7,4 +7,5 @@ export interface GoogleUserProfile {
 
 export interface GoogleLoginBody {
   idToken?: string
+  locale?: string
 }

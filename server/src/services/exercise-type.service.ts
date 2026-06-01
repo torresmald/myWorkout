@@ -1,3 +1,4 @@
+import { ErrorCode } from '../constants/error-codes.constants.js'
 import { exerciseTypeSelect } from '../constants/exercise-type.constants.js'
 import { prisma } from '../config/prisma.js'
 import { AppError } from '../interfaces/app-error.interface.js'
@@ -9,8 +10,6 @@ import type {
 import { findUserExerciseType } from '../utils/exercise-type.util.js'
 import { isPrismaUniqueViolation } from '../utils/prisma-error.util.js'
 
-const DUPLICATE_NAME_MESSAGE = 'Ya existe un ejercicio con ese nombre'
-
 function trimOptional(value?: string): string | null {
   return value?.trim() || null
 }
@@ -19,7 +18,7 @@ function requireName(name?: string): string {
   const trimmedName = name?.trim()
 
   if (!trimmedName) {
-    throw new AppError('El nombre es obligatorio', 400)
+    throw new AppError(ErrorCode.NAME_REQUIRED, 400)
   }
 
   return trimmedName
@@ -30,7 +29,7 @@ async function handleUniqueViolation<T>(operation: () => Promise<T>): Promise<T>
     return await operation()
   } catch (error) {
     if (isPrismaUniqueViolation(error)) {
-      throw new AppError(DUPLICATE_NAME_MESSAGE, 409)
+      throw new AppError(ErrorCode.DUPLICATE_EXERCISE_TYPE_NAME, 409)
     }
 
     throw error
@@ -72,7 +71,7 @@ export async function updateExerciseType(
   const existing = await findUserExerciseType(userId, id)
 
   if (!existing) {
-    throw new AppError('Ejercicio no encontrado', 404)
+    throw new AppError(ErrorCode.EXERCISE_TYPE_NOT_FOUND, 404)
   }
 
   const trimmedName = requireName(body.name)
@@ -97,7 +96,7 @@ export async function deleteExerciseType(
   const existing = await findUserExerciseType(userId, id)
 
   if (!existing) {
-    throw new AppError('Ejercicio no encontrado', 404)
+    throw new AppError(ErrorCode.EXERCISE_TYPE_NOT_FOUND, 404)
   }
 
   await prisma.exerciseType.delete({

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
+import { useI18n } from 'vue-i18n'
 
 import PageContainer from '@/components/layout/PageContainer.vue'
 import RoutePageHeader from '@/components/layout/RoutePageHeader.vue'
@@ -26,6 +27,7 @@ import { getErrorMessage } from '@/utils/error.util'
 const exerciseTypeStore = useExerciseTypeStore()
 const modalStore = useModalStore()
 const toastStore = useToastStore()
+const { t } = useI18n()
 const { exerciseTypes, loading, creating, updating, deletingId } = storeToRefs(exerciseTypeStore)
 
 const editingId = ref<number | null>(null)
@@ -54,7 +56,7 @@ onMounted(async () => {
   try {
     await exerciseTypeStore.fetchAll()
   } catch (e) {
-    toastStore.error(getErrorMessage(e, 'Error al cargar los ejercicios'))
+    toastStore.error(getErrorMessage(e, t('exerciseTypes.loadError')))
   }
 })
 
@@ -68,10 +70,10 @@ async function handleSubmit() {
   try {
     if (isEditing.value && editingId.value !== null) {
       await exerciseTypeStore.update(editingId.value, body)
-      toastStore.success('Ejercicio actualizado correctamente')
+      toastStore.success(t('exerciseTypes.updateSuccess'))
     } else {
       await exerciseTypeStore.create(body)
-      toastStore.success('Ejercicio creado correctamente')
+      toastStore.success(t('exerciseTypes.createSuccess'))
     }
 
     resetForm()
@@ -79,7 +81,7 @@ async function handleSubmit() {
     toastStore.error(
       getErrorMessage(
         e,
-        isEditing.value ? 'Error al actualizar el ejercicio' : 'Error al crear el ejercicio',
+        isEditing.value ? t('exerciseTypes.updateError') : t('exerciseTypes.createError'),
       ),
     )
   }
@@ -87,9 +89,9 @@ async function handleSubmit() {
 
 async function handleDelete(exercise: ExerciseTypePublic) {
   const confirmed = await modalStore.confirm({
-    title: 'Eliminar ejercicio',
-    message: `¿Eliminar "${exercise.name}"? Esta acción no se puede deshacer.`,
-    confirmLabel: 'Eliminar',
+    title: t('modals.deleteExerciseType.title'),
+    message: t('modals.deleteExerciseType.message', { name: exercise.name }),
+    confirmLabel: t('common.delete'),
     variant: 'danger',
   })
 
@@ -103,9 +105,9 @@ async function handleDelete(exercise: ExerciseTypePublic) {
 
   try {
     await exerciseTypeStore.remove(exercise.id)
-    toastStore.success('Ejercicio eliminado correctamente')
+    toastStore.success(t('exerciseTypes.deleteSuccess'))
   } catch (e) {
-    toastStore.error(getErrorMessage(e, 'Error al eliminar el ejercicio'))
+    toastStore.error(getErrorMessage(e, t('exerciseTypes.deleteError')))
   }
 }
 </script>
@@ -116,41 +118,41 @@ async function handleDelete(exercise: ExerciseTypePublic) {
 
     <section :class="CARD_BODY_CLASS">
       <h2 :class="SECTION_TITLE_CLASS">
-        {{ isEditing ? 'Editar ejercicio' : 'Nuevo ejercicio' }}
+        {{ isEditing ? t('exerciseTypes.form.editTitle') : t('exerciseTypes.form.newTitle') }}
       </h2>
 
       <form class="space-y-4" @submit.prevent="handleSubmit">
         <div>
-          <label for="name" :class="LABEL_CLASS">Nombre</label>
+          <label for="name" :class="LABEL_CLASS">{{ t('common.name') }}</label>
           <input
             id="name"
             v-model="name"
             type="text"
             required
             :class="INPUT_CLASS"
-            placeholder="Press banca"
+            :placeholder="t('exerciseTypes.form.namePlaceholder')"
           />
         </div>
 
         <div>
-          <label for="description" :class="LABEL_CLASS">Descripción</label>
+          <label for="description" :class="LABEL_CLASS">{{ t('common.description') }}</label>
           <input
             id="description"
             v-model="description"
             type="text"
             :class="INPUT_CLASS"
-            placeholder="Opcional"
+            :placeholder="t('exerciseTypes.form.descriptionPlaceholder')"
           />
         </div>
 
         <div>
-          <label for="muscleGroup" :class="LABEL_CLASS">Grupo muscular</label>
+          <label for="muscleGroup" :class="LABEL_CLASS">{{ t('common.muscleGroup') }}</label>
           <input
             id="muscleGroup"
             v-model="muscleGroup"
             type="text"
             :class="INPUT_CLASS"
-            placeholder="Pecho, pierna..."
+            :placeholder="t('exerciseTypes.form.muscleGroupPlaceholder')"
           />
         </div>
 
@@ -163,11 +165,11 @@ async function handleDelete(exercise: ExerciseTypePublic) {
             {{
               saving
                 ? isEditing
-                  ? 'Guardando...'
-                  : 'Creando...'
+                  ? t('common.saving')
+                  : t('common.creating')
                 : isEditing
-                  ? 'Guardar cambios'
-                  : 'Crear ejercicio'
+                  ? t('common.saveChanges')
+                  : t('exerciseTypes.form.createButton')
             }}
           </button>
 
@@ -177,19 +179,19 @@ async function handleDelete(exercise: ExerciseTypePublic) {
             :class="[BTN_SECONDARY_CLASS, BTN_MOBILE_FULL_CLASS]"
             @click="resetForm"
           >
-            Cancelar
+            {{ t('common.cancel') }}
           </button>
         </div>
       </form>
     </section>
 
     <section :class="CARD_BODY_CLASS">
-      <h2 :class="SECTION_TITLE_CLASS">Mis ejercicios</h2>
+      <h2 :class="SECTION_TITLE_CLASS">{{ t('exerciseTypes.list.title') }}</h2>
 
-      <p v-if="loading" class="text-sm text-text-muted">Cargando ejercicios...</p>
+      <p v-if="loading" class="text-sm text-text-muted">{{ t('exerciseTypes.list.loading') }}</p>
 
       <p v-else-if="exerciseTypes.length === 0" class="text-sm text-text-muted">
-        Aún no tienes ejercicios. Crea el primero arriba.
+        {{ t('exerciseTypes.list.empty') }}
       </p>
 
       <ul v-else class="divide-y divide-border-default">

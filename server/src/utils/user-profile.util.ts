@@ -6,12 +6,14 @@ import type { UserPublic } from '../interfaces/auth.interface.js'
 import { getCloudinaryImageUrl } from '../utils/cloudinary-image.util.js'
 import { calculateBmi } from './bmi.util.js'
 import { decimalToNumber } from './decimal.util.js'
+import { parseAppLocale } from './locale.util.js'
 
 export interface UserProfileRecord {
   id: number
   email: string
   name: string | null
   role: UserPublic['role']
+  locale: string
   createdAt: Date
   heightCm: Decimal | null
   profileImagePath: string | null
@@ -38,6 +40,7 @@ export function mapUserToPublic(user: UserProfileRecord, latestWeightKg: number 
     email: user.email,
     name: user.name,
     role: user.role,
+    locale: parseAppLocale(user.locale),
     createdAt: user.createdAt,
     heightCm,
     profileImageUrl: buildProfileImageUrl(user.profileImagePath),

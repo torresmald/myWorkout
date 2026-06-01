@@ -51,8 +51,8 @@ declare module 'vue-router' {
     requiresAuth?: boolean
     requiresGuest?: boolean
     requiresAdmin?: boolean
-    title?: string
-    pageDescription?: string
+    titleKey?: string
+    pageDescriptionKey?: string
   }
 }
 

@@ -1,10 +1,15 @@
 import type { ChartData, ChartOptions } from 'chart.js'
 
+import { i18n } from '@/i18n'
 import type { WeightEntryPublic } from '@/interfaces/profile.interface'
 import { formatWorkoutDate } from '@/utils/date.util'
 
 const CHART_COLOR = '#2563eb'
 const CHART_FILL = 'rgba(37, 99, 235, 0.12)'
+
+function t(key: string): string {
+  return i18n.global.t(key)
+}
 
 export function sortWeightEntriesAsc(entries: WeightEntryPublic[]): WeightEntryPublic[] {
   return [...entries].sort(
@@ -33,7 +38,7 @@ export function buildWeightChartData(
     labels: sorted.map((entry) => formatWorkoutDate(entry.recordedAt)),
     datasets: [
       {
-        label: 'Peso (kg)',
+        label: t('charts.weightKg'),
         data: sorted.map((entry) => entry.weightKg),
         borderColor: CHART_COLOR,
         backgroundColor: CHART_FILL,
