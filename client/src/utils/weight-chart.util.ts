@@ -1,11 +1,9 @@
 import type { ChartData, ChartOptions } from 'chart.js'
 
+import { CHART_COLORS, getChartTheme } from '@/constants/chart.constants'
 import { i18n } from '@/i18n'
 import type { WeightEntryPublic } from '@/interfaces/profile.interface'
 import { formatWorkoutDate } from '@/utils/date.util'
-
-const CHART_COLOR = '#2563eb'
-const CHART_FILL = 'rgba(37, 99, 235, 0.12)'
 
 function t(key: string): string {
   return i18n.global.t(key)
@@ -33,6 +31,7 @@ export function buildWeightChartData(
   isDark = false,
 ): ChartData<'line'> {
   const sorted = sortWeightEntriesAsc(entries)
+  const { pointBorderColor } = getChartTheme(isDark)
 
   return {
     labels: sorted.map((entry) => formatWorkoutDate(entry.recordedAt)),
@@ -40,10 +39,10 @@ export function buildWeightChartData(
       {
         label: t('charts.weightKg'),
         data: sorted.map((entry) => entry.weightKg),
-        borderColor: CHART_COLOR,
-        backgroundColor: CHART_FILL,
-        pointBackgroundColor: CHART_COLOR,
-        pointBorderColor: isDark ? '#111827' : '#ffffff',
+        borderColor: CHART_COLORS.primary,
+        backgroundColor: CHART_COLORS.primarySoft,
+        pointBackgroundColor: CHART_COLORS.primary,
+        pointBorderColor,
         pointBorderWidth: 2,
         pointRadius: 4,
         pointHoverRadius: 6,
@@ -60,8 +59,7 @@ export function buildWeightChartOptions(
 ): ChartOptions<'line'> {
   const weights = entries.map((entry) => entry.weightKg)
   const { min, max } = getWeightAxisBounds(weights)
-  const gridColor = isDark ? '#374151' : '#e5e7eb'
-  const tickColor = isDark ? '#9ca3af' : '#6b7280'
+  const { gridColor, tickColor } = getChartTheme(isDark)
 
   return {
     responsive: true,

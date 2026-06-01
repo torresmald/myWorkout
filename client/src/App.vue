@@ -3,6 +3,8 @@ import { watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 
+import CookieBanner from '@/components/cookies/CookieBanner.vue'
+import CookiePreferencesModal from '@/components/cookies/CookiePreferencesModal.vue'
 import ModalContainer from '@/components/ui/ModalContainer.vue'
 import ToastContainer from '@/components/ui/ToastContainer.vue'
 import { useLocaleStore } from '@/stores/locale.store'
@@ -21,4 +23,6 @@ watch(locale, () => {
   <RouterView />
   <ToastContainer />
   <ModalContainer />
+  <CookieBanner />
+  <CookiePreferencesModal />
 </template>

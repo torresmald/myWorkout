@@ -5,7 +5,9 @@ import { useI18n } from 'vue-i18n'
 
 import PageContainer from '@/components/layout/PageContainer.vue'
 import RoutePageHeader from '@/components/layout/RoutePageHeader.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
 import ListItemIconActions from '@/components/ui/ListItemIconActions.vue'
+import SkeletonList from '@/components/ui/SkeletonList.vue'
 import type { ExerciseTypePublic } from '@/interfaces/exercise-type.interface'
 import {
   BTN_ACTIONS_CLASS,
@@ -188,20 +190,25 @@ async function handleDelete(exercise: ExerciseTypePublic) {
     <section :class="CARD_BODY_CLASS">
       <h2 :class="SECTION_TITLE_CLASS">{{ t('exerciseTypes.list.title') }}</h2>
 
-      <p v-if="loading" class="text-sm text-text-muted">{{ t('exerciseTypes.list.loading') }}</p>
+      <SkeletonList v-if="loading" />
 
-      <p v-else-if="exerciseTypes.length === 0" class="text-sm text-text-muted">
-        {{ t('exerciseTypes.list.empty') }}
-      </p>
+      <EmptyState
+        v-else-if="exerciseTypes.length === 0"
+        variant="exercise-types"
+        :title="t('empty.exerciseTypes.title')"
+        :description="t('empty.exerciseTypes.description')"
+      />
 
       <ul v-else class="divide-y divide-border-default">
         <li
-          v-for="exercise in exerciseTypes"
+          v-for="(exercise, index) in exerciseTypes"
           :key="exercise.id"
           :class="[
             LIST_ITEM_ROW_CLASS,
+            'stagger-item',
             { 'rounded-lg bg-nav-active-bg px-3 -mx-3': editingId === exercise.id },
           ]"
+          :style="{ animationDelay: `${index * 45}ms` }"
         >
           <div :class="LIST_ITEM_CONTENT_CLASS">
             <p class="font-medium text-text-primary">{{ exercise.name }}</p>

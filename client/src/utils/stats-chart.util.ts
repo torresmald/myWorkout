@@ -1,5 +1,6 @@
 import type { ChartData, ChartOptions } from 'chart.js'
 
+import { CHART_COLORS, getChartTheme } from '@/constants/chart.constants'
 import { i18n } from '@/i18n'
 import type {
   ExerciseEvolutionSeries,
@@ -7,19 +8,8 @@ import type {
 } from '@/interfaces/stats.interface'
 import { formatWeekLabel, formatWorkoutDate } from '@/utils/date.util'
 
-const CHART_COLOR = '#2563eb'
-const CHART_COLOR_SECONDARY = '#16a34a'
-
 function t(key: string): string {
   return i18n.global.t(key)
-}
-
-function getChartTheme(isDark: boolean) {
-  return {
-    gridColor: isDark ? '#374151' : '#e5e7eb',
-    tickColor: isDark ? '#9ca3af' : '#6b7280',
-    pointBorderColor: isDark ? '#111827' : '#ffffff',
-  }
 }
 
 function buildBarChartOptions(isDark: boolean, yLabel?: string): ChartOptions<'bar'> {
@@ -62,7 +52,7 @@ export function buildWeeklyFrequencyChartData(
       {
         label: t('charts.workouts'),
         data: weekly.map((point) => point.workoutCount),
-        backgroundColor: CHART_COLOR,
+        backgroundColor: CHART_COLORS.primary,
         borderRadius: 6,
       },
     ],
@@ -76,7 +66,7 @@ export function buildWeeklyVolumeChartData(weekly: WeeklyStatPoint[]): ChartData
       {
         label: t('charts.volumeKg'),
         data: weekly.map((point) => Math.round(point.volumeKg)),
-        backgroundColor: CHART_COLOR_SECONDARY,
+        backgroundColor: CHART_COLORS.secondary,
         borderRadius: 6,
       },
     ],
@@ -115,9 +105,9 @@ export function buildExerciseEvolutionChartData(
         {
           label: t('charts.maxWeightKg'),
           data: pointsWithWeight.map((point) => point.maxWeight),
-          borderColor: CHART_COLOR,
-          backgroundColor: 'rgba(37, 99, 235, 0.12)',
-          pointBackgroundColor: CHART_COLOR,
+          borderColor: CHART_COLORS.primary,
+          backgroundColor: CHART_COLORS.primarySoft,
+          pointBackgroundColor: CHART_COLORS.primary,
           pointBorderColor,
           pointBorderWidth: 2,
           pointRadius: 4,
@@ -134,9 +124,9 @@ export function buildExerciseEvolutionChartData(
       {
         label: t('charts.reps'),
         data: series.dataPoints.map((point) => point.totalReps),
-        borderColor: CHART_COLOR_SECONDARY,
-        backgroundColor: 'rgba(22, 163, 74, 0.12)',
-        pointBackgroundColor: CHART_COLOR_SECONDARY,
+        borderColor: CHART_COLORS.accent,
+        backgroundColor: CHART_COLORS.accentSoft,
+        pointBackgroundColor: CHART_COLORS.accent,
         pointBorderColor,
         pointBorderWidth: 2,
         pointRadius: 4,

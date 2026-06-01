@@ -8,7 +8,8 @@ import WeeklyFrequencyChart from '@/components/stats/WeeklyFrequencyChart.vue'
 import WeeklyVolumeChart from '@/components/stats/WeeklyVolumeChart.vue'
 import PageContainer from '@/components/layout/PageContainer.vue'
 import RoutePageHeader from '@/components/layout/RoutePageHeader.vue'
-import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
+import SkeletonCardGrid from '@/components/ui/SkeletonCardGrid.vue'
 import { CARD_BODY_CLASS, CARD_COMPACT_CLASS, SECTION_TITLE_CLASS, TEXT_MUTED_CLASS } from '@/constants/ui.constants'
 import { useStatsStore } from '@/stores/stats.store'
 import { useToastStore } from '@/stores/toast.store'
@@ -28,6 +29,8 @@ const summaryCards = computed(() => [
   { key: 'totalReps' as const, label: t('stats.summary.totalReps'), suffix: '' },
 ])
 
+const hasWorkouts = computed(() => (stats.value?.summary.totalWorkouts ?? 0) > 0)
+
 onMounted(async () => {
   try {
     await statsStore.fetchStats()
@@ -41,13 +44,25 @@ onMounted(async () => {
   <PageContainer>
     <RoutePageHeader />
 
-    <div v-if="loading && !stats" class="flex justify-center py-16">
-      <LoadingSpinner size="lg" class="text-blue-600" />
-    </div>
+    <SkeletonCardGrid v-if="loading && !stats" />
+
+    <EmptyState
+      v-else-if="stats && !hasWorkouts"
+      variant="stats"
+      :title="t('empty.stats.title')"
+      :description="t('empty.stats.description')"
+      :action-label="t('empty.stats.action')"
+      action-to="/workouts"
+    />
 
     <template v-else-if="stats">
       <div class="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div v-for="card in summaryCards" :key="card.key" :class="CARD_COMPACT_CLASS">
+        <div
+          v-for="(card, index) in summaryCards"
+          :key="card.key"
+          :class="[CARD_COMPACT_CLASS, 'stagger-item']"
+          :style="{ animationDelay: `${index * 50}ms` }"
+        >
           <p :class="TEXT_MUTED_CLASS">{{ card.label }}</p>
           <p class="mt-1 text-2xl font-bold text-text-primary">
             {{ stats.summary[card.key] }}{{ card.suffix }}
@@ -56,20 +71,20 @@ onMounted(async () => {
       </div>
 
       <div class="grid gap-6 lg:grid-cols-2">
-        <section :class="CARD_BODY_CLASS">
+        <section :class="[CARD_BODY_CLASS, 'stagger-item']" style="animation-delay: 250ms">
           <h2 :class="SECTION_TITLE_CLASS">{{ t('stats.frequency.title') }}</h2>
           <p :class="['mb-4', TEXT_MUTED_CLASS]">{{ t('stats.frequency.description') }}</p>
           <WeeklyFrequencyChart :weekly="stats.weekly" />
         </section>
 
-        <section :class="CARD_BODY_CLASS">
+        <section :class="[CARD_BODY_CLASS, 'stagger-item']" style="animation-delay: 300ms">
           <h2 :class="SECTION_TITLE_CLASS">{{ t('stats.volume.title') }}</h2>
           <p :class="['mb-4', TEXT_MUTED_CLASS]">{{ t('stats.volume.description') }}</p>
           <WeeklyVolumeChart :weekly="stats.weekly" />
         </section>
       </div>
 
-      <section :class="[CARD_BODY_CLASS, 'mt-6']">
+      <section :class="[CARD_BODY_CLASS, 'mt-6 stagger-item']" style="animation-delay: 350ms">
         <h2 :class="SECTION_TITLE_CLASS">{{ t('stats.evolution.title') }}</h2>
         <ExerciseEvolutionChart :series-list="stats.exerciseEvolution" />
       </section>

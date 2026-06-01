@@ -38,4 +38,7 @@ export default {
   resetPassword: {
     title: 'Nueva contraseña',
   },
+  cookies: {
+    title: 'Política de cookies',
+  },
 } as const

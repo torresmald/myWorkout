@@ -5,7 +5,9 @@ import { useI18n } from 'vue-i18n'
 
 import PageContainer from '@/components/layout/PageContainer.vue'
 import RoutePageHeader from '@/components/layout/RoutePageHeader.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
+import SkeletonCardGrid from '@/components/ui/SkeletonCardGrid.vue'
 import {
   BTN_SECONDARY_CLASS,
   CARD_COMPACT_CLASS,
@@ -69,8 +71,15 @@ async function goToPage(nextPage: number) {
   <PageContainer>
     <RoutePageHeader />
 
-    <div v-if="metrics" class="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      <div v-for="card in metricCards" :key="card.key" :class="CARD_COMPACT_CLASS">
+    <SkeletonCardGrid v-if="loading && !metrics" />
+
+    <div v-else-if="metrics" class="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div
+        v-for="(card, index) in metricCards"
+        :key="card.key"
+        :class="[CARD_COMPACT_CLASS, 'stagger-item']"
+        :style="{ animationDelay: `${index * 50}ms` }"
+      >
         <p :class="TEXT_MUTED_CLASS">{{ card.label }}</p>
         <p class="mt-1 text-2xl font-bold text-text-primary">{{ metrics[card.key] }}</p>
       </div>
@@ -84,11 +93,14 @@ async function goToPage(nextPage: number) {
         <LoadingSpinner v-if="loading" size="sm" class="text-blue-600" />
       </div>
 
-      <div v-if="users.length === 0 && !loading" :class="TEXT_MUTED_CLASS">
-        {{ t('admin.users.empty') }}
-      </div>
+      <EmptyState
+        v-if="users.length === 0 && !loading"
+        variant="admin"
+        :title="t('empty.admin.title')"
+        :description="t('empty.admin.description')"
+      />
 
-      <div v-else class="overflow-x-auto">
+      <div v-else-if="users.length > 0" class="overflow-x-auto">
         <table class="min-w-full text-left text-sm">
           <thead>
             <tr class="border-b border-border-default text-text-muted">

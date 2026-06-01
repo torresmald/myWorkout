@@ -4,7 +4,7 @@ export const CARD_BODY_CLASS = `${CARD_CLASS} p-4 sm:p-6`
 
 export const CARD_COMPACT_CLASS = `${CARD_CLASS} p-4`
 
-export const CARD_INTERACTIVE_CLASS = `${CARD_BODY_CLASS} transition hover:border-blue-300 hover:shadow-md dark:hover:border-blue-700`
+export const CARD_INTERACTIVE_CLASS = `${CARD_BODY_CLASS} transition hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-lg dark:hover:border-blue-700`
 
 export const SECTION_TITLE_CLASS = 'mb-4 text-base font-semibold text-text-primary sm:text-lg'
 

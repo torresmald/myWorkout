@@ -1,12 +1,12 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import * as Sentry from '@sentry/vue'
 import { registerSW } from 'virtual:pwa-register'
 
 import App from './App.vue'
-import { getSentryDsn, isSentryEnabled } from './config/sentry'
+import { captureSentryException, initSentry, isSentryEnabled } from './config/sentry'
 import { i18n, setTheme } from './i18n'
 import router from './router'
+import { useCookieConsentStore } from './stores/cookie-consent.store'
 import { useThemeStore } from './stores/theme.store'
 
 const app = createApp(App)
@@ -16,15 +16,17 @@ app.use(pinia)
 app.use(i18n)
 app.use(router)
 
-if (isSentryEnabled()) {
-  Sentry.init({
-    app,
-    dsn: getSentryDsn(),
-    environment: import.meta.env.MODE,
-    integrations: [Sentry.browserTracingIntegration({ router })],
-    tracesSampleRate: 0.1,
-  })
+const cookieConsentStore = useCookieConsentStore()
+
+if (cookieConsentStore.hasAnalyticsConsent()) {
+  initSentry(app, router)
 }
+
+cookieConsentStore.$subscribe((_mutation, state) => {
+  if (state.preferences.analytics) {
+    initSentry(app, router)
+  }
+})
 
 const themeStore = useThemeStore()
 themeStore.initSystemListener()
@@ -35,7 +37,7 @@ registerSW({ immediate: true })
 
 app.config.errorHandler = (error) => {
   if (isSentryEnabled()) {
-    Sentry.captureException(error)
+    captureSentryException(error)
   }
   console.error(error)
 }

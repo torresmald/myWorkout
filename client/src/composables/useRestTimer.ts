@@ -9,6 +9,8 @@ export function useRestTimer() {
   const exerciseName = ref('')
   const remainingSeconds = ref(0)
 
+  const totalSeconds = ref(0)
+
   let endsAt = 0
   let pausedRemaining = 0
   let intervalId: ReturnType<typeof setInterval> | null = null
@@ -48,15 +50,16 @@ export function useRestTimer() {
     playRestTimerCompleteSound()
   }
 
-  function start(name: string, totalSeconds: number) {
+  function start(name: string, totalSecondsParam: number) {
     unlockRestTimerSound()
 
     exerciseName.value = name
+    totalSeconds.value = totalSecondsParam
     isOpen.value = true
     isPaused.value = false
     isFinished.value = false
-    endsAt = Date.now() + totalSeconds * 1000
-    pausedRemaining = totalSeconds
+    endsAt = Date.now() + totalSecondsParam * 1000
+    pausedRemaining = totalSecondsParam
     startTick()
   }
 
@@ -95,6 +98,7 @@ export function useRestTimer() {
     isFinished.value = false
     exerciseName.value = ''
     remainingSeconds.value = 0
+    totalSeconds.value = 0
   }
 
   function closeAfterFinish() {
@@ -115,6 +119,7 @@ export function useRestTimer() {
     isFinished,
     exerciseName,
     remainingSeconds,
+    totalSeconds,
     start,
     pause,
     resume,

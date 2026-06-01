@@ -4,7 +4,9 @@ import { RouterLink } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
 
+import EmptyState from '@/components/ui/EmptyState.vue'
 import ListItemIconActions from '@/components/ui/ListItemIconActions.vue'
+import SkeletonList from '@/components/ui/SkeletonList.vue'
 import RestTimerModal from '@/components/workout/RestTimerModal.vue'
 import { useRestTimer } from '@/composables/useRestTimer'
 import type { WorkoutExercisePublic } from '@/interfaces/workout.interface'
@@ -42,6 +44,7 @@ const {
   isFinished: isRestTimerFinished,
   exerciseName: restTimerExerciseName,
   remainingSeconds: restTimerRemainingSeconds,
+  totalSeconds: restTimerTotalSeconds,
   start: startRestTimer,
   togglePause: toggleRestTimerPause,
   cancel: cancelRestTimer,
@@ -199,18 +202,18 @@ defineExpose({ resetForm })
   <section :class="CARD_BODY_CLASS">
     <h2 :class="SECTION_TITLE_CLASS">{{ t('workouts.exercises.title') }}</h2>
 
-    <p v-if="loadingExercises" class="text-sm text-text-muted">
-      {{ t('workouts.exercises.loading') }}
-    </p>
+    <SkeletonList v-if="loadingExercises" class="mb-6" />
 
     <ul v-else-if="exercises.length > 0" class="mb-6 divide-y divide-border-default">
       <li
-        v-for="exercise in exercises"
+        v-for="(exercise, index) in exercises"
         :key="exercise.id"
         :class="[
           LIST_ITEM_ROW_CLASS,
+          'stagger-item',
           { 'rounded-lg bg-nav-active-bg px-3 -mx-3': exerciseEditingId === exercise.id },
         ]"
+        :style="{ animationDelay: `${index * 45}ms` }"
       >
         <div :class="LIST_ITEM_CONTENT_CLASS">
           <p class="font-medium text-text-primary">{{ exercise.exerciseType.name }}</p>
@@ -233,7 +236,13 @@ defineExpose({ resetForm })
       </li>
     </ul>
 
-    <p v-else class="mb-6 text-sm text-text-muted">{{ t('workouts.exercises.empty') }}</p>
+    <EmptyState
+      v-else
+      class="mb-6"
+      variant="exercises"
+      :title="t('empty.exercises.title')"
+      :description="t('empty.exercises.description')"
+    />
 
     <div
       v-if="exerciseTypes.length === 0"
@@ -352,6 +361,7 @@ defineExpose({ resetForm })
     :open="isRestTimerOpen"
     :exercise-name="restTimerExerciseName"
     :remaining-seconds="restTimerRemainingSeconds"
+    :total-seconds="restTimerTotalSeconds"
     :is-paused="isRestTimerPaused"
     :is-finished="isRestTimerFinished"
     @toggle-pause="toggleRestTimerPause"

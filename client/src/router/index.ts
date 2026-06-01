@@ -15,10 +15,20 @@ import VerifyEmailView from '@/views/VerifyEmailView.vue'
 import WorkoutsView from '@/views/WorkoutsView.vue'
 import StatsView from '@/views/StatsView.vue'
 import AdminView from '@/views/AdminView.vue'
+import CookiesView from '@/views/CookiesView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    {
+      path: '/cookies',
+      name: 'cookies',
+      component: CookiesView,
+      meta: {
+        titleKey: 'routes.cookies.title',
+        public: true,
+      },
+    },
     {
       path: '/',
       component: AppLayout,

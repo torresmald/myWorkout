@@ -12,8 +12,8 @@ import AddWeightModal from '@/components/profile/AddWeightModal.vue'
 import ScaleWeightIcon from '@/components/profile/ScaleWeightIcon.vue'
 import WeightEvolutionChart from '@/components/profile/WeightEvolutionChart.vue'
 import LoadingButton from '@/components/ui/LoadingButton.vue'
-import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
 import ListItemIconActions from '@/components/ui/ListItemIconActions.vue'
+import SkeletonProfile from '@/components/ui/SkeletonProfile.vue'
 import type { WeightEntryPublic } from '@/interfaces/profile.interface'
 import {
   BTN_MOBILE_FULL_CLASS,
@@ -249,9 +249,7 @@ async function handleDeleteWeightEntry(entry: WeightEntryPublic) {
   <PageContainer>
     <RoutePageHeader />
 
-    <div v-if="loading && !profile" class="flex justify-center py-12">
-      <LoadingSpinner size="lg" class="text-blue-600" />
-    </div>
+    <SkeletonProfile v-if="loading && !profile" />
 
     <template v-else-if="profile">
       <section :class="CARD_BODY_CLASS">
@@ -373,12 +371,14 @@ async function handleDeleteWeightEntry(entry: WeightEntryPublic) {
 
         <ul class="divide-y divide-border-default">
           <li
-            v-for="entry in profile.weightEntries"
+            v-for="(entry, index) in profile.weightEntries"
             :key="entry.id"
             :class="[
               weightEditingId === entry.id ? 'py-3 first:pt-0 last:pb-0' : LIST_ITEM_ROW_CLASS,
+              'stagger-item',
               { 'rounded-lg bg-nav-active-bg px-3 -mx-3': weightEditingId === entry.id },
             ]"
+            :style="{ animationDelay: `${index * 45}ms` }"
           >
             <form
               v-if="weightEditingId === entry.id"

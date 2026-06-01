@@ -4,7 +4,7 @@ import AppHeader from '@/components/layout/AppHeader.vue'
 </script>
 
 <template>
-  <div class="flex min-h-dvh flex-col bg-bg-page">
+  <div class="app-shell flex min-h-dvh flex-col bg-bg-page">
     <AppHeader />
 
     <main class="mx-auto w-full max-w-5xl flex-1">

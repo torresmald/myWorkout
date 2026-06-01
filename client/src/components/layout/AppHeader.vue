@@ -5,10 +5,10 @@ import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
 
 import { useNavItems } from '@/composables/useNavItems'
+import AppLogo from '@/components/layout/AppLogo.vue'
 import UserAvatar from '@/components/profile/UserAvatar.vue'
 import LanguageToggle from '@/components/ui/LanguageToggle.vue'
 import ThemeToggle from '@/components/ui/ThemeToggle.vue'
-import { APP_NAME } from '@/constants/app.constants'
 import { BTN_DANGER_CLASS } from '@/constants/ui.constants'
 import { useAuthStore } from '@/stores/auth.store'
 import { useToastStore } from '@/stores/toast.store'
@@ -78,15 +78,15 @@ onUnmounted(() => {
 
 <template>
   <header
-    class="sticky top-0 z-40 border-b border-border-default bg-bg-elevated shadow-sm pt-[env(safe-area-inset-top,0px)]"
+    class="sticky top-0 z-40 border-b border-border-default bg-bg-elevated/90 shadow-sm backdrop-blur-md pt-[env(safe-area-inset-top,0px)]"
   >
     <div class="mx-auto flex h-14 max-w-5xl items-center justify-between gap-3 px-4 sm:px-6">
       <RouterLink
         to="/"
-        class="shrink-0 text-base font-bold text-text-primary transition hover:text-blue-700 dark:hover:text-blue-400 sm:text-lg"
+        class="shrink-0 transition hover:opacity-90"
         @click="closeMenu"
       >
-        {{ APP_NAME }}
+        <AppLogo show-text size="sm" />
       </RouterLink>
 
       <nav class="hidden items-center gap-1 sm:flex">

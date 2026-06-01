@@ -39,6 +39,7 @@ async function handleSubmit() {
 
 <template>
   <AuthCard
+    variant="glass"
     :title="t('auth.forgotPassword.title')"
     :description="t('auth.forgotPassword.description')"
     :loading="loading"

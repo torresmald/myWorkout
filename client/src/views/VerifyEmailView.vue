@@ -37,6 +37,7 @@ onMounted(async () => {
 
 <template>
   <AuthCard
+    variant="glass"
     :title="t('auth.verifyEmail.title')"
     :description="t('auth.verifyEmail.description')"
   >

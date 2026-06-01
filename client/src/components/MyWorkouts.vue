@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 
+import EmptyState from '@/components/ui/EmptyState.vue'
 import ListItemIconActions from '@/components/ui/ListItemIconActions.vue'
+import SkeletonList from '@/components/ui/SkeletonList.vue'
 import {
   CARD_BODY_CLASS,
   LIST_ITEM_CONTENT_CLASS,
   LIST_ITEM_ROW_CLASS,
   SECTION_TITLE_CLASS,
-  TEXT_MUTED_CLASS,
   TEXT_HEADING_CLASS,
 } from '@/constants/ui.constants'
 import type { WorkoutPublic } from '@/interfaces/workout.interface'
@@ -32,20 +33,25 @@ const { t } = useI18n()
   <section :class="CARD_BODY_CLASS">
     <h2 :class="SECTION_TITLE_CLASS">{{ t('workouts.list.title') }}</h2>
 
-    <p v-if="props.loading" :class="TEXT_MUTED_CLASS">{{ t('workouts.list.loading') }}</p>
+    <SkeletonList v-if="props.loading" />
 
-    <p v-else-if="props.workouts.length === 0" :class="TEXT_MUTED_CLASS">
-      {{ t('workouts.list.empty') }}
-    </p>
+    <EmptyState
+      v-else-if="props.workouts.length === 0"
+      variant="workouts"
+      :title="t('empty.workouts.title')"
+      :description="t('empty.workouts.description')"
+    />
 
     <ul v-else class="divide-y divide-border-default">
       <li
-        v-for="workout in props.workouts"
+        v-for="(workout, index) in props.workouts"
         :key="workout.id"
         :class="[
           LIST_ITEM_ROW_CLASS,
+          'stagger-item',
           { 'rounded-lg bg-nav-active-bg px-3 -mx-3': props.editingWorkoutId === workout.id },
         ]"
+        :style="{ animationDelay: `${index * 45}ms` }"
       >
         <div :class="LIST_ITEM_CONTENT_CLASS">
           <p :class="TEXT_HEADING_CLASS">{{ workout.name }}</p>

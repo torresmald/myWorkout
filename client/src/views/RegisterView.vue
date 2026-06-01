@@ -90,6 +90,7 @@ function handleGoogleError(message: string) {
 
 <template>
   <AuthCard
+    variant="glass"
     :title="t('auth.register.title')"
     :description="t('auth.register.description')"
     :loading="isBusy"

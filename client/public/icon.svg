@@ -3,4 +3,5 @@
   <rect x="96" y="216" width="64" height="80" rx="12" fill="#ffffff"/>
   <rect x="352" y="216" width="64" height="80" rx="12" fill="#ffffff"/>
   <rect x="144" y="236" width="224" height="40" rx="20" fill="#ffffff"/>
+  <path d="M256 168v48M256 296v48" stroke="#ffffff" stroke-width="16" stroke-linecap="round" opacity="0.85"/>
 </svg>

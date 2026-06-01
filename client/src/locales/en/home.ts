@@ -1,6 +1,17 @@
 export default {
   greeting: 'Hello, {name}',
   subtitle: 'What do you want to do today?',
+  hero: {
+    eyebrow: 'Your progress',
+    title: 'Keep building your routine',
+    subtitle: 'Log workouts, track progress and stay consistent.',
+    streakLabel: 'Weekly streak',
+    streakWeekSingular: '{count} week',
+    streakWeeks: '{count} weeks',
+    lastWorkoutLabel: 'Last workout',
+    noWorkoutsYet: 'You have not logged any workouts yet.',
+    createFirstWorkout: 'Create first workout',
+  },
   links: {
     workouts: {
       label: 'Workouts',

@@ -14,6 +14,7 @@ import { useI18n } from 'vue-i18n'
 import { Line } from 'vue-chartjs'
 import { storeToRefs } from 'pinia'
 
+import EmptyState from '@/components/ui/EmptyState.vue'
 import type { ExerciseEvolutionSeries } from '@/interfaces/stats.interface'
 import { INPUT_CLASS, LABEL_CLASS, TEXT_MUTED_CLASS } from '@/constants/ui.constants'
 import { useLocaleStore } from '@/stores/locale.store'
@@ -66,9 +67,14 @@ const trendDescription = computed(() =>
 </script>
 
 <template>
-  <div v-if="seriesList.length === 0" :class="TEXT_MUTED_CLASS">
-    {{ t('stats.evolution.empty') }}
-  </div>
+  <EmptyState
+    v-if="seriesList.length === 0"
+    variant="stats"
+    :title="t('empty.stats.title')"
+    :description="t('stats.evolution.empty')"
+    :action-label="t('empty.stats.action')"
+    action-to="/workouts"
+  />
 
   <div v-else class="space-y-4">
     <div>
