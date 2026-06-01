@@ -26,9 +26,9 @@ const { user } = storeToRefs(authStore)
         :to="link.to"
         :class="CARD_INTERACTIVE_CLASS"
       >
-        <h2 class="text-lg font-semibold text-gray-900">{{ link.label }}</h2>
-        <p class="mt-2 text-sm text-gray-600">{{ link.description }}</p>
-        <span class="mt-4 inline-block text-sm font-medium text-blue-600">Ir →</span>
+        <h2 class="text-lg font-semibold text-text-primary">{{ link.label }}</h2>
+        <p class="mt-2 text-sm text-text-secondary">{{ link.description }}</p>
+        <span class="mt-4 inline-block text-sm font-medium text-blue-600 dark:text-blue-400">Ir →</span>
       </RouterLink>
     </div>
   </PageContainer>

@@ -33,7 +33,7 @@ function handleConfirm() {
 
 <template>
   <AppModal :open="isOpen" :title="title" @close="handleClose">
-    <p v-if="message" class="break-words text-sm text-gray-600 sm:text-base">{{ message }}</p>
+    <p v-if="message" class="break-words text-sm text-text-secondary sm:text-base">{{ message }}</p>
     <div v-else :id="MODAL_CONTENT_ID" />
 
     <template v-if="showDefaultFooter" #footer>

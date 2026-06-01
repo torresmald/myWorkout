@@ -38,7 +38,7 @@ const resolvedImageUrl = computed(() => {
 
 <template>
   <div
-    class="relative shrink-0 overflow-hidden rounded-full bg-blue-100 font-semibold text-blue-700"
+    class="relative shrink-0 overflow-hidden rounded-full bg-blue-100 font-semibold text-blue-700 dark:bg-blue-950 dark:text-blue-300"
     :class="sizeClass[size]"
   >
     <img

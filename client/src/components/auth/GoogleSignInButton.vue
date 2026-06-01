@@ -64,12 +64,12 @@ onMounted(async () => {
       class="flex min-h-11 justify-center"
       :class="{ invisible: !isReady || disabled }"
     />
-    <p v-if="!isReady && !disabled" class="text-center text-sm text-gray-500">
+    <p v-if="!isReady && !disabled" class="text-center text-sm text-text-muted">
       Cargando Google...
     </p>
     <div
       v-if="disabled"
-      class="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-gray-200 bg-gray-50 text-sm text-gray-600"
+      class="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-border-default bg-bg-muted text-sm text-text-secondary"
       aria-busy="true"
     >
       <LoadingSpinner size="sm" class="text-blue-600" />

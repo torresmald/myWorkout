@@ -49,15 +49,15 @@ const showWeightChart = computed(() => (profile.value?.weightEntries.length ?? 0
 const bmiCardClass = computed(() => {
   switch (profile.value?.bmiCategory) {
     case 'Bajo peso':
-      return 'border-sky-200 bg-sky-50 text-sky-900'
+      return 'border-sky-200 bg-sky-50 text-sky-900 dark:border-sky-900 dark:bg-sky-950 dark:text-sky-200'
     case 'Peso normal':
-      return 'border-green-200 bg-green-50 text-green-900'
+      return 'border-green-200 bg-green-50 text-green-900 dark:border-green-900 dark:bg-green-950 dark:text-green-200'
     case 'Sobrepeso':
-      return 'border-amber-200 bg-amber-50 text-amber-900'
+      return 'border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200'
     case 'Obesidad':
-      return 'border-red-200 bg-red-50 text-red-900'
+      return 'border-red-200 bg-red-50 text-red-900 dark:border-red-900 dark:bg-red-950 dark:text-red-200'
     default:
-      return 'border-gray-200 bg-gray-50 text-gray-700'
+      return 'border-border-default bg-bg-muted text-text-secondary'
   }
 })
 
@@ -244,7 +244,7 @@ async function handleDeleteWeightEntry(entry: WeightEntryPublic) {
               :value="profile.email"
               type="email"
               disabled
-              :class="`${INPUT_CLASS} bg-gray-50 text-gray-500`"
+              :class="`${INPUT_CLASS} bg-bg-muted text-text-muted`"
             />
           </div>
 
@@ -273,11 +273,11 @@ async function handleDeleteWeightEntry(entry: WeightEntryPublic) {
       <section :class="CARD_BODY_CLASS">
         <h2 :class="SECTION_TITLE_CLASS">Peso</h2>
 
-        <p v-if="profile.latestWeightKg !== null" class="mb-4 text-sm text-gray-600">
+        <p v-if="profile.latestWeightKg !== null" class="mb-4 text-sm text-text-secondary">
           Peso actual:
-          <span class="font-semibold text-gray-900">{{ profile.latestWeightKg }} kg</span>
+          <span class="font-semibold text-text-primary">{{ profile.latestWeightKg }} kg</span>
         </p>
-        <p v-else class="mb-4 text-sm text-gray-500">Aún no has registrado tu peso.</p>
+        <p v-else class="mb-4 text-sm text-text-muted">Aún no has registrado tu peso.</p>
 
         <form
           class="flex flex-col gap-3 sm:flex-row sm:items-end"
@@ -330,7 +330,7 @@ async function handleDeleteWeightEntry(entry: WeightEntryPublic) {
       <section v-if="profile.weightEntries.length > 0" :class="CARD_BODY_CLASS">
         <h2 :class="SECTION_TITLE_CLASS">Historial de peso</h2>
 
-        <ul class="divide-y divide-gray-100">
+        <ul class="divide-y divide-border-default">
           <li
             v-for="entry in profile.weightEntries"
             :key="entry.id"
@@ -396,8 +396,8 @@ async function handleDeleteWeightEntry(entry: WeightEntryPublic) {
 
             <template v-else>
               <div :class="LIST_ITEM_CONTENT_CLASS">
-                <p class="font-medium text-gray-900">{{ entry.weightKg }} kg</p>
-                <p class="text-sm text-gray-500">{{ formatWorkoutDate(entry.recordedAt) }}</p>
+                <p class="font-medium text-text-primary">{{ entry.weightKg }} kg</p>
+                <p class="text-sm text-text-muted">{{ formatWorkoutDate(entry.recordedAt) }}</p>
               </div>
 
               <ListItemIconActions

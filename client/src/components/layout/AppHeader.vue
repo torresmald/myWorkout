@@ -4,6 +4,7 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 
 import UserAvatar from '@/components/profile/UserAvatar.vue'
+import ThemeToggle from '@/components/ui/ThemeToggle.vue'
 import { NAV_ITEMS } from '@/constants/nav.constants'
 import { APP_NAME } from '@/constants/app.constants'
 import { BTN_DANGER_CLASS } from '@/constants/ui.constants'
@@ -23,13 +24,15 @@ function isActive(routeName: string): boolean {
 }
 
 function linkClasses(active: boolean): string {
-  return active ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+  return active
+    ? 'bg-nav-active-bg text-nav-active-text'
+    : 'text-text-muted hover:bg-bg-muted hover:text-text-primary'
 }
 
 function mobileLinkClasses(active: boolean): string {
   return active
-    ? 'bg-blue-50 text-blue-700'
-    : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+    ? 'bg-nav-active-bg text-nav-active-text'
+    : 'text-text-secondary hover:bg-bg-muted hover:text-text-primary'
 }
 
 function closeMenu() {
@@ -71,12 +74,12 @@ onUnmounted(() => {
 
 <template>
   <header
-    class="sticky top-0 z-40 border-b border-gray-200 bg-white shadow-sm pt-[env(safe-area-inset-top,0px)]"
+    class="sticky top-0 z-40 border-b border-border-default bg-bg-elevated shadow-sm pt-[env(safe-area-inset-top,0px)]"
   >
     <div class="mx-auto flex h-14 max-w-5xl items-center justify-between gap-3 px-4 sm:px-6">
       <RouterLink
         to="/"
-        class="shrink-0 text-base font-bold text-gray-900 transition hover:text-blue-700 sm:text-lg"
+        class="shrink-0 text-base font-bold text-text-primary transition hover:text-blue-700 dark:hover:text-blue-400 sm:text-lg"
         @click="closeMenu"
       >
         {{ APP_NAME }}
@@ -94,7 +97,9 @@ onUnmounted(() => {
         </RouterLink>
       </nav>
 
-      <div class="flex items-center gap-3 sm:shrink-0">
+      <div class="flex items-center gap-2 sm:gap-3 sm:shrink-0">
+        <ThemeToggle />
+
         <button
           type="button"
           class="rounded-full ring-offset-2 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 sm:hidden"
@@ -140,10 +145,10 @@ onUnmounted(() => {
     <div
       v-if="isMenuOpen"
       id="mobile-header-menu"
-      class="border-t border-gray-200 bg-white sm:hidden"
+      class="border-t border-border-default bg-bg-elevated sm:hidden"
     >
       <div class="mx-auto max-w-5xl px-4 py-4">
-        <div v-if="user" class="mb-4 flex items-center gap-3 border-b border-gray-100 pb-4">
+        <div v-if="user" class="mb-4 flex items-center gap-3 border-b border-border-default pb-4">
           <UserAvatar
             :name="user.name"
             :email="user.email"
@@ -151,10 +156,10 @@ onUnmounted(() => {
             size="md"
           />
           <div class="min-w-0">
-            <p class="truncate font-medium text-gray-900">
+            <p class="truncate font-medium text-text-primary">
               {{ user.name || 'Mi cuenta' }}
             </p>
-            <p class="truncate text-sm text-gray-500">{{ user.email }}</p>
+            <p class="truncate text-sm text-text-muted">{{ user.email }}</p>
           </div>
         </div>
 

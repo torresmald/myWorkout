@@ -23,7 +23,10 @@ function getWeightAxisBounds(weights: number[]): { min: number; max: number } {
   }
 }
 
-export function buildWeightChartData(entries: WeightEntryPublic[]): ChartData<'line'> {
+export function buildWeightChartData(
+  entries: WeightEntryPublic[],
+  isDark = false,
+): ChartData<'line'> {
   const sorted = sortWeightEntriesAsc(entries)
 
   return {
@@ -35,7 +38,7 @@ export function buildWeightChartData(entries: WeightEntryPublic[]): ChartData<'l
         borderColor: CHART_COLOR,
         backgroundColor: CHART_FILL,
         pointBackgroundColor: CHART_COLOR,
-        pointBorderColor: '#ffffff',
+        pointBorderColor: isDark ? '#111827' : '#ffffff',
         pointBorderWidth: 2,
         pointRadius: 4,
         pointHoverRadius: 6,
@@ -46,9 +49,14 @@ export function buildWeightChartData(entries: WeightEntryPublic[]): ChartData<'l
   }
 }
 
-export function buildWeightChartOptions(entries: WeightEntryPublic[]): ChartOptions<'line'> {
+export function buildWeightChartOptions(
+  entries: WeightEntryPublic[],
+  isDark = false,
+): ChartOptions<'line'> {
   const weights = entries.map((entry) => entry.weightKg)
   const { min, max } = getWeightAxisBounds(weights)
+  const gridColor = isDark ? '#374151' : '#e5e7eb'
+  const tickColor = isDark ? '#9ca3af' : '#6b7280'
 
   return {
     responsive: true,
@@ -72,6 +80,7 @@ export function buildWeightChartOptions(entries: WeightEntryPublic[]): ChartOpti
           display: false,
         },
         ticks: {
+          color: tickColor,
           maxRotation: 45,
           minRotation: 0,
         },
@@ -79,7 +88,11 @@ export function buildWeightChartOptions(entries: WeightEntryPublic[]): ChartOpti
       y: {
         min,
         max,
+        grid: {
+          color: gridColor,
+        },
         ticks: {
+          color: tickColor,
           callback(value) {
             return `${value} kg`
           },

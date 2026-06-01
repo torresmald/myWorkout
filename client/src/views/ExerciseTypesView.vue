@@ -186,29 +186,29 @@ async function handleDelete(exercise: ExerciseTypePublic) {
     <section :class="CARD_BODY_CLASS">
       <h2 :class="SECTION_TITLE_CLASS">Mis ejercicios</h2>
 
-      <p v-if="loading" class="text-sm text-gray-500">Cargando ejercicios...</p>
+      <p v-if="loading" class="text-sm text-text-muted">Cargando ejercicios...</p>
 
-      <p v-else-if="exerciseTypes.length === 0" class="text-sm text-gray-500">
+      <p v-else-if="exerciseTypes.length === 0" class="text-sm text-text-muted">
         Aún no tienes ejercicios. Crea el primero arriba.
       </p>
 
-      <ul v-else class="divide-y divide-gray-100">
+      <ul v-else class="divide-y divide-border-default">
         <li
           v-for="exercise in exerciseTypes"
           :key="exercise.id"
           :class="[
             LIST_ITEM_ROW_CLASS,
-            { 'rounded-lg bg-blue-50 px-3 -mx-3': editingId === exercise.id },
+            { 'rounded-lg bg-nav-active-bg px-3 -mx-3': editingId === exercise.id },
           ]"
         >
           <div :class="LIST_ITEM_CONTENT_CLASS">
-            <p class="font-medium text-gray-900">{{ exercise.name }}</p>
-            <p v-if="exercise.description" class="text-sm text-gray-500">
+            <p class="font-medium text-text-primary">{{ exercise.name }}</p>
+            <p v-if="exercise.description" class="text-sm text-text-muted">
               {{ exercise.description }}
             </p>
             <span
               v-if="exercise.muscleGroup"
-              class="mt-1 inline-flex w-fit rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700"
+              class="mt-1 inline-flex w-fit rounded-full bg-bg-muted px-2.5 py-0.5 text-xs font-medium text-text-secondary"
             >
               {{ exercise.muscleGroup }}
             </span>

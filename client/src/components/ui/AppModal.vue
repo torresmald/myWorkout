@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, watch } from 'vue'
 
+import { CARD_CLASS } from '@/constants/ui.constants'
+
 const props = defineProps<{
   open: boolean
   title?: string | null
@@ -67,13 +69,13 @@ onUnmounted(() => {
             role="dialog"
             aria-modal="true"
             :aria-labelledby="title ? 'app-modal-title' : undefined"
-            class="relative z-10 max-h-[85dvh] w-full overflow-y-auto rounded-t-2xl border border-gray-200 bg-white p-4 shadow-xl sm:max-w-md sm:rounded-xl sm:p-6"
+            :class="`${CARD_CLASS} relative z-10 max-h-[85dvh] w-full overflow-y-auto p-4 shadow-xl sm:max-w-md sm:rounded-xl sm:p-6`"
             @click.stop
           >
             <h2
               v-if="title"
               id="app-modal-title"
-              class="mb-4 text-base font-semibold text-gray-900 sm:text-lg"
+              class="mb-4 text-base font-semibold text-text-primary sm:text-lg"
             >
               {{ title }}
             </h2>

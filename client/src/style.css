@@ -1,5 +1,43 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  --color-bg-page: var(--mw-bg-page);
+  --color-bg-elevated: var(--mw-bg-elevated);
+  --color-bg-muted: var(--mw-bg-muted);
+  --color-border-default: var(--mw-border);
+  --color-text-primary: var(--mw-text-primary);
+  --color-text-secondary: var(--mw-text-secondary);
+  --color-text-muted: var(--mw-text-muted);
+  --color-nav-active-bg: var(--mw-nav-active-bg);
+  --color-nav-active-text: var(--mw-nav-active-text);
+}
+
+:root {
+  --mw-bg-page: #f9fafb;
+  --mw-bg-elevated: #ffffff;
+  --mw-bg-muted: #f3f4f6;
+  --mw-border: #e5e7eb;
+  --mw-text-primary: #111827;
+  --mw-text-secondary: #4b5563;
+  --mw-text-muted: #6b7280;
+  --mw-nav-active-bg: #eff6ff;
+  --mw-nav-active-text: #1d4ed8;
+}
+
+.dark {
+  --mw-bg-page: #030712;
+  --mw-bg-elevated: #111827;
+  --mw-bg-muted: #1f2937;
+  --mw-border: #374151;
+  --mw-text-primary: #f9fafb;
+  --mw-text-secondary: #d1d5db;
+  --mw-text-muted: #9ca3af;
+  --mw-nav-active-bg: #1e3a5f;
+  --mw-nav-active-text: #93c5fd;
+}
+
 html {
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
@@ -7,6 +45,8 @@ html {
 
 body {
   overflow-x: hidden;
+  background-color: var(--mw-bg-page);
+  color: var(--mw-text-primary);
 }
 
 #app {

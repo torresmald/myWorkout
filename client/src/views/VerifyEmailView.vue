@@ -38,7 +38,7 @@ onMounted(async () => {
     <div class="space-y-4 text-center">
       <div v-if="status === 'loading'" class="flex flex-col items-center gap-3 py-2">
         <LoadingSpinner size="lg" class="text-blue-600" />
-        <p class="text-sm text-gray-600">Verificando tu cuenta...</p>
+        <p class="text-sm text-text-secondary">Verificando tu cuenta...</p>
       </div>
 
       <p

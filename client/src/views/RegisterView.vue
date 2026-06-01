@@ -93,11 +93,11 @@ function handleGoogleError(message: string) {
     :loading-message="loadingMessage"
   >
     <div v-if="registeredEmail" class="space-y-4 text-center">
-      <p class="text-sm text-gray-600">
+      <p class="text-sm text-text-secondary">
         Hemos creado tu cuenta con
-        <span class="font-medium text-gray-900">{{ registeredEmail }}</span>.
+        <span class="font-medium text-text-primary">{{ registeredEmail }}</span>.
       </p>
-      <p class="text-sm text-gray-600">
+      <p class="text-sm text-text-secondary">
         Revisa tu email para activar la cuenta antes de iniciar sesión.
       </p>
       <LoadingButton
@@ -167,10 +167,10 @@ function handleGoogleError(message: string) {
 
       <div class="relative my-2">
         <div class="absolute inset-0 flex items-center">
-          <div class="w-full border-t border-gray-200" />
+          <div class="w-full border-t border-border-default" />
         </div>
         <div class="relative flex justify-center text-sm">
-          <span class="bg-white px-2 text-gray-500">o continúa con</span>
+          <span class="bg-bg-elevated px-2 text-text-muted">o continúa con</span>
         </div>
       </div>
 
@@ -181,11 +181,11 @@ function handleGoogleError(message: string) {
       />
     </form>
 
-    <p v-if="!registeredEmail" class="mt-6 text-center text-sm text-gray-600">
+    <p v-if="!registeredEmail" class="mt-6 text-center text-sm text-text-secondary">
       ¿Ya tienes cuenta?
       <RouterLink
         to="/login"
-        class="font-medium text-blue-600 hover:text-blue-700"
+        class="font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
         :class="{ 'pointer-events-none opacity-50': isBusy }"
       >
         Inicia sesión

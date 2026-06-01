@@ -197,23 +197,23 @@ defineExpose({ resetForm })
   <section :class="CARD_BODY_CLASS">
     <h2 :class="SECTION_TITLE_CLASS">Ejercicios del entrenamiento</h2>
 
-    <p v-if="loadingExercises" class="text-sm text-gray-500">Cargando ejercicios...</p>
+    <p v-if="loadingExercises" class="text-sm text-text-muted">Cargando ejercicios...</p>
 
-    <ul v-else-if="exercises.length > 0" class="mb-6 divide-y divide-gray-100">
+    <ul v-else-if="exercises.length > 0" class="mb-6 divide-y divide-border-default">
       <li
         v-for="exercise in exercises"
         :key="exercise.id"
         :class="[
           LIST_ITEM_ROW_CLASS,
-          { 'rounded-lg bg-blue-50 px-3 -mx-3': exerciseEditingId === exercise.id },
+          { 'rounded-lg bg-nav-active-bg px-3 -mx-3': exerciseEditingId === exercise.id },
         ]"
       >
         <div :class="LIST_ITEM_CONTENT_CLASS">
-          <p class="font-medium text-gray-900">{{ exercise.exerciseType.name }}</p>
-          <p class="text-sm text-gray-500">{{ formatExerciseDetails(exercise) }}</p>
+          <p class="font-medium text-text-primary">{{ exercise.exerciseType.name }}</p>
+          <p class="text-sm text-text-muted">{{ formatExerciseDetails(exercise) }}</p>
           <span
             v-if="exercise.exerciseType.muscleGroup"
-            class="mt-1 inline-flex w-fit rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700"
+            class="mt-1 inline-flex w-fit rounded-full bg-bg-muted px-2.5 py-0.5 text-xs font-medium text-text-secondary"
           >
             {{ exercise.exerciseType.muscleGroup }}
           </span>
@@ -229,11 +229,11 @@ defineExpose({ resetForm })
       </li>
     </ul>
 
-    <p v-else class="mb-6 text-sm text-gray-500">Este entrenamiento aún no tiene ejercicios.</p>
+    <p v-else class="mb-6 text-sm text-text-muted">Este entrenamiento aún no tiene ejercicios.</p>
 
     <div
       v-if="exerciseTypes.length === 0"
-      class="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800"
+      class="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200"
     >
       Crea tipos de ejercicio antes de añadirlos al entrenamiento.
       <RouterLink to="/exercise-types" class="ml-1 font-medium underline">
@@ -243,10 +243,10 @@ defineExpose({ resetForm })
 
     <form
       v-else
-      class="space-y-4 border-t border-gray-100 pt-4"
+      class="space-y-4 border-t border-border-default pt-4"
       @submit.prevent="handleSubmit"
     >
-      <h3 class="text-sm font-semibold text-gray-800">
+      <h3 class="text-sm font-semibold text-text-primary">
         {{ exerciseEditingId !== null ? 'Editar ejercicio' : 'Añadir ejercicio' }}
       </h3>
 

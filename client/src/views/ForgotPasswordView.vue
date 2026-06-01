@@ -40,7 +40,7 @@ async function handleSubmit() {
     loading-message="Enviando enlace..."
   >
     <div v-if="submitted" class="space-y-4 text-center">
-      <p class="text-sm text-gray-600">{{ message }}</p>
+      <p class="text-sm text-text-secondary">{{ message }}</p>
       <RouterLink to="/login" :class="`${BTN_PRIMARY_FULL_CLASS} inline-flex`">
         Volver a iniciar sesión
       </RouterLink>
@@ -66,10 +66,10 @@ async function handleSubmit() {
       </LoadingButton>
     </form>
 
-    <p v-if="!submitted" class="mt-6 text-center text-sm text-gray-600">
+    <p v-if="!submitted" class="mt-6 text-center text-sm text-text-secondary">
       <RouterLink
         to="/login"
-        class="font-medium text-blue-600 hover:text-blue-700"
+        class="font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
         :class="{ 'pointer-events-none opacity-50': loading }"
       >
         Volver a iniciar sesión

@@ -12,8 +12,8 @@ defineProps<{
 
 <template>
   <div :class="`${CARD_CLASS} relative w-full max-w-md p-6 sm:p-8`">
-    <h1 class="mb-2 text-xl font-bold text-gray-900 sm:text-2xl">{{ title }}</h1>
-    <p class="mb-6 text-sm text-gray-600">{{ description }}</p>
+    <h1 class="mb-2 text-xl font-bold text-text-primary sm:text-2xl">{{ title }}</h1>
+    <p class="mb-6 text-sm text-text-secondary">{{ description }}</p>
 
     <div :class="{ 'pointer-events-none opacity-60': loading }">
       <slot />
@@ -21,12 +21,12 @@ defineProps<{
 
     <div
       v-if="loading"
-      class="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-xl bg-white/80"
+      class="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-xl bg-bg-elevated/80"
       aria-live="polite"
       aria-busy="true"
     >
       <LoadingSpinner size="lg" class="text-blue-600" />
-      <p class="text-sm font-medium text-gray-700">
+      <p class="text-sm font-medium text-text-secondary">
         {{ loadingMessage ?? 'Procesando...' }}
       </p>
     </div>

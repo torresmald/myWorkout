@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import { APP_NAME } from '@/constants/app.constants'
+import { LINK_MUTED_CLASS } from '@/constants/ui.constants'
 
 const GITHUB_URL = 'https://github.com/torresmald'
 const GITHUB_USERNAME = 'torresmald'
 </script>
 
 <template>
-  <footer class="mt-auto border-t border-gray-200 bg-white pb-[env(safe-area-inset-bottom,0px)]">
+  <footer class="mt-auto border-t border-border-default bg-bg-elevated pb-[env(safe-area-inset-bottom,0px)]">
     <div
-      class="mx-auto flex max-w-5xl flex-col items-center gap-2 px-4 py-4 text-center text-sm text-gray-500 sm:flex-row sm:justify-between sm:px-6"
+      class="mx-auto flex max-w-5xl flex-col items-center gap-2 px-4 py-4 text-center text-sm text-text-muted sm:flex-row sm:justify-between sm:px-6"
     >
       <p>&copy; {{ new Date().getFullYear() }} {{ APP_NAME }}</p>
 
@@ -16,7 +17,8 @@ const GITHUB_USERNAME = 'torresmald'
         :href="GITHUB_URL"
         target="_blank"
         rel="noopener noreferrer"
-        class="inline-flex items-center gap-2 font-medium text-gray-600 transition hover:text-gray-900"
+        :class="LINK_MUTED_CLASS"
+        class="inline-flex items-center gap-2 font-medium"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

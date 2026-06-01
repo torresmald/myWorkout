@@ -156,10 +156,10 @@ function handleGoogleError(message: string) {
 
     <div class="relative my-6">
       <div class="absolute inset-0 flex items-center">
-        <div class="w-full border-t border-gray-200" />
+        <div class="w-full border-t border-border-default" />
       </div>
       <div class="relative flex justify-center text-sm">
-        <span class="bg-white px-2 text-gray-500">o continúa con</span>
+        <span class="bg-bg-elevated px-2 text-text-muted">o continúa con</span>
       </div>
     </div>
 
@@ -169,11 +169,11 @@ function handleGoogleError(message: string) {
       @error="handleGoogleError"
     />
 
-    <p class="mt-6 text-center text-sm text-gray-600">
+    <p class="mt-6 text-center text-sm text-text-secondary">
       ¿No tienes cuenta?
       <RouterLink
         to="/register"
-        class="font-medium text-blue-600 hover:text-blue-700"
+        class="font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
         :class="{ 'pointer-events-none opacity-50': isBusy }"
       >
         Regístrate

@@ -112,7 +112,7 @@ async function handleRemoveAvatar() {
     </div>
 
     <div class="flex flex-col gap-2 sm:flex-1">
-      <p class="text-sm text-gray-600">JPEG, PNG o WebP. Máximo 2 MB.</p>
+      <p class="text-sm text-text-secondary">JPEG, PNG o WebP. Máximo 2 MB.</p>
 
       <LoadingButton
         type="button"
