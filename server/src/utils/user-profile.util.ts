@@ -1,7 +1,9 @@
 import type { Decimal } from '@prisma/client/runtime/library'
 
+import { isCloudinaryPublicId } from '../constants/cloudinary.constants.js'
 import { UPLOADS_BASE_PATH } from '../constants/profile.constants.js'
 import type { UserPublic } from '../interfaces/auth.interface.js'
+import { getCloudinaryImageUrl } from '../utils/cloudinary-image.util.js'
 import { calculateBmi } from './bmi.util.js'
 import { decimalToNumber } from './decimal.util.js'
 
@@ -18,6 +20,10 @@ export interface UserProfileRecord {
 export function buildProfileImageUrl(profileImagePath: string | null): string | null {
   if (!profileImagePath) {
     return null
+  }
+
+  if (isCloudinaryPublicId(profileImagePath)) {
+    return getCloudinaryImageUrl(profileImagePath)
   }
 
   return `${UPLOADS_BASE_PATH}/${profileImagePath}`

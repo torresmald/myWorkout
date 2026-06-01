@@ -5,7 +5,6 @@ export const MAX_WEIGHT_KG = 500
 export const MAX_NAME_LENGTH = 100
 export const MAX_AVATAR_SIZE_BYTES = 2 * 1024 * 1024
 export const UPLOADS_BASE_PATH = '/uploads'
-export const AVATARS_SUBDIR = 'avatars'
 
 export const ALLOWED_IMAGE_MIME_TYPES = [
   'image/jpeg',
