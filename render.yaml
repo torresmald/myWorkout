@@ -1,0 +1,38 @@
+# Blueprint Render — https://render.com/docs/blueprint-spec
+# Tras conectar el repo, Render crea el Web Service con esta config.
+# Las variables sensibles se configuran en el dashboard (sync: false).
+
+services:
+  - type: web
+    name: myworkout-api
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm install && npm run build:prod --workspace=server && npm run migrate:deploy --workspace=server
+    startCommand: npm run start:prod --workspace=server
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: APP_URL
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: MAIL_FROM
+        sync: false
