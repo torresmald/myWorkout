@@ -12,6 +12,10 @@
     {
       "source": "/uploads/:path*",
       "destination": "https://myworkout-api-amhd.onrender.com/uploads/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
