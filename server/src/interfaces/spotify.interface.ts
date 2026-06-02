@@ -19,13 +19,13 @@ export interface SpotifyUserProfileResponse {
 export interface SpotifyPlaylistItemResponse {
   id: string
   name: string
-  tracks: {
+  tracks?: {
     total: number
+  } | null
+  external_urls?: {
+    spotify?: string
   }
-  external_urls: {
-    spotify: string
-  }
-  images: Array<{
+  images?: Array<{
     url: string
   }>
 }

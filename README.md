@@ -6,12 +6,12 @@ Monorepo con workspaces `client/` (frontend PWA) y `server/` (API REST).
 
 ## Stack
 
-| Capa | Tecnología |
-|------|------------|
-| Frontend | Vue 3, Vite, Pinia, Vue Router, Tailwind CSS, PWA |
-| Backend | Express 5, Prisma, JWT + refresh token |
-| Base de datos | PostgreSQL (Neon recomendado) |
-| Despliegue | Vercel (client) + Render (API) |
+| Capa          | Tecnología                                        |
+| ------------- | ------------------------------------------------- |
+| Frontend      | Vue 3, Vite, Pinia, Vue Router, Tailwind CSS, PWA |
+| Backend       | Express 5, Prisma, JWT + refresh token            |
+| Base de datos | PostgreSQL (Neon recomendado)                     |
+| Despliegue    | Vercel (client) + Render (API)                    |
 
 ## Requisitos
 
@@ -100,12 +100,12 @@ Servicios opcionales:
 
 Puedes usar el blueprint [`render.yaml`](render.yaml) al conectar el repositorio, o crear el Web Service manualmente:
 
-| Campo | Valor |
-|-------|-------|
-| Runtime | Node |
-| Build Command | `npm install --include=dev && npm run build:prod --workspace=server && npm run migrate:deploy --workspace=server` |
-| Start Command | `npm run start:prod --workspace=server` |
-| Health Check Path | `/api/health` |
+| Campo             | Valor                                                                                                             |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Runtime           | Node                                                                                                              |
+| Build Command     | `npm install --include=dev && npm run build:prod --workspace=server && npm run migrate:deploy --workspace=server` |
+| Start Command     | `npm run start:prod --workspace=server`                                                                           |
+| Health Check Path | `/api/health`                                                                                                     |
 
 Configura las variables de entorno del servidor en el dashboard de Render (ver tabla más abajo).
 
@@ -133,7 +133,7 @@ Anota la URL del servicio Render, p. ej. `https://myworkout-api-xxxx.onrender.co
 
 En [Google Cloud Console](https://console.cloud.google.com/):
 
-1. Crea credenciales OAuth 2.0 (tipo *Web application*).
+1. Crea credenciales OAuth 2.0 (tipo _Web application_).
 2. **Authorized JavaScript origins:** `http://localhost:5173` y tu dominio de Vercel.
 3. Usa el mismo Client ID en `GOOGLE_CLIENT_ID` (server) y `VITE_GOOGLE_CLIENT_ID` (client).
 
@@ -167,32 +167,35 @@ npm run reminders:send --workspace=server
 
 ### Server (`server/.env`)
 
-| Variable | Obligatoria | Descripción |
-|----------|-------------|-------------|
-| `DATABASE_URL` | Sí | PostgreSQL pooled (Neon `-pooler`) |
-| `DIRECT_URL` | Sí | PostgreSQL directo (migraciones) |
-| `PORT` | No | Puerto local (default `3000`) |
-| `JWT_SECRET` | Sí | Secreto largo y aleatorio |
-| `JWT_EXPIRES_IN` | No | Caducidad del access token (default `1h`; en Render: `7d`) |
-| `APP_URL` | Sí | URL pública del frontend (Vercel) |
-| `GOOGLE_CLIENT_ID` | OAuth | Client ID de Google |
-| `SMTP_HOST` | Email | p. ej. `smtp.gmail.com` |
-| `SMTP_PORT` | Email | p. ej. `587` |
-| `SMTP_USER` | Email | Cuenta SMTP |
-| `SMTP_PASS` | Email | Contraseña de aplicación |
-| `MAIL_FROM` | Email | Remitente, p. ej. `myWorkout <tu@gmail.com>` |
-| `CLOUDINARY_CLOUD_NAME` | Avatares | Cloud name |
-| `CLOUDINARY_API_KEY` | Avatares | API key |
-| `CLOUDINARY_API_SECRET` | Avatares | API secret |
-| `SENTRY_DSN` | No | DSN del proyecto Sentry (server) |
-| `CRON_SECRET` | Recordatorios | Secreto para `POST /api/cron/workout-reminders` |
+| Variable                | Obligatoria   | Descripción                                                |
+| ----------------------- | ------------- | ---------------------------------------------------------- |
+| `DATABASE_URL`          | Sí            | PostgreSQL pooled (Neon `-pooler`)                         |
+| `DIRECT_URL`            | Sí            | PostgreSQL directo (migraciones)                           |
+| `PORT`                  | No            | Puerto local (default `3000`)                              |
+| `JWT_SECRET`            | Sí            | Secreto largo y aleatorio                                  |
+| `JWT_EXPIRES_IN`        | No            | Caducidad del access token (default `1h`; en Render: `7d`) |
+| `APP_URL`               | Sí            | URL pública del frontend (Vercel)                          |
+| `GOOGLE_CLIENT_ID`      | OAuth         | Client ID de Google                                        |
+| `SMTP_HOST`             | Email         | p. ej. `smtp.gmail.com`                                    |
+| `SMTP_PORT`             | Email         | p. ej. `587`                                               |
+| `SMTP_USER`             | Email         | Cuenta SMTP                                                |
+| `SMTP_PASS`             | Email         | Contraseña de aplicación                                   |
+| `MAIL_FROM`             | Email         | Remitente, p. ej. `myWorkout <tu@gmail.com>`               |
+| `CLOUDINARY_CLOUD_NAME` | Avatares      | Cloud name                                                 |
+| `CLOUDINARY_API_KEY`    | Avatares      | API key                                                    |
+| `CLOUDINARY_API_SECRET` | Avatares      | API secret                                                 |
+| `SENTRY_DSN`            | No            | DSN del proyecto Sentry (server)                           |
+| `CRON_SECRET`           | Recordatorios | Secreto para `POST /api/cron/workout-reminders`            |
+| `SPOTIFY_CLIENT_ID`     | Spotify       | Client ID                                                  |
+| `SPOTIFY_CLIENT_SECRET` | Spotify       | Client Secret                                              |
+| `SPOTIFY_REDIRECT_URI`  | Spotify       | Redirect URI                                               |
 
 ### Client (`client/.env`)
 
-| Variable | Obligatoria | Descripción |
-|----------|-------------|-------------|
-| `VITE_GOOGLE_CLIENT_ID` | OAuth | Mismo valor que `GOOGLE_CLIENT_ID` |
-| `VITE_SENTRY_DSN` | No | DSN Sentry (browser) |
+| Variable                | Obligatoria | Descripción                        |
+| ----------------------- | ----------- | ---------------------------------- |
+| `VITE_GOOGLE_CLIENT_ID` | OAuth       | Mismo valor que `GOOGLE_CLIENT_ID` |
+| `VITE_SENTRY_DSN`       | No          | DSN Sentry (browser)               |
 
 En Vercel solo hace falta configurar las `VITE_*`; el proxy `/api` se resuelve con `vercel.json`.
 
@@ -202,6 +205,15 @@ En Vercel solo hace falta configurar las `VITE_*`; el proxy `/api` se resuelve c
 - **Refresh token:** se guarda en `localStorage` y se usa para renovar la sesión cuando el JWT expira.
 - **`POST /api/auth/refresh`** — emite nuevo JWT y rota el refresh token.
 - **`POST /api/auth/logout`** — invalida el refresh token en base de datos.
+
+## Spotify
+
+- **`GET /api/spotify/login`** — redirige al usuario a la página de autenticación de Spotify.
+- **`GET /api/spotify/callback`** — recibe el token de acceso de Spotify y lo guarda en la base de datos.
+- **`GET /api/spotify/user`** — obtiene el perfil del usuario de Spotify.
+- **`GET /api/spotify/playlists`** — obtiene las playlists del usuario de Spotify.
+- **`GET /api/spotify/playlist/:id`** — obtiene una playlist específica del usuario de Spotify.
+- **`GET /api/spotify/playlist/:id/tracks`** — obtiene las canciones de una playlist específica del usuario de Spotify.
 
 El cliente renueva automáticamente ante respuestas `401` y también al iniciar la app si el JWT expiró pero el refresh sigue válido.
 

@@ -72,13 +72,17 @@ function mapConnection(user: {
   }
 }
 
-function mapPlaylist(item: SpotifyPlaylistItemResponse): SpotifyPlaylistPublic {
+function mapPlaylist(item: SpotifyPlaylistItemResponse | null): SpotifyPlaylistPublic | null {
+  if (!item?.id || !item.name) {
+    return null
+  }
+
   return {
     id: item.id,
     name: item.name,
-    url: item.external_urls.spotify,
-    imageUrl: item.images[0]?.url ?? null,
-    trackCount: item.tracks.total,
+    url: item.external_urls?.spotify ?? buildSpotifyPlaylistUrl(item.id),
+    imageUrl: item.images?.[0]?.url ?? null,
+    trackCount: item.tracks?.total ?? 0,
   }
 }
 
@@ -303,7 +307,10 @@ export async function getSpotifyPlaylists(userId: number): Promise<SpotifyPlayli
   }
 
   const data = await spotifyApiFetch<SpotifyPlaylistsResponse>(userId, '/me/playlists?limit=50')
-  return data.items.map(mapPlaylist)
+
+  return (data.items ?? [])
+    .map(mapPlaylist)
+    .filter((playlist): playlist is SpotifyPlaylistPublic => playlist !== null)
 }
 
 export async function setSpotifyWorkoutPlaylist(
