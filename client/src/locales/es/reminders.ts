@@ -1,0 +1,31 @@
+export default {
+  title: 'Recordatorios de entrenamiento',
+  description:
+    'Te avisamos si llevas más de una semana sin registrar un entrenamiento en los días que elijas.',
+  pushEnabled: 'Notificaciones en el dispositivo',
+  pushHint:
+    'Funciona cuando tienes la app abierta o instalada como PWA. Necesita permiso del navegador.',
+  emailEnabled: 'Recordatorio por email',
+  emailHint: 'Se envía a tu correo si no has entrenado en los últimos 7 días.',
+  daysLabel: 'Días de la semana',
+  timeLabel: 'Hora',
+  timezoneLabel: 'Zona horaria',
+  saveSuccess: 'Recordatorios actualizados',
+  saveError: 'Error al guardar los recordatorios',
+  loadError: 'Error al cargar los recordatorios',
+  daysRequired: 'Selecciona al menos un día',
+  permissionDenied: 'Permiso de notificaciones denegado',
+  permissionGranted: 'Notificaciones activadas',
+  workoutsLast7Days: 'Entrenamientos en los últimos 7 días: {count}',
+  notificationTitle: 'Hora de entrenar',
+  notificationBody: 'Llevas más de una semana sin registrar un entrenamiento. ¿Empezamos hoy?',
+  days: {
+    0: 'Dom',
+    1: 'Lun',
+    2: 'Mar',
+    3: 'Mié',
+    4: 'Jue',
+    5: 'Vie',
+    6: 'Sáb',
+  },
+} as const

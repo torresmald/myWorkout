@@ -1,0 +1,17 @@
+model TemplateExercise {
+  id             Int      @id @default(autoincrement())
+  templateId     Int
+  exerciseTypeId Int
+  sets           Int
+  reps           Int
+  restSeconds    Int      @default(0)
+  weight         Float?
+  sortOrder      Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  template     WorkoutTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  exerciseType ExerciseType    @relation(fields: [exerciseTypeId], references: [id], onDelete: Restrict)
+
+  @@index([templateId, sortOrder])
+}

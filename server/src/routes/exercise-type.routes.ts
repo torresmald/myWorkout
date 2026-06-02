@@ -9,6 +9,7 @@ import {
   getExerciseTypesByUser,
   updateExerciseType,
 } from '../services/exercise-type.service.js'
+import { getExerciseHistory } from '../services/exercise-history.service.js'
 import { handleServiceError } from '../utils/app-error.util.js'
 import { sendSuccess } from '../utils/api-response.util.js'
 
@@ -37,6 +38,22 @@ router.post('/', async (req, res) => {
   try {
     const exerciseType = await createExerciseType(userId, req.body as CreateExerciseTypeBody)
     sendSuccess(res, exerciseType, 201)
+  } catch (error) {
+    if (handleServiceError(error, res)) {
+      return
+    }
+
+    throw error
+  }
+})
+
+router.get('/:id/history', async (req, res) => {
+  const { userId } = (req as unknown as AuthenticatedRequest).user
+  const { id } = req.params
+
+  try {
+    const history = await getExerciseHistory(userId, id)
+    sendSuccess(res, history)
   } catch (error) {
     if (handleServiceError(error, res)) {
       return

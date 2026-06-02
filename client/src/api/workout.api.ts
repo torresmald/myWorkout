@@ -4,6 +4,7 @@ import type {
   CreateWorkoutExerciseBody,
   UpdateWorkoutBody,
   UpdateWorkoutExerciseBody,
+  WorkoutCreateResult,
   WorkoutExercisePublic,
   WorkoutPublic,
 } from '@/interfaces/workout.interface'
@@ -13,7 +14,7 @@ export function getWorkouts() {
 }
 
 export function createWorkout(body: CreateWorkoutBody) {
-  return api<WorkoutPublic>('/workouts', {
+  return api<WorkoutCreateResult>('/workouts', {
     method: 'POST',
     body: JSON.stringify(body),
   })

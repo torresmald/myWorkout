@@ -7,9 +7,19 @@ export default {
     title: 'Exercise types',
     description: 'Manage your exercise library',
   },
+  exerciseHistory: {
+    title: 'Exercise history',
+  },
   workouts: {
     title: 'Workouts',
     description: 'Log and review your sessions',
+  },
+  workoutSession: {
+    title: 'Live session',
+  },
+  templates: {
+    title: 'Templates',
+    description: 'Reusable routines for your workouts',
   },
   stats: {
     title: 'Statistics',

@@ -22,4 +22,12 @@ export default {
     title: 'No users',
     description: 'When users register they will appear in this list.',
   },
+  templates: {
+    title: 'No templates yet',
+    description: 'Create reusable routines to build workouts faster.',
+    exercises: {
+      title: 'This template has no exercises',
+      description: 'Add exercises with sets, reps and rest time.',
+    },
+  },
 } as const

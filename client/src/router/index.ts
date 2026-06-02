@@ -5,6 +5,7 @@ import GuestLayout from '@/components/layout/GuestLayout.vue'
 import { useAuthStore } from '@/stores/auth.store'
 import { updateDocumentTitle } from '@/utils/document-title.util'
 import ExerciseTypesView from '@/views/ExerciseTypesView.vue'
+import ExerciseHistoryView from '@/views/ExerciseHistoryView.vue'
 import ForgotPasswordView from '@/views/ForgotPasswordView.vue'
 import HomeView from '@/views/HomeView.vue'
 import LoginView from '@/views/LoginView.vue'
@@ -13,7 +14,9 @@ import RegisterView from '@/views/RegisterView.vue'
 import ResetPasswordView from '@/views/ResetPasswordView.vue'
 import VerifyEmailView from '@/views/VerifyEmailView.vue'
 import WorkoutsView from '@/views/WorkoutsView.vue'
+import WorkoutSessionView from '@/views/WorkoutSessionView.vue'
 import StatsView from '@/views/StatsView.vue'
+import TemplatesView from '@/views/TemplatesView.vue'
 import AdminView from '@/views/AdminView.vue'
 import CookiesView from '@/views/CookiesView.vue'
 
@@ -53,12 +56,37 @@ const router = createRouter({
           },
         },
         {
+          path: 'exercise-types/:id/history',
+          name: 'exercise-history',
+          component: ExerciseHistoryView,
+          meta: {
+            titleKey: 'routes.exerciseHistory.title',
+          },
+        },
+        {
           path: 'workouts',
           name: 'workouts',
           component: WorkoutsView,
           meta: {
             titleKey: 'routes.workouts.title',
             pageDescriptionKey: 'routes.workouts.description',
+          },
+        },
+        {
+          path: 'workouts/:id/session',
+          name: 'workout-session',
+          component: WorkoutSessionView,
+          meta: {
+            titleKey: 'routes.workoutSession.title',
+          },
+        },
+        {
+          path: 'templates',
+          name: 'templates',
+          component: TemplatesView,
+          meta: {
+            titleKey: 'routes.templates.title',
+            pageDescriptionKey: 'routes.templates.description',
           },
         },
         {

@@ -7,9 +7,19 @@ export default {
     title: 'Tipos de ejercicio',
     description: 'Gestiona tu biblioteca de ejercicios',
   },
+  exerciseHistory: {
+    title: 'Historial del ejercicio',
+  },
   workouts: {
     title: 'Entrenamientos',
     description: 'Registra y consulta tus sesiones',
+  },
+  workoutSession: {
+    title: 'Sesión en vivo',
+  },
+  templates: {
+    title: 'Plantillas',
+    description: 'Rutinas reutilizables para tus entrenamientos',
   },
   stats: {
     title: 'Estadísticas',

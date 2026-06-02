@@ -4,6 +4,7 @@ import type { CreateWorkoutBody, UpdateWorkoutBody } from '../interfaces/workout
 import type { AuthenticatedRequest } from '../interfaces/express.interface.js'
 import { authenticate } from '../middleware/auth.middleware.js'
 import workoutExerciseRoutes from './workout-exercise.routes.js'
+import workoutSessionRoutes from './workout-session.routes.js'
 import {
   createWorkout,
   deleteWorkout,
@@ -48,6 +49,7 @@ router.post('/', async (req, res) => {
 })
 
 router.use('/:workoutId/exercises', workoutExerciseRoutes)
+router.use('/:workoutId', workoutSessionRoutes)
 
 router.put('/:id', async (req, res) => {
   const { userId } = (req as unknown as AuthenticatedRequest).user

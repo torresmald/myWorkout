@@ -9,6 +9,7 @@ import RoutePageHeader from '@/components/layout/RoutePageHeader.vue'
 import AdminIcon from '@/components/profile/AdminIcon.vue'
 import ProfileAvatarUpload from '@/components/profile/ProfileAvatarUpload.vue'
 import AddWeightModal from '@/components/profile/AddWeightModal.vue'
+import WorkoutReminderSettings from '@/components/profile/WorkoutReminderSettings.vue'
 import ScaleWeightIcon from '@/components/profile/ScaleWeightIcon.vue'
 import WeightEvolutionChart from '@/components/profile/WeightEvolutionChart.vue'
 import LoadingButton from '@/components/ui/LoadingButton.vue'
@@ -347,6 +348,8 @@ async function handleDeleteWeightEntry(entry: WeightEntryPublic) {
 
         <p v-else class="text-sm opacity-80">{{ t('profile.bmi.empty') }}</p>
       </section>
+
+      <WorkoutReminderSettings />
 
       <section v-if="showWeightChart" :class="CARD_BODY_CLASS">
         <h2 :class="SECTION_TITLE_CLASS">{{ t('profile.sections.weightEvolution') }}</h2>

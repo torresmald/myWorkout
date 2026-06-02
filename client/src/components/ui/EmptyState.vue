@@ -11,6 +11,7 @@ export type EmptyStateVariant =
   | 'stats'
   | 'admin'
   | 'weight'
+  | 'templates'
 
 const props = defineProps<{
   variant: EmptyStateVariant
@@ -36,6 +37,8 @@ const illustrationClass = computed(() => {
       return 'text-emerald-500'
     case 'admin':
       return 'text-violet-500'
+    case 'templates':
+      return 'text-indigo-500'
     default:
       return 'text-blue-600'
   }
@@ -105,6 +108,18 @@ const illustrationClass = computed(() => {
         <path d="M20 44c0-6.627 5.373-12 12-12s12 5.373 12 12" stroke="currentColor" stroke-width="2.5" />
         <rect x="26" y="16" width="12" height="18" rx="6" stroke="currentColor" stroke-width="2.5" />
         <path d="M32 34v10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+      </svg>
+
+      <svg
+        v-else-if="variant === 'templates'"
+        viewBox="0 0 64 64"
+        class="h-16 w-16"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <rect x="12" y="10" width="40" height="44" rx="6" stroke="currentColor" stroke-width="2.5" />
+        <path d="M22 22h20M22 30h20M22 38h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+        <path d="M40 42l8 8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
       </svg>
 
       <svg

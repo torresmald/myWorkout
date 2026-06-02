@@ -1,0 +1,27 @@
+export default {
+  title: 'Sesión en vivo',
+  loading: 'Preparando sesión...',
+  progress: '{completed} de {total} series completadas',
+  finishButton: 'Finalizar entrenamiento',
+  finishSuccess: 'Entrenamiento completado',
+  finishError: 'Error al finalizar el entrenamiento',
+  loadError: 'Error al cargar la sesión',
+  startError: 'Error al iniciar la sesión',
+  updateSetError: 'Error al actualizar la serie',
+  noExercises: 'Este entrenamiento no tiene ejercicios. Añádelos antes de empezar.',
+  alreadyCompleted: 'Este entrenamiento ya está completado.',
+  backToWorkouts: 'Volver a entrenamientos',
+  setLabel: 'Serie {number}',
+  repsLabel: 'Reps',
+  weightLabel: 'Peso (kg)',
+  completeSet: 'Marcar serie completada',
+  uncompleteSet: 'Desmarcar serie',
+  incompleteFinishTitle: 'Finalizar con series pendientes',
+  incompleteFinishMessage:
+    'Aún quedan series sin completar. ¿Quieres finalizar igualmente? Solo se guardarán las series marcadas.',
+  status: {
+    planned: 'Planificado',
+    inProgress: 'En curso',
+    completed: 'Completado',
+  },
+} as const

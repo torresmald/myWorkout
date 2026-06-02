@@ -16,10 +16,17 @@ model User {
   refreshTokenHash        String?                   @unique
   emailVerifiedAt         DateTime?
   lastLoginAt             DateTime?
+  pushReminderEnabled     Boolean                   @default(false)
+  emailReminderEnabled    Boolean                   @default(false)
+  reminderDays            Int[]                     @default([])
+  reminderTimeLocal       String                    @default("18:00")
+  reminderTimezone        String                    @default("UTC")
+  lastEmailReminderSentAt DateTime?
   createdAt               DateTime                  @default(now())
   updatedAt               DateTime                  @updatedAt
   exerciseTypes           ExerciseType[]
   workouts                Workout[]
+  workoutTemplates        WorkoutTemplate[]
   emailVerificationTokens EmailVerificationToken[]
   passwordResetTokens     PasswordResetToken[]
   weightEntries           WeightEntry[]

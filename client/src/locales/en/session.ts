@@ -1,0 +1,27 @@
+export default {
+  title: 'Live session',
+  loading: 'Preparing session...',
+  progress: '{completed} of {total} sets completed',
+  finishButton: 'Finish workout',
+  finishSuccess: 'Workout completed',
+  finishError: 'Could not finish workout',
+  loadError: 'Could not load session',
+  startError: 'Could not start session',
+  updateSetError: 'Could not update set',
+  noExercises: 'This workout has no exercises. Add them before starting.',
+  alreadyCompleted: 'This workout is already completed.',
+  backToWorkouts: 'Back to workouts',
+  setLabel: 'Set {number}',
+  repsLabel: 'Reps',
+  weightLabel: 'Weight (kg)',
+  completeSet: 'Mark set complete',
+  uncompleteSet: 'Unmark set',
+  incompleteFinishTitle: 'Finish with pending sets',
+  incompleteFinishMessage:
+    'Some sets are still pending. Finish anyway? Only completed sets will be saved.',
+  status: {
+    planned: 'Planned',
+    inProgress: 'In progress',
+    completed: 'Completed',
+  },
+} as const

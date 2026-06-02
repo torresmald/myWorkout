@@ -21,6 +21,7 @@ const { t } = useI18n()
 const { user } = storeToRefs(authStore)
 
 const isMenuOpen = ref(false)
+const isUserMenuOpen = ref(false)
 const visibleNavItems = useNavItems()
 
 function isActive(routeName: string): boolean {
@@ -43,12 +44,31 @@ function closeMenu() {
   isMenuOpen.value = false
 }
 
+function closeUserMenu() {
+  isUserMenuOpen.value = false
+}
+
+function closeAllMenus() {
+  closeMenu()
+  closeUserMenu()
+}
+
 function toggleMenu() {
   isMenuOpen.value = !isMenuOpen.value
+  if (isMenuOpen.value) {
+    closeUserMenu()
+  }
+}
+
+function toggleUserMenu() {
+  isUserMenuOpen.value = !isUserMenuOpen.value
+  if (isUserMenuOpen.value) {
+    closeMenu()
+  }
 }
 
 async function handleLogout() {
-  closeMenu()
+  closeAllMenus()
   authStore.logout()
   toastStore.success(t('layout.logoutSuccess'))
   await router.push('/login')
@@ -56,16 +76,34 @@ async function handleLogout() {
 
 function handleEscape(event: KeyboardEvent) {
   if (event.key === 'Escape') {
-    closeMenu()
+    closeAllMenus()
+  }
+}
+
+function handleDocumentClick(event: MouseEvent) {
+  const target = event.target as Node | null
+  const userMenu = document.getElementById('desktop-user-menu')
+
+  if (userMenu && target && !userMenu.contains(target)) {
+    closeUserMenu()
   }
 }
 
 watch(
   () => route.fullPath,
   () => {
-    closeMenu()
+    closeAllMenus()
   },
 )
+
+watch(isUserMenuOpen, (open) => {
+  if (open) {
+    document.addEventListener('click', handleDocumentClick)
+    return
+  }
+
+  document.removeEventListener('click', handleDocumentClick)
+})
 
 onMounted(() => {
   document.addEventListener('keydown', handleEscape)
@@ -73,6 +111,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   document.removeEventListener('keydown', handleEscape)
+  document.removeEventListener('click', handleDocumentClick)
 })
 </script>
 
@@ -123,19 +162,48 @@ onUnmounted(() => {
           />
         </button>
 
-        <RouterLink
-          v-if="user"
-          to="/profile"
-          class="hidden rounded-full transition hover:opacity-90 sm:block"
-          :aria-label="t('layout.goToProfile')"
-        >
-          <UserAvatar
-            :name="user.name"
-            :email="user.email"
-            :image-url="user.profileImageUrl"
-            size="sm"
-          />
-        </RouterLink>
+        <div v-if="user" id="desktop-user-menu" class="relative hidden sm:block">
+          <button
+            type="button"
+            class="rounded-full ring-offset-2 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            :class="{ 'ring-2 ring-blue-500': isUserMenuOpen }"
+            :aria-expanded="isUserMenuOpen"
+            aria-haspopup="menu"
+            :aria-label="t('layout.openUserMenu')"
+            @click.stop="toggleUserMenu"
+          >
+            <UserAvatar
+              :name="user.name"
+              :email="user.email"
+              :image-url="user.profileImageUrl"
+              size="sm"
+            />
+          </button>
+
+          <div
+            v-if="isUserMenuOpen"
+            class="absolute right-0 top-[calc(100%+0.5rem)] z-50 min-w-44 overflow-hidden rounded-xl border border-border-default bg-bg-elevated py-1 shadow-lg"
+            role="menu"
+            @click.stop
+          >
+            <RouterLink
+              to="/profile"
+              class="block px-4 py-2.5 text-sm font-medium text-text-secondary transition hover:bg-bg-muted hover:text-text-primary"
+              role="menuitem"
+              @click="closeUserMenu"
+            >
+              {{ t('layout.goToProfile') }}
+            </RouterLink>
+            <button
+              type="button"
+              class="block w-full px-4 py-2.5 text-left text-sm font-medium text-red-600 transition hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
+              role="menuitem"
+              @click="handleLogout"
+            >
+              {{ t('layout.logout') }}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 

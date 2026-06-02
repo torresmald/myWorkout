@@ -1,12 +1,15 @@
 import { ErrorCode } from '../constants/error-codes.constants.js'
-import { workoutSelect } from '../constants/workout.constants.js'
+import { workoutExerciseSelect, workoutSelect } from '../constants/workout.constants.js'
 import { prisma } from '../config/prisma.js'
 import { AppError } from '../interfaces/app-error.interface.js'
 import type {
   CreateWorkoutBody,
   UpdateWorkoutBody,
+  WorkoutCreateResult,
   WorkoutPublic,
 } from '../interfaces/workout.interface.js'
+import { buildWorkoutExerciseCreateData } from '../utils/workout-exercise.util.js'
+import { assertUserOwnsExerciseTypes } from '../utils/exercise-type.util.js'
 import { findUserWorkout } from '../utils/workout.util.js'
 
 function trimOptional(value?: string): string | null {
@@ -45,17 +48,72 @@ export async function getWorkoutsByUser(userId: number): Promise<WorkoutPublic[]
   })
 }
 
-export async function createWorkout(userId: number, body: CreateWorkoutBody): Promise<WorkoutPublic> {
+export async function createWorkout(userId: number, body: CreateWorkoutBody): Promise<WorkoutCreateResult> {
   const trimmedName = requireName(body.name)
+  const parsedDate = parseWorkoutDate(body.date)
+  const notes = trimOptional(body.notes)
 
-  return prisma.workout.create({
-    data: {
-      userId,
-      name: trimmedName,
-      date: parseWorkoutDate(body.date),
-      notes: trimOptional(body.notes),
-    },
-    select: workoutSelect,
+  if (body.exercises === undefined) {
+    return prisma.workout.create({
+      data: {
+        userId,
+        name: trimmedName,
+        date: parsedDate,
+        notes,
+      },
+      select: workoutSelect,
+    })
+  }
+
+  if (!Array.isArray(body.exercises)) {
+    throw new AppError(ErrorCode.INVALID_EXERCISES_PAYLOAD, 400)
+  }
+
+  if (body.exercises.length === 0) {
+    return prisma.workout.create({
+      data: {
+        userId,
+        name: trimmedName,
+        date: parsedDate,
+        notes,
+      },
+      select: workoutSelect,
+    })
+  }
+
+  const exercisePayloads = body.exercises.map((exercise, index) =>
+    buildWorkoutExerciseCreateData(exercise, index),
+  )
+
+  const uniqueExerciseTypeIds = [...new Set(exercisePayloads.map((exercise) => exercise.exerciseTypeId))]
+  await assertUserOwnsExerciseTypes(userId, uniqueExerciseTypeIds)
+
+  return prisma.$transaction(async (tx) => {
+    const workout = await tx.workout.create({
+      data: {
+        userId,
+        name: trimmedName,
+        date: parsedDate,
+        notes,
+        exercises: {
+          create: exercisePayloads,
+        },
+      },
+      select: {
+        ...workoutSelect,
+        exercises: {
+          select: workoutExerciseSelect,
+          orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }],
+        },
+      },
+    })
+
+    const { exercises, ...workoutData } = workout
+
+    return {
+      ...workoutData,
+      exercises,
+    }
   })
 }
 

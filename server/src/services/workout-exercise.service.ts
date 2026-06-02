@@ -10,42 +10,16 @@ import type {
 import { findUserExerciseType } from '../utils/exercise-type.util.js'
 import { isPrismaForeignKeyViolation } from '../utils/prisma-error.util.js'
 import {
+  buildWorkoutExerciseCreateData,
+  parseOptionalWeight,
+  requireNonNegativeInteger,
+  requirePositiveInteger,
+} from '../utils/workout-exercise.util.js'
+import {
   findUserWorkout,
   parseWorkoutExerciseId,
   parseWorkoutId,
 } from '../utils/workout.util.js'
-
-function requirePositiveInteger(value: number | undefined, field: string): number {
-  if (value === undefined || !Number.isInteger(value) || value <= 0) {
-    throw new AppError(ErrorCode.POSITIVE_INTEGER_REQUIRED, 400, { field })
-  }
-
-  return value
-}
-
-function requireNonNegativeInteger(value: number | undefined, field: string, defaultValue: number): number {
-  if (value === undefined) {
-    return defaultValue
-  }
-
-  if (!Number.isInteger(value) || value < 0) {
-    throw new AppError(ErrorCode.NON_NEGATIVE_INTEGER_REQUIRED, 400, { field })
-  }
-
-  return value
-}
-
-function parseOptionalWeight(weight?: number | null): number | null {
-  if (weight === undefined || weight === null) {
-    return null
-  }
-
-  if (typeof weight !== 'number' || weight <= 0) {
-    throw new AppError(ErrorCode.WEIGHT_MUST_BE_POSITIVE, 400)
-  }
-
-  return weight
-}
 
 async function findUserWorkoutExercise(
   userId: number,
@@ -89,17 +63,6 @@ async function requireUserExerciseType(userId: number, exerciseTypeId: number) {
   return exerciseType
 }
 
-function buildWorkoutExerciseData(body: CreateWorkoutExerciseBody, exerciseTypeId: number) {
-  return {
-    exerciseTypeId,
-    sets: requirePositiveInteger(body.sets, 'sets'),
-    reps: requirePositiveInteger(body.reps, 'reps'),
-    restSeconds: requireNonNegativeInteger(body.restSeconds, 'restSeconds', 0),
-    weight: parseOptionalWeight(body.weight),
-    sortOrder: requireNonNegativeInteger(body.sortOrder, 'sortOrder', 0),
-  }
-}
-
 async function handleForeignKeyViolation<T>(operation: () => Promise<T>): Promise<T> {
   try {
     return await operation()
@@ -133,15 +96,15 @@ export async function createWorkoutExercise(
   body: CreateWorkoutExerciseBody,
 ): Promise<WorkoutExercisePublic> {
   const workout = await requireUserWorkout(userId, workoutId)
-  const exerciseTypeId = requirePositiveInteger(body.exerciseTypeId, 'exerciseTypeId')
+  const exerciseData = buildWorkoutExerciseCreateData(body)
 
-  await requireUserExerciseType(userId, exerciseTypeId)
+  await requireUserExerciseType(userId, exerciseData.exerciseTypeId)
 
   return handleForeignKeyViolation(() =>
     prisma.workoutExercise.create({
       data: {
         workoutId: workout.id,
-        ...buildWorkoutExerciseData(body, exerciseTypeId),
+        ...exerciseData,
       },
       select: workoutExerciseSelect,
     }),

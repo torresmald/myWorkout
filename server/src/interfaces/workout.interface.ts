@@ -2,17 +2,25 @@ export interface CreateWorkoutBody {
   name?: string
   date?: string
   notes?: string
+  exercises?: CreateWorkoutExerciseBody[]
 }
 
-export type UpdateWorkoutBody = CreateWorkoutBody
+export type UpdateWorkoutBody = Omit<CreateWorkoutBody, 'exercises'>
 
 export interface WorkoutPublic {
   id: number
   name: string
   date: Date
   notes: string | null
+  status: 'PLANNED' | 'IN_PROGRESS' | 'COMPLETED'
+  startedAt: Date | null
+  completedAt: Date | null
   createdAt: Date
   updatedAt: Date
+}
+
+export interface WorkoutCreateResult extends WorkoutPublic {
+  exercises?: WorkoutExercisePublic[]
 }
 
 export interface CreateWorkoutExerciseBody {

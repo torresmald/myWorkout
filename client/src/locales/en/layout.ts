@@ -3,6 +3,7 @@ export default {
   logoutSuccess: 'Signed out',
   myAccount: 'My account',
   openNavMenu: 'Open navigation menu',
+  openUserMenu: 'Open user menu',
   goToProfile: 'Go to my profile',
   switchToLight: 'Switch to light mode',
   switchToDark: 'Switch to dark mode',

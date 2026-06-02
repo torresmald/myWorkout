@@ -1,0 +1,15 @@
+model WorkoutSet {
+  id                Int       @id @default(autoincrement())
+  workoutExerciseId Int
+  setNumber         Int
+  reps              Int
+  weight            Float?
+  completedAt       DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  workoutExercise WorkoutExercise @relation(fields: [workoutExerciseId], references: [id], onDelete: Cascade)
+
+  @@unique([workoutExerciseId, setNumber])
+  @@index([workoutExerciseId])
+}

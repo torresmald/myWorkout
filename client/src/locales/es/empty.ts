@@ -22,4 +22,12 @@ export default {
     title: 'No hay usuarios',
     description: 'Cuando se registren usuarios aparecerán en esta lista.',
   },
+  templates: {
+    title: 'Sin plantillas todavía',
+    description: 'Crea rutinas reutilizables para montar entrenamientos más rápido.',
+    exercises: {
+      title: 'Esta plantilla no tiene ejercicios',
+      description: 'Añade ejercicios con series, repeticiones y descanso.',
+    },
+  },
 } as const

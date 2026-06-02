@@ -9,7 +9,10 @@ import ListItemIconActions from '@/components/ui/ListItemIconActions.vue'
 import SkeletonList from '@/components/ui/SkeletonList.vue'
 import RestTimerModal from '@/components/workout/RestTimerModal.vue'
 import { useRestTimer } from '@/composables/useRestTimer'
-import type { WorkoutExercisePublic } from '@/interfaces/workout.interface'
+import type {
+  DraftWorkoutExercise,
+  WorkoutExercisePublic,
+} from '@/interfaces/workout.interface'
 import {
   BTN_ACTIONS_CLASS,
   BTN_MOBILE_FULL_CLASS,
@@ -27,10 +30,20 @@ import { useModalStore } from '@/stores/modal.store'
 import { useToastStore } from '@/stores/toast.store'
 import { useWorkoutStore } from '@/stores/workout.store'
 import { getErrorMessage } from '@/utils/error.util'
+import {
+  createDraftExercise,
+  updateDraftExercise,
+} from '@/utils/workout-draft.util'
 
 const props = defineProps<{
-  workoutId: number
+  workoutId?: number
 }>()
+
+const draftExercises = defineModel<DraftWorkoutExercise[]>('draftExercises', {
+  default: () => [],
+})
+
+const isDraftMode = computed(() => props.workoutId === undefined)
 
 const workoutStore = useWorkoutStore()
 const exerciseTypeStore = useExerciseTypeStore()
@@ -56,30 +69,41 @@ const { exercises, loadingExercises, creatingExercise, updatingExerciseId, delet
 
 const { exerciseTypes } = storeToRefs(exerciseTypeStore)
 
-const exerciseEditingId = ref<number | null>(null)
+const exerciseEditingKey = ref<number | string | null>(null)
 const exerciseTypeId = ref<number | ''>('')
 const sets = ref(3)
 const reps = ref(10)
 const restSeconds = ref(60)
 const weight = ref<number | ''>('')
 const sortOrder = ref(0)
+const savingDraftExercise = ref(false)
 
-const savingExercise = computed(() =>
-  exerciseEditingId.value !== null ? updatingExerciseId.value !== null : creatingExercise.value,
+const listLength = computed(() =>
+  isDraftMode.value ? draftExercises.value.length : exercises.value.length,
 )
 
+const savingExercise = computed(() => {
+  if (isDraftMode.value) {
+    return savingDraftExercise.value
+  }
+
+  return exerciseEditingKey.value !== null
+    ? updatingExerciseId.value !== null
+    : creatingExercise.value
+})
+
 function resetForm() {
-  exerciseEditingId.value = null
+  exerciseEditingKey.value = null
   exerciseTypeId.value = ''
   sets.value = 3
   reps.value = 10
   restSeconds.value = 60
   weight.value = ''
-  sortOrder.value = exercises.value.length
+  sortOrder.value = listLength.value
 }
 
-function startEditExercise(exercise: WorkoutExercisePublic) {
-  exerciseEditingId.value = exercise.id
+function startEditExercise(exercise: WorkoutExercisePublic | DraftWorkoutExercise) {
+  exerciseEditingKey.value = 'localId' in exercise ? exercise.localId : exercise.id
   exerciseTypeId.value = exercise.exerciseTypeId
   sets.value = exercise.sets
   reps.value = exercise.reps
@@ -88,7 +112,9 @@ function startEditExercise(exercise: WorkoutExercisePublic) {
   sortOrder.value = exercise.sortOrder
 }
 
-function formatExerciseDetails(exercise: WorkoutExercisePublic): string {
+function formatExerciseDetails(
+  exercise: Pick<WorkoutExercisePublic, 'sets' | 'reps' | 'restSeconds' | 'weight'>,
+): string {
   const parts = [`${exercise.sets} × ${exercise.reps}`]
 
   if (exercise.restSeconds > 0) {
@@ -113,12 +139,54 @@ function buildExerciseBody() {
   }
 }
 
-async function handleSubmit() {
+function getSelectedExerciseType() {
+  return exerciseTypes.value.find((type) => type.id === Number(exerciseTypeId.value)) ?? null
+}
+
+async function handleDraftSubmit() {
+  const exerciseType = getSelectedExerciseType()
+
+  if (!exerciseType) {
+    return
+  }
+
+  savingDraftExercise.value = true
+
+  try {
+    const body = buildExerciseBody()
+
+    if (typeof exerciseEditingKey.value === 'string') {
+      draftExercises.value = draftExercises.value.map((exercise) =>
+        exercise.localId === exerciseEditingKey.value
+          ? updateDraftExercise(exercise, body, exerciseType)
+          : exercise,
+      )
+      toastStore.success(t('workouts.exercises.updateSuccess'))
+    } else {
+      draftExercises.value = [
+        ...draftExercises.value,
+        createDraftExercise(body, exerciseType),
+      ]
+      toastStore.success(t('workouts.exercises.createSuccess'))
+    }
+
+    resetForm()
+    sortOrder.value = draftExercises.value.length
+  } finally {
+    savingDraftExercise.value = false
+  }
+}
+
+async function handlePersistedSubmit() {
+  if (props.workoutId === undefined) {
+    return
+  }
+
   const body = buildExerciseBody()
 
   try {
-    if (exerciseEditingId.value !== null) {
-      await workoutStore.updateExercise(props.workoutId, exerciseEditingId.value, body)
+    if (typeof exerciseEditingKey.value === 'number') {
+      await workoutStore.updateExercise(props.workoutId, exerciseEditingKey.value, body)
       toastStore.success(t('workouts.exercises.updateSuccess'))
     } else {
       await workoutStore.createExercise(props.workoutId, body)
@@ -131,7 +199,7 @@ async function handleSubmit() {
     toastStore.error(
       getErrorMessage(
         e,
-        exerciseEditingId.value !== null
+        typeof exerciseEditingKey.value === 'number'
           ? t('workouts.exercises.updateError')
           : t('workouts.exercises.createError'),
       ),
@@ -139,7 +207,18 @@ async function handleSubmit() {
   }
 }
 
-function startExerciseRestTimer(exercise: WorkoutExercisePublic) {
+async function handleSubmit() {
+  if (isDraftMode.value) {
+    await handleDraftSubmit()
+    return
+  }
+
+  await handlePersistedSubmit()
+}
+
+function startExerciseRestTimer(
+  exercise: Pick<WorkoutExercisePublic, 'restSeconds' | 'exerciseType'>,
+) {
   if (exercise.restSeconds <= 0) {
     return
   }
@@ -147,7 +226,11 @@ function startExerciseRestTimer(exercise: WorkoutExercisePublic) {
   startRestTimer(exercise.exerciseType.name, exercise.restSeconds)
 }
 
-async function handleDelete(exercise: WorkoutExercisePublic) {
+async function handleDeletePersisted(exercise: WorkoutExercisePublic) {
+  if (props.workoutId === undefined) {
+    return
+  }
+
   const confirmed = await modalStore.confirm({
     title: t('modals.deleteWorkoutExercise.title'),
     message: t('modals.deleteWorkoutExercise.message', { name: exercise.exerciseType.name }),
@@ -159,7 +242,7 @@ async function handleDelete(exercise: WorkoutExercisePublic) {
     return
   }
 
-  if (exerciseEditingId.value === exercise.id) {
+  if (exerciseEditingKey.value === exercise.id) {
     resetForm()
   }
 
@@ -172,10 +255,53 @@ async function handleDelete(exercise: WorkoutExercisePublic) {
   }
 }
 
+async function handleDeleteDraft(exercise: DraftWorkoutExercise) {
+  const confirmed = await modalStore.confirm({
+    title: t('modals.deleteWorkoutExercise.title'),
+    message: t('modals.deleteWorkoutExercise.message', { name: exercise.exerciseType.name }),
+    confirmLabel: t('common.delete'),
+    variant: 'danger',
+  })
+
+  if (!confirmed) {
+    return
+  }
+
+  if (exerciseEditingKey.value === exercise.localId) {
+    resetForm()
+  }
+
+  draftExercises.value = draftExercises.value.filter(
+    (item) => item.localId !== exercise.localId,
+  )
+  sortOrder.value = draftExercises.value.length
+  toastStore.success(t('workouts.exercises.deleteSuccess'))
+}
+
+function isExerciseEditing(exercise: WorkoutExercisePublic | DraftWorkoutExercise): boolean {
+  const key = 'localId' in exercise ? exercise.localId : exercise.id
+  return exerciseEditingKey.value === key
+}
+
 watch(
   () => props.workoutId,
   async (workoutId) => {
+    if (workoutId === undefined) {
+      resetForm()
+      sortOrder.value = draftExercises.value.length
+      return
+    }
+
     resetForm()
+
+    if (
+      workoutStore.activeWorkoutId === workoutId &&
+      exercises.value.length > 0 &&
+      !workoutStore.loadingExercises
+    ) {
+      sortOrder.value = exercises.value.length
+      return
+    }
 
     try {
       await workoutStore.fetchExercises(workoutId)
@@ -200,40 +326,82 @@ defineExpose({ resetForm })
 
 <template>
   <section :class="CARD_BODY_CLASS">
-    <h2 :class="SECTION_TITLE_CLASS">{{ t('workouts.exercises.title') }}</h2>
+    <h2 :class="SECTION_TITLE_CLASS">
+      {{
+        isDraftMode
+          ? t('workouts.exercises.draftTitle')
+          : t('workouts.exercises.title')
+      }}
+    </h2>
 
-    <SkeletonList v-if="loadingExercises" class="mb-6" />
+    <SkeletonList v-if="!isDraftMode && loadingExercises" class="mb-6" />
 
-    <ul v-else-if="exercises.length > 0" class="mb-6 divide-y divide-border-default">
-      <li
-        v-for="(exercise, index) in exercises"
-        :key="exercise.id"
-        :class="[
-          LIST_ITEM_ROW_CLASS,
-          'stagger-item',
-          { 'rounded-lg bg-nav-active-bg px-3 -mx-3': exerciseEditingId === exercise.id },
-        ]"
-        :style="{ animationDelay: `${index * 45}ms` }"
-      >
-        <div :class="LIST_ITEM_CONTENT_CLASS">
-          <p class="font-medium text-text-primary">{{ exercise.exerciseType.name }}</p>
-          <p class="text-sm text-text-muted">{{ formatExerciseDetails(exercise) }}</p>
-          <span
-            v-if="exercise.exerciseType.muscleGroup"
-            class="mt-1 inline-flex w-fit rounded-full bg-bg-muted px-2.5 py-0.5 text-xs font-medium text-text-secondary"
-          >
-            {{ exercise.exerciseType.muscleGroup }}
-          </span>
-        </div>
+    <ul
+      v-else-if="isDraftMode ? draftExercises.length > 0 : exercises.length > 0"
+      class="mb-6 divide-y divide-border-default"
+    >
+      <template v-if="isDraftMode">
+        <li
+          v-for="(exercise, index) in draftExercises"
+          :key="exercise.localId"
+          :class="[
+            LIST_ITEM_ROW_CLASS,
+            'stagger-item',
+            { 'rounded-lg bg-nav-active-bg px-3 -mx-3': isExerciseEditing(exercise) },
+          ]"
+          :style="{ animationDelay: `${index * 45}ms` }"
+        >
+          <div :class="LIST_ITEM_CONTENT_CLASS">
+            <p class="font-medium text-text-primary">{{ exercise.exerciseType.name }}</p>
+            <p class="text-sm text-text-muted">{{ formatExerciseDetails(exercise) }}</p>
+            <span
+              v-if="exercise.exerciseType.muscleGroup"
+              class="mt-1 inline-flex w-fit rounded-full bg-bg-muted px-2.5 py-0.5 text-xs font-medium text-text-secondary"
+            >
+              {{ exercise.exerciseType.muscleGroup }}
+            </span>
+          </div>
 
-        <ListItemIconActions
-          :show-timer="exercise.restSeconds > 0"
-          :deleting="deletingExerciseId === exercise.id"
-          @timer="startExerciseRestTimer(exercise)"
-          @edit="startEditExercise(exercise)"
-          @delete="handleDelete(exercise)"
-        />
-      </li>
+          <ListItemIconActions
+            :show-timer="exercise.restSeconds > 0"
+            @timer="startExerciseRestTimer(exercise)"
+            @edit="startEditExercise(exercise)"
+            @delete="handleDeleteDraft(exercise)"
+          />
+        </li>
+      </template>
+
+      <template v-else>
+        <li
+          v-for="(exercise, index) in exercises"
+          :key="exercise.id"
+          :class="[
+            LIST_ITEM_ROW_CLASS,
+            'stagger-item',
+            { 'rounded-lg bg-nav-active-bg px-3 -mx-3': isExerciseEditing(exercise) },
+          ]"
+          :style="{ animationDelay: `${index * 45}ms` }"
+        >
+          <div :class="LIST_ITEM_CONTENT_CLASS">
+            <p class="font-medium text-text-primary">{{ exercise.exerciseType.name }}</p>
+            <p class="text-sm text-text-muted">{{ formatExerciseDetails(exercise) }}</p>
+            <span
+              v-if="exercise.exerciseType.muscleGroup"
+              class="mt-1 inline-flex w-fit rounded-full bg-bg-muted px-2.5 py-0.5 text-xs font-medium text-text-secondary"
+            >
+              {{ exercise.exerciseType.muscleGroup }}
+            </span>
+          </div>
+
+          <ListItemIconActions
+            :show-timer="exercise.restSeconds > 0"
+            :deleting="deletingExerciseId === exercise.id"
+            @timer="startExerciseRestTimer(exercise)"
+            @edit="startEditExercise(exercise)"
+            @delete="handleDeletePersisted(exercise)"
+          />
+        </li>
+      </template>
     </ul>
 
     <EmptyState
@@ -261,7 +429,7 @@ defineExpose({ resetForm })
     >
       <h3 class="text-sm font-semibold text-text-primary">
         {{
-          exerciseEditingId !== null
+          exerciseEditingKey !== null
             ? t('workouts.exercises.editTitle')
             : t('workouts.exercises.addTitle')
         }}
@@ -336,17 +504,17 @@ defineExpose({ resetForm })
         >
           {{
             savingExercise
-              ? exerciseEditingId !== null
+              ? exerciseEditingKey !== null
                 ? t('common.saving')
                 : t('common.adding')
-              : exerciseEditingId !== null
+              : exerciseEditingKey !== null
                 ? t('workouts.exercises.saveButton')
                 : t('workouts.exercises.addButton')
           }}
         </button>
 
         <button
-          v-if="exerciseEditingId !== null"
+          v-if="exerciseEditingKey !== null"
           type="button"
           :class="[BTN_SECONDARY_CLASS, BTN_MOBILE_FULL_CLASS]"
           @click="resetForm"

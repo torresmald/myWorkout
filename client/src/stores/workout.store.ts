@@ -52,6 +52,14 @@ export const useWorkoutStore = defineStore('workout', () => {
     }
   }
 
+  function hydrateExercises(workoutId: number, items?: WorkoutExercisePublic[]) {
+    activeWorkoutId.value = workoutId
+
+    if (items !== undefined) {
+      exercises.value = items
+    }
+  }
+
   async function update(id: number, body: UpdateWorkoutBody) {
     updating.value = true
 
@@ -157,6 +165,7 @@ export const useWorkoutStore = defineStore('workout', () => {
     remove,
     fetchExercises,
     clearExercises,
+    hydrateExercises,
     createExercise,
     updateExercise,
     removeExercise,

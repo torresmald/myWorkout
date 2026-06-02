@@ -3,6 +3,14 @@ export default {
     title: 'Delete workout',
     message: 'Delete "{name}"? Its exercises will also be removed.',
   },
+  deleteTemplate: {
+    title: 'Delete template',
+    message: 'Delete "{name}"? Its exercises will also be removed.',
+  },
+  saveAsTemplate: {
+    title: 'Save as template',
+    message: 'Create template "{name}" with the current exercises?',
+  },
   deleteExerciseType: {
     title: 'Delete exercise',
     message: 'Delete "{name}"? This action cannot be undone.',
@@ -10,6 +18,10 @@ export default {
   deleteWorkoutExercise: {
     title: 'Delete exercise',
     message: 'Remove "{name}" from this workout?',
+  },
+  deleteTemplateExercise: {
+    title: 'Delete exercise',
+    message: 'Remove "{name}" from this template?',
   },
   deleteWeightEntry: {
     title: 'Delete entry',

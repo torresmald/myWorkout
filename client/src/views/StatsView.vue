@@ -4,6 +4,7 @@ import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
 
 import ExerciseEvolutionChart from '@/components/stats/ExerciseEvolutionChart.vue'
+import PersonalRecordsList from '@/components/stats/PersonalRecordsList.vue'
 import WeeklyFrequencyChart from '@/components/stats/WeeklyFrequencyChart.vue'
 import WeeklyVolumeChart from '@/components/stats/WeeklyVolumeChart.vue'
 import PageContainer from '@/components/layout/PageContainer.vue'
@@ -12,14 +13,17 @@ import EmptyState from '@/components/ui/EmptyState.vue'
 import SkeletonCardGrid from '@/components/ui/SkeletonCardGrid.vue'
 import { CARD_BODY_CLASS, CARD_COMPACT_CLASS, SECTION_TITLE_CLASS, TEXT_MUTED_CLASS } from '@/constants/ui.constants'
 import { useStatsStore } from '@/stores/stats.store'
+import { usePersonalRecordStore } from '@/stores/personal-record.store'
 import { useToastStore } from '@/stores/toast.store'
 import { getErrorMessage } from '@/utils/error.util'
 
 const statsStore = useStatsStore()
+const personalRecordStore = usePersonalRecordStore()
 const toastStore = useToastStore()
 const { t } = useI18n()
 
 const { stats, loading } = storeToRefs(statsStore)
+const { records: personalRecords, loading: loadingPersonalRecords } = storeToRefs(personalRecordStore)
 
 const summaryCards = computed(() => [
   { key: 'workoutsThisWeek' as const, label: t('stats.summary.workoutsThisWeek'), suffix: t('stats.summary.workoutsSuffix') },
@@ -33,7 +37,7 @@ const hasWorkouts = computed(() => (stats.value?.summary.totalWorkouts ?? 0) > 0
 
 onMounted(async () => {
   try {
-    await statsStore.fetchStats()
+    await Promise.all([statsStore.fetchStats(), personalRecordStore.fetchAll()])
   } catch (error) {
     toastStore.error(getErrorMessage(error, t('stats.loadError')))
   }
@@ -85,6 +89,13 @@ onMounted(async () => {
       </div>
 
       <section :class="[CARD_BODY_CLASS, 'mt-6 stagger-item']" style="animation-delay: 350ms">
+        <PersonalRecordsList
+          :records="personalRecords"
+          :loading="loadingPersonalRecords"
+        />
+      </section>
+
+      <section :class="[CARD_BODY_CLASS, 'mt-6 stagger-item']" style="animation-delay: 400ms">
         <h2 :class="SECTION_TITLE_CLASS">{{ t('stats.evolution.title') }}</h2>
         <ExerciseEvolutionChart :series-list="stats.exerciseEvolution" />
       </section>

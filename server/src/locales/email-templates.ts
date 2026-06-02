@@ -13,6 +13,11 @@ interface EmailTemplate {
   resetLinkLabel: string
   resetExpiry: string
   resetIgnore: string
+  reminderSubject: string
+  reminderIntro: string
+  reminderBody: string
+  reminderLinkLabel: string
+  reminderIgnore: string
 }
 
 const templates: Record<AppLocale, EmailTemplate> = {
@@ -29,6 +34,12 @@ const templates: Record<AppLocale, EmailTemplate> = {
     resetLinkLabel: 'Restablecer contraseña',
     resetExpiry: 'El enlace caduca en 1 hora.',
     resetIgnore: 'Si no solicitaste este cambio, puedes ignorar este email.',
+    reminderSubject: 'Hora de entrenar en {appName}',
+    reminderIntro: 'Hola{userName},',
+    reminderBody:
+      'Llevás más de una semana sin registrar un entrenamiento. ¿Te apetece retomar la rutina hoy?',
+    reminderLinkLabel: 'Ir a mis entrenamientos',
+    reminderIgnore: 'Puedes desactivar estos recordatorios en tu perfil.',
   },
   en: {
     verificationSubject: 'Verify your {appName} account',
@@ -43,6 +54,12 @@ const templates: Record<AppLocale, EmailTemplate> = {
     resetLinkLabel: 'Reset password',
     resetExpiry: 'This link expires in 1 hour.',
     resetIgnore: 'If you did not request this change, you can ignore this email.',
+    reminderSubject: 'Time to train on {appName}',
+    reminderIntro: 'Hi{userName},',
+    reminderBody:
+      'You have not logged a workout in over a week. Ready to get back on track today?',
+    reminderLinkLabel: 'Go to my workouts',
+    reminderIgnore: 'You can turn off these reminders in your profile.',
   },
 }
 

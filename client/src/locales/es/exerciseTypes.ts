@@ -18,5 +18,6 @@ export default {
     title: 'Mis ejercicios',
     loading: 'Cargando ejercicios...',
     empty: 'Aún no tienes ejercicios. Crea el primero arriba.',
+    viewHistory: 'Ver historial',
   },
 } as const
