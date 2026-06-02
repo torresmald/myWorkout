@@ -10,6 +10,7 @@ export interface AdminMetrics {
   totalWorkouts: number
   totalExerciseTypes: number
   totalWeightEntries: number
+  totalCatalogExercises: number
 }
 
 export interface AdminUserSummary {
@@ -39,6 +40,7 @@ export async function getAdminMetrics(): Promise<AdminMetrics> {
     totalWorkouts,
     totalExerciseTypes,
     totalWeightEntries,
+    totalCatalogExercises,
   ] = await Promise.all([
     prisma.user.count(),
     prisma.user.count({ where: { emailVerifiedAt: { not: null } } }),
@@ -46,6 +48,7 @@ export async function getAdminMetrics(): Promise<AdminMetrics> {
     prisma.workout.count(),
     prisma.exerciseType.count(),
     prisma.weightEntry.count(),
+    prisma.exerciseCatalog.count(),
   ])
 
   return {
@@ -55,6 +58,7 @@ export async function getAdminMetrics(): Promise<AdminMetrics> {
     totalWorkouts,
     totalExerciseTypes,
     totalWeightEntries,
+    totalCatalogExercises,
   }
 }
 

@@ -49,6 +49,10 @@ export interface WorkoutExerciseTypeSummary {
   id: number
   name: string
   muscleGroup: string | null
+  catalogExercise?: {
+    mediaType: string
+    mediaUrl: string | null
+  } | null
 }
 
 export interface WorkoutExercisePublic {

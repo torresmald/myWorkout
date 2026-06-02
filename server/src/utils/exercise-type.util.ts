@@ -1,5 +1,5 @@
 import { ErrorCode } from '../constants/error-codes.constants.js'
-import { exerciseTypeSelect } from '../constants/exercise-type.constants.js'
+import { exerciseTypeSelect, mapExerciseTypePublic } from '../constants/exercise-type.constants.js'
 import { prisma } from '../config/prisma.js'
 import { AppError } from '../interfaces/app-error.interface.js'
 import type { ExerciseTypePublic } from '../interfaces/exercise-type.interface.js'
@@ -19,10 +19,12 @@ export async function findUserExerciseType(
     return null
   }
 
-  return prisma.exerciseType.findFirst({
+  const exercise = await prisma.exerciseType.findFirst({
     where: { id: exerciseTypeId, userId },
     select: exerciseTypeSelect,
   })
+
+  return exercise ? mapExerciseTypePublic(exercise) : null
 }
 
 export async function assertUserOwnsExerciseTypes(

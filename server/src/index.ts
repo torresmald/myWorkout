@@ -6,6 +6,7 @@ import { captureException, initSentry } from './config/sentry.js'
 import adminRoutes from './routes/admin.routes.js'
 import authRoutes from './routes/auth.routes.js'
 import cronRoutes from './routes/cron.routes.js'
+import exerciseCatalogRoutes from './routes/exercise-catalog.routes.js'
 import exerciseTypeRoutes from './routes/exercise-type.routes.js'
 import healthRoutes from './routes/health.routes.js'
 import profileRoutes from './routes/profile.routes.js'
@@ -28,6 +29,7 @@ app.use(express.json())
 
 app.use('/api/auth', authRoutes)
 app.use('/api/admin', adminRoutes)
+app.use('/api/exercise-catalog', exerciseCatalogRoutes)
 app.use('/api/exercise-types', exerciseTypeRoutes)
 app.use('/api/health', healthRoutes)
 app.use('/api/profile', profileRoutes)

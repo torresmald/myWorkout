@@ -17,7 +17,8 @@ export default {
   list: {
     title: 'Mis ejercicios',
     loading: 'Cargando ejercicios...',
-    empty: 'Aún no tienes ejercicios. Crea el primero arriba.',
+    empty: 'Aún no tienes ejercicios. Crea el primero arriba o explora el catálogo.',
     viewHistory: 'Ver historial',
+    browseCatalog: 'Explorar catálogo',
   },
 } as const

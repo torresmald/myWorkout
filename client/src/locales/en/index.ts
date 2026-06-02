@@ -5,6 +5,7 @@ import common from './common'
 import cookies from './cookies'
 import empty from './empty'
 import errors from './errors'
+import exerciseCatalog from './exerciseCatalog'
 import exerciseHistory from './exerciseHistory'
 import exerciseTypes from './exerciseTypes'
 import google from './google'
@@ -36,6 +37,7 @@ export default {
   session,
   spotify,
   exerciseTypes,
+  exerciseCatalog,
   exerciseHistory,
   stats,
   templates,

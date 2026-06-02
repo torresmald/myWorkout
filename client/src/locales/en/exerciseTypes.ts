@@ -17,7 +17,8 @@ export default {
   list: {
     title: 'My exercises',
     loading: 'Loading exercises...',
-    empty: 'You have no exercises yet. Create your first one above.',
+    empty: 'You have no exercises yet. Create your first one above or browse the catalog.',
     viewHistory: 'View history',
+    browseCatalog: 'Browse catalog',
   },
 } as const

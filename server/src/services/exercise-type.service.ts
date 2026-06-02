@@ -1,5 +1,9 @@
 import { ErrorCode } from '../constants/error-codes.constants.js'
-import { exerciseTypeSelect } from '../constants/exercise-type.constants.js'
+import { getMuscleGroupLabel } from '../constants/exercise-catalog.constants.js'
+import {
+  exerciseTypeSelect,
+  mapExerciseTypePublic,
+} from '../constants/exercise-type.constants.js'
 import { prisma } from '../config/prisma.js'
 import { AppError } from '../interfaces/app-error.interface.js'
 import type {
@@ -8,6 +12,7 @@ import type {
   UpdateExerciseTypeBody,
 } from '../interfaces/exercise-type.interface.js'
 import { findUserExerciseType } from '../utils/exercise-type.util.js'
+import { parseAppLocale } from '../utils/locale.util.js'
 import { isPrismaUniqueViolation } from '../utils/prisma-error.util.js'
 
 function trimOptional(value?: string): string | null {
@@ -37,11 +42,13 @@ async function handleUniqueViolation<T>(operation: () => Promise<T>): Promise<T>
 }
 
 export async function getExerciseTypesByUser(userId: number): Promise<ExerciseTypePublic[]> {
-  return prisma.exerciseType.findMany({
+  const exercises = await prisma.exerciseType.findMany({
     where: { userId },
     select: exerciseTypeSelect,
     orderBy: { name: 'asc' },
   })
+
+  return exercises.map(mapExerciseTypePublic)
 }
 
 export async function createExerciseType(
@@ -50,7 +57,7 @@ export async function createExerciseType(
 ): Promise<ExerciseTypePublic> {
   const trimmedName = requireName(body.name)
 
-  return handleUniqueViolation(() =>
+  const created = await handleUniqueViolation(() =>
     prisma.exerciseType.create({
       data: {
         userId,
@@ -61,6 +68,66 @@ export async function createExerciseType(
       select: exerciseTypeSelect,
     }),
   )
+
+  return mapExerciseTypePublic(created)
+}
+
+export async function importExerciseTypeFromCatalog(
+  userId: number,
+  catalogId: number,
+): Promise<ExerciseTypePublic> {
+  const existingImported = await prisma.exerciseType.findFirst({
+    where: {
+      userId,
+      catalogExerciseId: catalogId,
+    },
+    select: exerciseTypeSelect,
+  })
+
+  if (existingImported) {
+    return mapExerciseTypePublic(existingImported)
+  }
+
+  const [catalogExercise, user] = await Promise.all([
+    prisma.exerciseCatalog.findFirst({
+      where: {
+        id: catalogId,
+        active: true,
+      },
+    }),
+    prisma.user.findUnique({
+      where: { id: userId },
+      select: { locale: true },
+    }),
+  ])
+
+  if (!catalogExercise) {
+    throw new AppError(ErrorCode.CATALOG_EXERCISE_NOT_FOUND, 404)
+  }
+
+  if (!user) {
+    throw new AppError(ErrorCode.USER_NOT_FOUND, 404)
+  }
+
+  const locale = parseAppLocale(user.locale)
+  const name = locale === 'es' ? catalogExercise.nameEs : catalogExercise.nameEn
+  const description = locale === 'es' ? catalogExercise.descriptionEs : catalogExercise.descriptionEn
+  const muscleGroup = getMuscleGroupLabel(catalogExercise.muscleGroup, locale)
+
+  const created = await handleUniqueViolation(() =>
+    prisma.exerciseType.create({
+      data: {
+        userId,
+        catalogExerciseId: catalogExercise.id,
+        name,
+        description,
+        muscleGroup,
+      },
+      select: exerciseTypeSelect,
+    }),
+  )
+
+  return mapExerciseTypePublic(created)
 }
 
 export async function updateExerciseType(
@@ -76,7 +143,7 @@ export async function updateExerciseType(
 
   const trimmedName = requireName(body.name)
 
-  return handleUniqueViolation(() =>
+  const updated = await handleUniqueViolation(() =>
     prisma.exerciseType.update({
       where: { id: existing.id },
       data: {
@@ -87,6 +154,8 @@ export async function updateExerciseType(
       select: exerciseTypeSelect,
     }),
   )
+
+  return mapExerciseTypePublic(updated)
 }
 
 export async function deleteExerciseType(

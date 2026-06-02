@@ -37,6 +37,12 @@ export const workoutExerciseSelect = {
       id: true,
       name: true,
       muscleGroup: true,
+      catalogExercise: {
+        select: {
+          mediaType: true,
+          mediaUrl: true,
+        },
+      },
     },
   },
 } as const

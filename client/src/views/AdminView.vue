@@ -2,6 +2,7 @@
 import { computed, onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
+import { RouterLink } from 'vue-router'
 
 import PageContainer from '@/components/layout/PageContainer.vue'
 import RoutePageHeader from '@/components/layout/RoutePageHeader.vue'
@@ -9,6 +10,7 @@ import EmptyState from '@/components/ui/EmptyState.vue'
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
 import SkeletonCardGrid from '@/components/ui/SkeletonCardGrid.vue'
 import {
+  BTN_MOBILE_FULL_CLASS,
   BTN_SECONDARY_CLASS,
   CARD_COMPACT_CLASS,
   INPUT_CLASS,
@@ -34,6 +36,7 @@ const metricCards = computed(() => [
   { key: 'adminUsers' as const, label: t('admin.metrics.adminUsers') },
   { key: 'totalWorkouts' as const, label: t('admin.metrics.totalWorkouts') },
   { key: 'totalExerciseTypes' as const, label: t('admin.metrics.totalExerciseTypes') },
+  { key: 'totalCatalogExercises' as const, label: t('admin.metrics.totalCatalogExercises') },
   { key: 'totalWeightEntries' as const, label: t('admin.metrics.totalWeightEntries') },
 ])
 
@@ -83,6 +86,15 @@ async function goToPage(nextPage: number) {
         <p :class="TEXT_MUTED_CLASS">{{ card.label }}</p>
         <p class="mt-1 text-2xl font-bold text-text-primary">{{ metrics[card.key] }}</p>
       </div>
+    </div>
+
+    <div class="mb-6">
+      <RouterLink
+        :to="{ name: 'admin-catalog' }"
+        :class="[BTN_SECONDARY_CLASS, BTN_MOBILE_FULL_CLASS, 'inline-flex sm:w-auto']"
+      >
+        {{ t('admin.manageCatalog') }}
+      </RouterLink>
     </div>
 
     <section :class="CARD_COMPACT_CLASS">

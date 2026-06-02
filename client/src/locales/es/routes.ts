@@ -7,6 +7,10 @@ export default {
     title: 'Tipos de ejercicio',
     description: 'Gestiona tu biblioteca de ejercicios',
   },
+  exerciseCatalog: {
+    title: 'Catálogo de ejercicios',
+    description: 'Explora ejercicios base e impórtalos a tu biblioteca',
+  },
   exerciseHistory: {
     title: 'Historial del ejercicio',
   },
@@ -32,6 +36,10 @@ export default {
   admin: {
     title: 'Administración',
     description: 'Métricas y gestión de usuarios',
+  },
+  adminCatalog: {
+    title: 'Catálogo de ejercicios',
+    description: 'Gestiona el catálogo base de ejercicios',
   },
   login: {
     title: 'Iniciar sesión',

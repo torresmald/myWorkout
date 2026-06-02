@@ -2,7 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 
 import PageContainer from '@/components/layout/PageContainer.vue'
 import RoutePageHeader from '@/components/layout/RoutePageHeader.vue'
@@ -208,7 +208,15 @@ function handleViewHistory(exercise: ExerciseTypePublic) {
     </section>
 
     <section :class="CARD_BODY_CLASS">
-      <h2 :class="SECTION_TITLE_CLASS">{{ t('exerciseTypes.list.title') }}</h2>
+      <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <h2 :class="SECTION_TITLE_CLASS">{{ t('exerciseTypes.list.title') }}</h2>
+        <RouterLink
+          :to="{ name: 'exercise-catalog' }"
+          :class="[BTN_SECONDARY_CLASS, BTN_MOBILE_FULL_CLASS, 'inline-flex']"
+        >
+          {{ t('exerciseTypes.list.browseCatalog') }}
+        </RouterLink>
+      </div>
 
       <SkeletonList v-if="loading" />
 

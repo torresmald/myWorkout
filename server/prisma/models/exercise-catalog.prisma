@@ -1,0 +1,34 @@
+enum MuscleGroup {
+  CHEST
+  BACK
+  LEGS
+  SHOULDERS
+  ARMS
+  CORE
+  FULL_BODY
+}
+
+enum CatalogMediaType {
+  IMAGE
+  GIF
+  VIDEO
+  YOUTUBE
+}
+
+model ExerciseCatalog {
+  id            Int              @id @default(autoincrement())
+  slug          String           @unique
+  nameEs        String
+  nameEn        String
+  descriptionEs String?
+  descriptionEn String?
+  muscleGroup   MuscleGroup
+  mediaType     CatalogMediaType @default(IMAGE)
+  mediaUrl      String?
+  sortOrder     Int              @default(0)
+  active        Boolean          @default(true)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  exerciseTypes ExerciseType[]
+}

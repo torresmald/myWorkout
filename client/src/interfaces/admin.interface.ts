@@ -5,6 +5,7 @@ export interface AdminMetrics {
   totalWorkouts: number
   totalExerciseTypes: number
   totalWeightEntries: number
+  totalCatalogExercises: number
 }
 
 export interface AdminUserSummary {

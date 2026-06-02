@@ -5,6 +5,7 @@ import GuestLayout from '@/components/layout/GuestLayout.vue'
 import { useAuthStore } from '@/stores/auth.store'
 import { updateDocumentTitle } from '@/utils/document-title.util'
 import ExerciseTypesView from '@/views/ExerciseTypesView.vue'
+import ExerciseCatalogView from '@/views/ExerciseCatalogView.vue'
 import ExerciseHistoryView from '@/views/ExerciseHistoryView.vue'
 import ForgotPasswordView from '@/views/ForgotPasswordView.vue'
 import HomeView from '@/views/HomeView.vue'
@@ -18,6 +19,7 @@ import WorkoutSessionView from '@/views/WorkoutSessionView.vue'
 import StatsView from '@/views/StatsView.vue'
 import TemplatesView from '@/views/TemplatesView.vue'
 import AdminView from '@/views/AdminView.vue'
+import AdminCatalogView from '@/views/AdminCatalogView.vue'
 import CookiesView from '@/views/CookiesView.vue'
 
 const router = createRouter({
@@ -53,6 +55,15 @@ const router = createRouter({
           meta: {
             titleKey: 'routes.exerciseTypes.title',
             pageDescriptionKey: 'routes.exerciseTypes.description',
+          },
+        },
+        {
+          path: 'exercise-catalog',
+          name: 'exercise-catalog',
+          component: ExerciseCatalogView,
+          meta: {
+            titleKey: 'routes.exerciseCatalog.title',
+            pageDescriptionKey: 'routes.exerciseCatalog.description',
           },
         },
         {
@@ -115,6 +126,16 @@ const router = createRouter({
             requiresAdmin: true,
             titleKey: 'routes.admin.title',
             pageDescriptionKey: 'routes.admin.description',
+          },
+        },
+        {
+          path: 'admin/catalog',
+          name: 'admin-catalog',
+          component: AdminCatalogView,
+          meta: {
+            requiresAdmin: true,
+            titleKey: 'routes.adminCatalog.title',
+            pageDescriptionKey: 'routes.adminCatalog.description',
           },
         },
       ],
