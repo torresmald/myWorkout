@@ -5,7 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 
 import WorkoutSessionExercise from '@/components/workout/WorkoutSessionExercise.vue'
-import SpotifyWorkoutButton from '@/components/workout/SpotifyWorkoutButton.vue'
+import SpotifyPlayCard from '@/components/spotify/SpotifyPlayCard.vue'
 import RestTimerModal from '@/components/workout/RestTimerModal.vue'
 import PageContainer from '@/components/layout/PageContainer.vue'
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
@@ -20,6 +20,7 @@ import {
 } from '@/constants/ui.constants'
 import { useModalStore } from '@/stores/modal.store'
 import { useToastStore } from '@/stores/toast.store'
+import { useAuthStore } from '@/stores/auth.store'
 import { useWorkoutSessionStore } from '@/stores/workout-session.store'
 import { useWorkoutStore } from '@/stores/workout.store'
 import { getErrorMessage } from '@/utils/error.util'
@@ -27,6 +28,7 @@ import { getErrorMessage } from '@/utils/error.util'
 const route = useRoute()
 const router = useRouter()
 const sessionStore = useWorkoutSessionStore()
+const authStore = useAuthStore()
 const workoutStore = useWorkoutStore()
 const modalStore = useModalStore()
 const toastStore = useToastStore()
@@ -56,6 +58,8 @@ const {
   cancel: cancelRestTimer,
   closeAfterFinish: closeRestTimerAfterFinish,
 } = useRestTimer()
+
+const { user } = storeToRefs(authStore)
 
 const isBusy = computed(() => loading.value || starting.value)
 const isCompleted = computed(() => session.value?.status === 'COMPLETED')
@@ -205,9 +209,14 @@ onUnmounted(() => {
               : t('session.status.completed')
         }}
       </span>
-
-      <SpotifyWorkoutButton v-if="session && !isCompleted && !isBusy" />
     </div>
+
+    <SpotifyPlayCard
+      v-if="session && !isCompleted && !isBusy"
+      class="mb-4"
+      :playlist-url="user?.spotifyPlaylistUrl ?? null"
+      :playlist-name="user?.spotifyPlaylistName ?? null"
+    />
 
     <section v-if="isBusy" :class="[CARD_BODY_CLASS, 'flex items-center justify-center gap-3']">
       <LoadingSpinner />

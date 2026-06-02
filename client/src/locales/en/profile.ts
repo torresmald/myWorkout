@@ -77,6 +77,8 @@ export default {
     playlistHint: 'Paste a Spotify playlist link or spotify:playlist:... URI.',
     saveManualButton: 'Save manual link',
     openButton: 'Open playlist',
+    playButton: 'Play on Spotify',
+    savePlaylistFirst: 'Select a playlist below and tap “Save workout playlist” to enable playback.',
     saveSuccess: 'Workout playlist saved',
     saveError: 'Could not save workout playlist',
     noChanges: 'No changes to save',

@@ -77,6 +77,8 @@ export default {
     playlistHint: 'Pega un enlace de playlist o una URI spotify:playlist:...',
     saveManualButton: 'Guardar enlace manual',
     openButton: 'Abrir playlist',
+    playButton: 'Reproducir en Spotify',
+    savePlaylistFirst: 'Selecciona una playlist abajo y pulsa «Guardar playlist de entreno» para poder reproducirla.',
     saveSuccess: 'Playlist de entreno guardada',
     saveError: 'No se pudo guardar la playlist de entreno',
     noChanges: 'No hay cambios para guardar',

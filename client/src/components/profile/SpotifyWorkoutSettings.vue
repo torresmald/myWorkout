@@ -6,6 +6,7 @@ import { useRoute, useRouter } from 'vue-router'
 
 import LoadingButton from '@/components/ui/LoadingButton.vue'
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
+import SpotifyPlayCard from '@/components/spotify/SpotifyPlayCard.vue'
 import {
   BTN_MOBILE_FULL_CLASS,
   BTN_PRIMARY_CLASS,
@@ -21,7 +22,6 @@ import { useProfileStore } from '@/stores/profile.store'
 import { useSpotifyStore } from '@/stores/spotify.store'
 import { useToastStore } from '@/stores/toast.store'
 import { getErrorMessage } from '@/utils/error.util'
-import { openSpotifyPlaylist } from '@/utils/spotify.util'
 
 const profileStore = useProfileStore()
 const spotifyStore = useSpotifyStore()
@@ -178,16 +178,6 @@ async function handleSaveManualUrl() {
     toastStore.error(getErrorMessage(error, t('profile.spotify.saveError')))
   }
 }
-
-function handleOpenPlaylist() {
-  const url = workoutPlaylistUrl.value
-
-  if (!url) {
-    return
-  }
-
-  openSpotifyPlaylist(url)
-}
 </script>
 
 <template>
@@ -201,6 +191,20 @@ function handleOpenPlaylist() {
     </div>
 
     <template v-else>
+      <SpotifyPlayCard
+        v-if="workoutPlaylistUrl"
+        class="mb-6"
+        :playlist-url="workoutPlaylistUrl"
+        :playlist-name="workoutPlaylistName"
+      />
+
+      <div
+        v-if="isConnected && !workoutPlaylistUrl"
+        class="mb-6 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-100"
+      >
+        {{ t('profile.spotify.savePlaylistFirst') }}
+      </div>
+
       <div
         v-if="isConnected"
         class="mb-4 rounded-lg border border-border-default bg-bg-muted px-4 py-3 text-sm"
@@ -237,19 +241,6 @@ function handleOpenPlaylist() {
         >
           {{ t('profile.spotify.disconnectButton') }}
         </LoadingButton>
-
-        <button
-          v-if="workoutPlaylistUrl"
-          type="button"
-          :class="[
-            'inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition',
-            'bg-[#1DB954] text-white hover:bg-[#1ed760]',
-            BTN_MOBILE_FULL_CLASS,
-          ]"
-          @click="handleOpenPlaylist"
-        >
-          {{ t('profile.spotify.openButton') }}
-        </button>
       </div>
 
       <div v-if="isConnected" class="mb-6 space-y-4">

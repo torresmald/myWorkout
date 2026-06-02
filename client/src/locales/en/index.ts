@@ -19,6 +19,7 @@ import profile from './profile'
 import reminders from './reminders'
 import routes from './routes'
 import session from './session'
+import spotify from './spotify'
 import stats from './stats'
 import templates from './templates'
 import workouts from './workouts'
@@ -33,6 +34,7 @@ export default {
   modals,
   workouts,
   session,
+  spotify,
   exerciseTypes,
   exerciseHistory,
   stats,
