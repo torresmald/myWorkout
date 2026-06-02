@@ -6,6 +6,8 @@ export default {
   GOOGLE_ACCOUNT_ALREADY_LINKED: 'This account is already linked to another Google sign-in',
   EMAIL_ALREADY_REGISTERED: 'Email is already registered',
   INVALID_CREDENTIALS: 'Invalid credentials',
+  REFRESH_TOKEN_REQUIRED: 'Refresh token is required',
+  INVALID_REFRESH_TOKEN: 'Invalid or expired refresh token',
   EMAIL_NOT_VERIFIED: 'You must verify your email before signing in',
   USER_NOT_FOUND: 'User not found',
   INVALID_VERIFICATION_TOKEN: 'Invalid verification token',

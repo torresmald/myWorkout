@@ -9,7 +9,7 @@ import type { GoogleUserProfile } from '../interfaces/google.interface.js'
 import { normalizeEmail } from '../utils/auth.util.js'
 import { signAccessToken } from '../utils/jwt.util.js'
 import { parseAppLocale } from '../utils/locale.util.js'
-import { generateRefreshToken } from '../utils/token.util.js'
+import { buildRefreshToken, parseRefreshTokenUserId } from '../utils/token.util.js'
 import {
   createEmailVerificationToken,
   sendUserVerificationEmail,
@@ -60,7 +60,7 @@ async function createUserSession(user: {
   email: string
   role: UserPublic['role']
 }): Promise<LoginResponse> {
-  const refreshToken = generateRefreshToken()
+  const refreshToken = buildRefreshToken(user.id)
   const refreshTokenHash = await bcrypt.hash(refreshToken, SALT_ROUNDS)
 
   const updatedUser = await prisma.user.update({
@@ -189,6 +189,67 @@ export async function loginUser(body: LoginBody): Promise<LoginResponse> {
   }
 
   return createUserSession(user)
+}
+
+async function validateRefreshToken(refreshToken: string): Promise<{
+  id: number
+  email: string
+  role: UserPublic['role']
+}> {
+  const userId = parseRefreshTokenUserId(refreshToken)
+  if (!userId) {
+    throw new AppError(ErrorCode.INVALID_REFRESH_TOKEN, 401)
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      email: true,
+      role: true,
+      refreshTokenHash: true,
+    },
+  })
+
+  if (!user?.refreshTokenHash || !(await bcrypt.compare(refreshToken, user.refreshTokenHash))) {
+    throw new AppError(ErrorCode.INVALID_REFRESH_TOKEN, 401)
+  }
+
+  return user
+}
+
+export async function refreshAccessToken(refreshToken: string | undefined): Promise<LoginResponse> {
+  if (!refreshToken?.trim()) {
+    throw new AppError(ErrorCode.REFRESH_TOKEN_REQUIRED, 400)
+  }
+
+  const user = await validateRefreshToken(refreshToken)
+  return createUserSession(user)
+}
+
+export async function logoutUser(refreshToken: string | undefined): Promise<void> {
+  if (!refreshToken?.trim()) {
+    return
+  }
+
+  const userId = parseRefreshTokenUserId(refreshToken)
+  if (!userId) {
+    return
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { refreshTokenHash: true },
+  })
+
+  if (!user?.refreshTokenHash || !(await bcrypt.compare(refreshToken, user.refreshTokenHash))) {
+    return
+  }
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { refreshTokenHash: null },
+  })
 }
 
 export async function getUserById(userId: number): Promise<UserPublic> {

@@ -5,11 +5,18 @@ import * as authApi from '@/api/auth.api'
 import type { LoginBody, RegisterBody, UserPublic } from '@/interfaces/auth.interface'
 import { useLocaleStore } from '@/stores/locale.store'
 import { clearTokens, getAccessToken, getRefreshToken, setTokens } from '@/utils/storage.util'
+import { onSessionRefreshed, refreshAccessToken } from '@/utils/refresh-session.util'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<UserPublic | null>(null)
   const token = ref<string | null>(getAccessToken())
   const refreshToken = ref<string | null>(getRefreshToken())
+
+  onSessionRefreshed((data) => {
+    token.value = data.token
+    refreshToken.value = data.refreshToken
+    user.value = data.user
+  })
 
   const isAuthenticated = computed(() => !!token.value && !!user.value)
 
@@ -68,15 +75,31 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function initAuth() {
-    if (!token.value) {
+    token.value = getAccessToken()
+    refreshToken.value = getRefreshToken()
+
+    if (!token.value && !refreshToken.value) {
       return
     }
 
-    try {
-      await fetchMe()
-    } catch {
-      clearSession()
+    if (token.value) {
+      try {
+        await fetchMe()
+        return
+      } catch {
+        // Access token expired or invalid — try refresh below.
+      }
     }
+
+    if (refreshToken.value) {
+      const data = await refreshAccessToken()
+      if (data) {
+        setSession(data.token, data.refreshToken, data.user)
+        return
+      }
+    }
+
+    clearSession()
   }
 
   let authReadyPromise: Promise<void> | null = null
@@ -86,8 +109,17 @@ export const useAuthStore = defineStore('auth', () => {
     return authReadyPromise
   }
 
-  function logout() {
+  async function logout() {
+    const storedRefreshToken = refreshToken.value ?? getRefreshToken()
     clearSession()
+
+    if (storedRefreshToken) {
+      try {
+        await authApi.logout(storedRefreshToken)
+      } catch {
+        // Session already cleared locally; ignore server errors.
+      }
+    }
   }
 
   return {

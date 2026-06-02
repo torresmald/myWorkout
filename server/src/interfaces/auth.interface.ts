@@ -13,6 +13,14 @@ export interface LoginBody {
   password?: string
 }
 
+export interface RefreshTokenBody {
+  refreshToken?: string
+}
+
+export interface LogoutBody {
+  refreshToken?: string
+}
+
 export interface UserPublic {
   id: number
   email: string

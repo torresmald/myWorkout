@@ -1,11 +1,27 @@
 import { Router } from 'express'
 
-import type { ForgotPasswordBody, LoginBody, RegisterBody, ResendVerificationBody, ResetPasswordBody, VerifyEmailBody } from '../interfaces/auth.interface.js'
+import type {
+  ForgotPasswordBody,
+  LoginBody,
+  LogoutBody,
+  RefreshTokenBody,
+  RegisterBody,
+  ResendVerificationBody,
+  ResetPasswordBody,
+  VerifyEmailBody,
+} from '../interfaces/auth.interface.js'
 import type { GoogleLoginBody } from '../interfaces/google.interface.js'
 import type { AuthenticatedRequest } from '../interfaces/express.interface.js'
 import { authenticate } from '../middleware/auth.middleware.js'
 import { authActionLimiter, authEmailLimiter } from '../middleware/rate-limit.middleware.js'
-import { getUserById, loginUser, loginWithGoogle, registerUser } from '../services/auth.service.js'
+import {
+  getUserById,
+  loginUser,
+  loginWithGoogle,
+  logoutUser,
+  refreshAccessToken,
+  registerUser,
+} from '../services/auth.service.js'
 import { resendVerificationEmail, verifyEmailWithToken } from '../services/email-verification.service.js'
 import { requestPasswordReset, resetPassword } from '../services/password-reset.service.js'
 import { handleServiceError } from '../utils/app-error.util.js'
@@ -100,6 +116,34 @@ router.post('/reset-password', async (req, res) => {
     const { token, password } = req.body as ResetPasswordBody
     const result = await resetPassword(token ?? '', password ?? '')
     sendSuccess(res, result)
+  } catch (error) {
+    if (handleServiceError(error, res)) {
+      return
+    }
+
+    throw error
+  }
+})
+
+router.post('/refresh', authActionLimiter, async (req, res) => {
+  try {
+    const { refreshToken } = req.body as RefreshTokenBody
+    const loginResponse = await refreshAccessToken(refreshToken)
+    sendSuccess(res, loginResponse)
+  } catch (error) {
+    if (handleServiceError(error, res)) {
+      return
+    }
+
+    throw error
+  }
+})
+
+router.post('/logout', authActionLimiter, async (req, res) => {
+  try {
+    const { refreshToken } = req.body as LogoutBody
+    await logoutUser(refreshToken)
+    sendSuccess(res, null)
   } catch (error) {
     if (handleServiceError(error, res)) {
       return

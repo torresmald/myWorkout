@@ -63,3 +63,10 @@ export function resetPassword(token: string, password: string) {
 export function getMe() {
   return api<UserPublic>('/auth/me')
 }
+
+export function logout(refreshToken: string) {
+  return api<null>('/auth/logout', {
+    method: 'POST',
+    body: JSON.stringify({ refreshToken }),
+  })
+}

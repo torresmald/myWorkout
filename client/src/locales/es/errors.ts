@@ -7,6 +7,8 @@ export default {
     'Esta cuenta ya está vinculada a otro inicio de sesión de Google',
   EMAIL_ALREADY_REGISTERED: 'El email ya está registrado',
   INVALID_CREDENTIALS: 'Credenciales inválidas',
+  REFRESH_TOKEN_REQUIRED: 'El token de refresco es obligatorio',
+  INVALID_REFRESH_TOKEN: 'Token de refresco inválido o expirado',
   EMAIL_NOT_VERIFIED: 'Debes verificar tu email antes de iniciar sesión',
   USER_NOT_FOUND: 'Usuario no encontrado',
   INVALID_VERIFICATION_TOKEN: 'Token de verificación inválido',
