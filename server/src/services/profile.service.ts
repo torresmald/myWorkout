@@ -14,6 +14,7 @@ import type { AddWeightBody, UpdateProfileBody, UpdateWeightBody, UserProfile, W
 import { decimalToNumber } from '../utils/decimal.util.js'
 import { parseAppLocale } from '../utils/locale.util.js'
 import { mapUserToPublic } from '../utils/user-profile.util.js'
+import { normalizeSpotifyPlaylistUrl } from '../utils/spotify.util.js'
 
 async function getLatestWeightKg(userId: number): Promise<number | null> {
   const entry = await prisma.weightEntry.findFirst({
@@ -103,6 +104,26 @@ function validateRecordedAt(recordedAt: string | undefined): Date | undefined {
   return parsed
 }
 
+function validateSpotifyPlaylistUrl(
+  spotifyPlaylistUrl: string | null | undefined,
+): string | null | undefined {
+  if (spotifyPlaylistUrl === undefined) {
+    return undefined
+  }
+
+  if (spotifyPlaylistUrl === null || !spotifyPlaylistUrl.trim()) {
+    return null
+  }
+
+  const normalized = normalizeSpotifyPlaylistUrl(spotifyPlaylistUrl)
+
+  if (!normalized) {
+    throw new AppError(ErrorCode.INVALID_SPOTIFY_PLAYLIST_URL, 400)
+  }
+
+  return normalized
+}
+
 async function getWeightEntriesForUser(userId: number): Promise<WeightEntryPublic[]> {
   const weightEntries = await prisma.weightEntry.findMany({
     where: { userId },
@@ -172,8 +193,15 @@ export async function updateUserProfile(userId: number, body: UpdateProfileBody)
   const heightCm = validateHeightCm(body.heightCm)
   const weightKg = body.weightKg !== undefined ? validateWeightKg(body.weightKg) : undefined
   const locale = body.locale !== undefined ? parseAppLocale(body.locale) : undefined
+  const spotifyPlaylistUrl = validateSpotifyPlaylistUrl(body.spotifyPlaylistUrl)
 
-  if (name === undefined && heightCm === undefined && weightKg === undefined && locale === undefined) {
+  if (
+    name === undefined &&
+    heightCm === undefined &&
+    weightKg === undefined &&
+    locale === undefined &&
+    spotifyPlaylistUrl === undefined
+  ) {
     throw new AppError(ErrorCode.NO_DATA_TO_UPDATE, 400)
   }
 
@@ -186,13 +214,16 @@ export async function updateUserProfile(userId: number, body: UpdateProfileBody)
     throw new AppError(ErrorCode.USER_NOT_FOUND, 404)
   }
 
-  if (name !== undefined || heightCm !== undefined || locale !== undefined) {
+  if (name !== undefined || heightCm !== undefined || locale !== undefined || spotifyPlaylistUrl !== undefined) {
     await prisma.user.update({
       where: { id: userId },
       data: {
         ...(name !== undefined ? { name } : {}),
         ...(heightCm !== undefined ? { heightCm } : {}),
         ...(locale !== undefined ? { locale } : {}),
+        ...(spotifyPlaylistUrl !== undefined
+          ? { spotifyPlaylistUrl, spotifyPlaylistName: null }
+          : {}),
       },
     })
   }

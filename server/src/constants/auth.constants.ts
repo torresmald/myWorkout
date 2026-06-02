@@ -12,4 +12,8 @@ export const userPublicSelect = {
   createdAt: true,
   heightCm: true,
   profileImagePath: true,
+  spotifyPlaylistUrl: true,
+  spotifyUserId: true,
+  spotifyDisplayName: true,
+  spotifyPlaylistName: true,
 } as const

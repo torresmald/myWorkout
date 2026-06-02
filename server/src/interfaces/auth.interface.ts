@@ -30,6 +30,10 @@ export interface UserPublic {
   createdAt: Date
   heightCm: number | null
   profileImageUrl: string | null
+  spotifyPlaylistUrl: string | null
+  spotifyConnected: boolean
+  spotifyDisplayName: string | null
+  spotifyPlaylistName: string | null
   latestWeightKg: number | null
   bmi: number | null
   bmiCategory: string | null

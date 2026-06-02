@@ -6,6 +6,7 @@ export interface UpdateProfileBody {
   heightCm?: number | null
   weightKg?: number
   locale?: string
+  spotifyPlaylistUrl?: string | null
 }
 
 export interface AddWeightBody {

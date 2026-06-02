@@ -12,6 +12,7 @@ import profileRoutes from './routes/profile.routes.js'
 import reminderRoutes from './routes/reminder.routes.js'
 import personalRecordRoutes from './routes/personal-record.routes.js'
 import statsRoutes from './routes/stats.routes.js'
+import spotifyRoutes from './routes/spotify.routes.js'
 import templateRoutes from './routes/template.routes.js'
 import workoutRoutes from './routes/workout.routes.js'
 import { sendError } from './utils/api-response.util.js'
@@ -34,6 +35,7 @@ app.use('/api/profile/reminders', reminderRoutes)
 app.use('/api/personal-records', personalRecordRoutes)
 app.use('/api/cron', cronRoutes)
 app.use('/api/stats', statsRoutes)
+app.use('/api/spotify', spotifyRoutes)
 app.use('/api/templates', templateRoutes)
 app.use('/api/workouts', workoutRoutes)
 

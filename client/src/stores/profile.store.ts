@@ -51,7 +51,12 @@ export const useProfileStore = defineStore('profile', () => {
     }
   }
 
-  async function saveProfile(body: { name?: string; heightCm?: number | null; weightKg?: number }) {
+  async function saveProfile(body: {
+    name?: string
+    heightCm?: number | null
+    weightKg?: number
+    spotifyPlaylistUrl?: string | null
+  }) {
     saving.value = true
 
     try {

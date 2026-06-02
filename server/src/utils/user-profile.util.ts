@@ -17,6 +17,10 @@ export interface UserProfileRecord {
   createdAt: Date
   heightCm: Decimal | null
   profileImagePath: string | null
+  spotifyPlaylistUrl: string | null
+  spotifyUserId: string | null
+  spotifyDisplayName: string | null
+  spotifyPlaylistName: string | null
 }
 
 export function buildProfileImageUrl(profileImagePath: string | null): string | null {
@@ -44,6 +48,10 @@ export function mapUserToPublic(user: UserProfileRecord, latestWeightKg: number 
     createdAt: user.createdAt,
     heightCm,
     profileImageUrl: buildProfileImageUrl(user.profileImagePath),
+    spotifyPlaylistUrl: user.spotifyPlaylistUrl,
+    spotifyConnected: Boolean(user.spotifyUserId),
+    spotifyDisplayName: user.spotifyDisplayName,
+    spotifyPlaylistName: user.spotifyPlaylistName,
     latestWeightKg,
     bmi,
     bmiCategory,

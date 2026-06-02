@@ -24,4 +24,9 @@ export default {
     inProgress: 'In progress',
     completed: 'Completed',
   },
+  spotify: {
+    openButton: 'Open Spotify',
+    configureButton: 'Set up Spotify',
+    missingPlaylist: 'Add your workout playlist in Profile first.',
+  },
 } as const

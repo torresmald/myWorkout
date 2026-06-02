@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 
 import WorkoutSessionExercise from '@/components/workout/WorkoutSessionExercise.vue'
+import SpotifyWorkoutButton from '@/components/workout/SpotifyWorkoutButton.vue'
 import RestTimerModal from '@/components/workout/RestTimerModal.vue'
 import PageContainer from '@/components/layout/PageContainer.vue'
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
@@ -204,6 +205,8 @@ onUnmounted(() => {
               : t('session.status.completed')
         }}
       </span>
+
+      <SpotifyWorkoutButton v-if="session && !isCompleted && !isBusy" />
     </div>
 
     <section v-if="isBusy" :class="[CARD_BODY_CLASS, 'flex items-center justify-center gap-3']">

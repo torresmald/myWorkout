@@ -16,6 +16,7 @@ export function updateProfile(body: {
   heightCm?: number | null
   weightKg?: number
   locale?: AppLocale
+  spotifyPlaylistUrl?: string | null
 }) {
   return api<UserProfile>('/profile', {
     method: 'PATCH',
