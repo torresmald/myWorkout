@@ -11,6 +11,7 @@ export const useAuthStore = defineStore('auth', () => {
   const user = ref<UserPublic | null>(null)
   const token = ref<string | null>(getAccessToken())
   const refreshToken = ref<string | null>(getRefreshToken())
+  const authReady = ref(false)
 
   onSessionRefreshed((data) => {
     token.value = data.token
@@ -105,7 +106,10 @@ export const useAuthStore = defineStore('auth', () => {
   let authReadyPromise: Promise<void> | null = null
 
   function ensureAuthReady() {
-    authReadyPromise ??= initAuth()
+    authReadyPromise ??= initAuth().finally(() => {
+      authReady.value = true
+    })
+
     return authReadyPromise
   }
 
@@ -126,6 +130,7 @@ export const useAuthStore = defineStore('auth', () => {
     user,
     token,
     refreshToken,
+    authReady,
     isAuthenticated,
     login,
     loginWithGoogle,

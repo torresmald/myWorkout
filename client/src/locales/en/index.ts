@@ -1,4 +1,5 @@
 import admin from './admin'
+import app from './app'
 import auth from './auth'
 import charts from './charts'
 import common from './common'
@@ -26,6 +27,7 @@ import templates from './templates'
 import workouts from './workouts'
 
 export default {
+  app,
   common,
   nav,
   routes,

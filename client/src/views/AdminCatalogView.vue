@@ -26,6 +26,11 @@ import {
 import { useAdminCatalogStore } from '@/stores/admin-catalog.store'
 import { useModalStore } from '@/stores/modal.store'
 import { useToastStore } from '@/stores/toast.store'
+import * as adminApi from '@/api/admin.api'
+import {
+  getCatalogMediaAcceptAttribute,
+  validateCatalogMediaFile,
+} from '@/utils/catalog-media.util'
 import { getErrorMessage } from '@/utils/error.util'
 
 const MUSCLE_GROUPS: MuscleGroup[] = [
@@ -58,6 +63,14 @@ const mediaType = ref<CatalogMediaType>('IMAGE')
 const mediaUrl = ref('')
 const sortOrder = ref<number | string>(0)
 const active = ref(true)
+const mediaFileInput = ref<HTMLInputElement | null>(null)
+const uploadingMedia = ref(false)
+
+const mediaAccept = getCatalogMediaAcceptAttribute()
+const hasMediaPreview = computed(() => Boolean(mediaUrl.value.trim()))
+const previewIsVideo = computed(() => mediaType.value === 'VIDEO' && hasMediaPreview.value)
+const previewIsGif = computed(() => mediaType.value === 'GIF' && hasMediaPreview.value)
+const previewIsImage = computed(() => mediaType.value === 'IMAGE' && hasMediaPreview.value)
 
 const isEditing = computed(() => editingId.value !== null)
 const formTitle = computed(() =>
@@ -76,6 +89,42 @@ function resetForm() {
   mediaUrl.value = ''
   sortOrder.value = 0
   active.value = true
+  uploadingMedia.value = false
+}
+
+function openMediaPicker() {
+  mediaFileInput.value?.click()
+}
+
+async function handleMediaFileChange(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+
+  input.value = ''
+
+  if (!file) {
+    return
+  }
+
+  const validationError = validateCatalogMediaFile(file)
+
+  if (validationError) {
+    toastStore.error(t(`admin.catalog.media.${validationError}`))
+    return
+  }
+
+  uploadingMedia.value = true
+
+  try {
+    const result = await adminApi.uploadCatalogMedia(file, slug.value)
+    mediaUrl.value = result.mediaUrl
+    mediaType.value = result.mediaType
+    toastStore.success(t('admin.catalog.media.uploadSuccess'))
+  } catch (error) {
+    toastStore.error(getErrorMessage(error, t('admin.catalog.media.uploadError')))
+  } finally {
+    uploadingMedia.value = false
+  }
 }
 
 function startEdit(entry: AdminExerciseCatalogEntry) {
@@ -234,6 +283,49 @@ async function handleDelete(entry: AdminExerciseCatalogEntry) {
         <div class="md:col-span-2">
           <label for="catalog-media-url" :class="LABEL_CLASS">{{ t('admin.catalog.fields.mediaUrl') }}</label>
           <input id="catalog-media-url" v-model="mediaUrl" type="url" :class="INPUT_CLASS" />
+          <p :class="['mt-1 text-xs', TEXT_MUTED_CLASS]">{{ t('admin.catalog.media.urlHint') }}</p>
+        </div>
+
+        <div class="md:col-span-2 space-y-3 rounded-lg border border-border-default p-4">
+          <div>
+            <p class="text-sm font-medium text-text-primary">{{ t('admin.catalog.media.uploadTitle') }}</p>
+            <p :class="['mt-1 text-xs', TEXT_MUTED_CLASS]">{{ t('admin.catalog.media.uploadHint') }}</p>
+          </div>
+
+          <div v-if="hasMediaPreview" class="overflow-hidden rounded-lg bg-bg-muted">
+            <video
+              v-if="previewIsVideo"
+              :src="mediaUrl"
+              autoplay
+              loop
+              muted
+              playsinline
+              class="mx-auto max-h-48 w-full object-contain"
+            />
+            <img
+              v-else-if="previewIsGif || previewIsImage"
+              :src="mediaUrl"
+              :alt="nameEs || slug"
+              class="mx-auto max-h-48 w-full object-contain"
+            />
+          </div>
+
+          <input
+            ref="mediaFileInput"
+            type="file"
+            class="hidden"
+            :accept="mediaAccept"
+            @change="handleMediaFileChange"
+          />
+
+          <LoadingButton
+            type="button"
+            :loading="uploadingMedia"
+            :class="[BTN_SECONDARY_CLASS, BTN_MOBILE_FULL_CLASS]"
+            @click="openMediaPicker"
+          >
+            {{ t('admin.catalog.media.uploadButton') }}
+          </LoadingButton>
         </div>
 
         <label class="flex items-center gap-2 text-sm text-text-primary md:col-span-2">

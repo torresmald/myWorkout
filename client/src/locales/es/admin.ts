@@ -58,5 +58,15 @@ export default {
       sortOrder: 'Orden',
       active: 'Visible en catálogo',
     },
+    media: {
+      uploadTitle: 'Subir GIF o vídeo',
+      uploadHint: 'JPEG, PNG, WebP, GIF, MP4 o WebM. Máximo 15 MB. Se sube a Cloudinary.',
+      uploadButton: 'Subir archivo',
+      uploadSuccess: 'Media subida correctamente',
+      uploadError: 'No se pudo subir la media',
+      urlHint: 'También puedes pegar una URL de YouTube o enlace directo a GIF/vídeo',
+      invalidFormat: 'Formato no permitido. Usa imagen, GIF o vídeo MP4/WebM',
+      tooLarge: 'El archivo supera el tamaño máximo de 15 MB',
+    },
   },
 } as const

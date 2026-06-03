@@ -20,6 +20,8 @@ export default {
   INVALID_MUSCLE_GROUP: 'Invalid muscle group',
   INVALID_CATALOG_MEDIA_TYPE: 'Invalid media type',
   INVALID_SORT_ORDER: 'Invalid sort order',
+  CATALOG_MEDIA_FORMAT_NOT_ALLOWED: 'Format not allowed. Use image, GIF, or MP4/WebM video',
+  CATALOG_MEDIA_TOO_LARGE: 'File exceeds the 15 MB size limit',
   EMAIL_NOT_VERIFIED: 'You must verify your email before signing in',
   USER_NOT_FOUND: 'User not found',
   INVALID_VERIFICATION_TOKEN: 'Invalid verification token',

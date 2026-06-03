@@ -21,6 +21,9 @@ export default {
   INVALID_MUSCLE_GROUP: 'Grupo muscular inválido',
   INVALID_CATALOG_MEDIA_TYPE: 'Tipo de media inválido',
   INVALID_SORT_ORDER: 'Orden inválido',
+  CATALOG_MEDIA_FORMAT_NOT_ALLOWED:
+    'Formato no permitido. Usa imagen, GIF o vídeo MP4/WebM',
+  CATALOG_MEDIA_TOO_LARGE: 'El archivo supera el tamaño máximo de 15 MB',
   EMAIL_NOT_VERIFIED: 'Debes verificar tu email antes de iniciar sesión',
   USER_NOT_FOUND: 'Usuario no encontrado',
   INVALID_VERIFICATION_TOKEN: 'Token de verificación inválido',

@@ -20,9 +20,8 @@ const { t } = useI18n()
 
 const isYoutube = computed(() => props.mediaType === 'YOUTUBE' && props.mediaUrl)
 const isVideo = computed(() => props.mediaType === 'VIDEO' && props.mediaUrl)
-const isImage = computed(
-  () => (props.mediaType === 'IMAGE' || props.mediaType === 'GIF') && props.mediaUrl,
-)
+const isGif = computed(() => props.mediaType === 'GIF' && props.mediaUrl)
+const isImage = computed(() => props.mediaType === 'IMAGE' && props.mediaUrl)
 
 const youtubeEmbedUrl = computed(() => {
   if (!props.mediaUrl || props.mediaType !== 'YOUTUBE') {
@@ -45,15 +44,24 @@ const youtubeEmbedUrl = computed(() => {
         v-if="isImage"
         :src="mediaUrl ?? undefined"
         :alt="exerciseName"
-        class="mx-auto max-h-80 w-full rounded-lg object-contain bg-bg-muted"
+        class="mx-auto max-h-[28rem] w-full rounded-lg object-contain bg-bg-muted"
+      />
+
+      <img
+        v-else-if="isGif"
+        :src="mediaUrl ?? undefined"
+        :alt="exerciseName"
+        class="mx-auto max-h-[28rem] w-full rounded-lg object-contain bg-bg-muted"
       />
 
       <video
         v-else-if="isVideo"
         :src="mediaUrl ?? undefined"
-        controls
+        autoplay
+        loop
+        muted
         playsinline
-        class="mx-auto max-h-80 w-full rounded-lg bg-bg-muted"
+        class="mx-auto max-h-[28rem] w-full rounded-lg object-contain bg-bg-muted"
       />
 
       <div v-else-if="isYoutube && youtubeEmbedUrl" class="aspect-video overflow-hidden rounded-lg">

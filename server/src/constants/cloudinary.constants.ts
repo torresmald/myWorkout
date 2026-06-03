@@ -2,6 +2,7 @@ export const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME?.trim() ?
 export const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY?.trim() ?? ''
 export const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET?.trim() ?? ''
 export const CLOUDINARY_AVATAR_FOLDER = 'myworkout/avatars'
+export const CLOUDINARY_CATALOG_FOLDER = 'myworkout/catalog'
 
 export function isCloudinaryConfigured(): boolean {
   return Boolean(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDINARY_API_SECRET)

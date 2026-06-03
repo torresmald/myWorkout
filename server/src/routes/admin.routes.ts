@@ -15,6 +15,8 @@ import {
   listAdminExerciseCatalog,
   updateAdminExerciseCatalog,
 } from '../services/admin-exercise-catalog.service.js'
+import { handleCatalogMediaUpload } from '../middleware/upload.middleware.js'
+import { uploadCatalogMedia } from '../services/cloudinary.service.js'
 import type { UpsertAdminExerciseCatalogBody } from '../interfaces/admin-exercise-catalog.interface.js'
 import { ErrorCode } from '../constants/error-codes.constants.js'
 import { AppError } from '../interfaces/app-error.interface.js'
@@ -74,6 +76,24 @@ router.patch('/users/:id/role', async (req, res) => {
 
     const user = await updateUserRole(userId, targetUserId, role)
     sendSuccess(res, user)
+  } catch (error) {
+    if (handleServiceError(error, res)) {
+      return
+    }
+
+    throw error
+  }
+})
+
+router.post('/exercise-catalog/media/upload', handleCatalogMediaUpload, async (req, res) => {
+  try {
+    if (!req.file) {
+      throw new AppError(ErrorCode.NO_IMAGE_RECEIVED, 400)
+    }
+
+    const slug = typeof req.body.slug === 'string' ? req.body.slug : undefined
+    const result = await uploadCatalogMedia(req.file.buffer, req.file.mimetype, slug)
+    sendSuccess(res, result, 201)
   } catch (error) {
     if (handleServiceError(error, res)) {
       return

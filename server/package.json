@@ -13,7 +13,8 @@
     "migrate:deploy": "prisma migrate deploy --schema=prisma",
     "studio": "prisma studio --schema=prisma",
     "generate": "prisma generate --schema=prisma",
-    "reminders:send": "tsx src/scripts/send-workout-reminders.ts"
+    "reminders:send": "tsx src/scripts/send-workout-reminders.ts",
+    "seed:catalog-media": "tsx src/scripts/seed-catalog-media.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
