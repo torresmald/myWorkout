@@ -18,7 +18,12 @@ import {
   TEXT_MUTED_CLASS,
 } from '@/constants/ui.constants'
 import { useExerciseCatalogStore } from '@/stores/exercise-catalog.store'
+import { useLocaleStore } from '@/stores/locale.store'
 import { useToastStore } from '@/stores/toast.store'
+import {
+  getCatalogDescription,
+  getCatalogName,
+} from '@/utils/catalog-localization.util'
 import { getErrorMessage } from '@/utils/error.util'
 
 const MUSCLE_GROUPS: MuscleGroup[] = [
@@ -32,13 +37,23 @@ const MUSCLE_GROUPS: MuscleGroup[] = [
 ]
 
 const catalogStore = useExerciseCatalogStore()
+const localeStore = useLocaleStore()
 const toastStore = useToastStore()
 const { t } = useI18n()
 
 const { exercises, loading, importingId } = storeToRefs(catalogStore)
+const { locale } = storeToRefs(localeStore)
 
 const activeFilter = ref<MuscleGroup | null>(null)
 const previewExercise = ref<ExerciseCatalogPublic | null>(null)
+
+const previewName = computed(() =>
+  previewExercise.value ? getCatalogName(previewExercise.value, locale.value) : '',
+)
+
+const previewDescription = computed(() =>
+  previewExercise.value ? getCatalogDescription(previewExercise.value, locale.value) : null,
+)
 
 const filterOptions = computed(() => [
   { value: null, label: t('exerciseCatalog.filterAll') },
@@ -135,7 +150,7 @@ function closePreview() {
           <img
             v-if="exercise.mediaUrl"
             :src="exercise.mediaUrl"
-            :alt="exercise.name"
+            :alt="getCatalogName(exercise, locale)"
             class="aspect-video w-full object-cover"
           />
           <div
@@ -147,10 +162,17 @@ function closePreview() {
         </button>
 
         <div class="flex flex-1 flex-col">
-          <h2 class="text-base font-semibold text-text-primary">{{ exercise.name }}</h2>
-          <p :class="['mt-1 text-xs', TEXT_MUTED_CLASS]">{{ exercise.muscleGroupLabel }}</p>
-          <p v-if="exercise.description" :class="['mt-2 line-clamp-2 text-sm', TEXT_MUTED_CLASS]">
-            {{ exercise.description }}
+          <h2 class="text-base font-semibold text-text-primary">
+            {{ getCatalogName(exercise, locale) }}
+          </h2>
+          <p :class="['mt-1 text-xs', TEXT_MUTED_CLASS]">
+            {{ t(`exerciseCatalog.muscleGroups.${exercise.muscleGroup}`) }}
+          </p>
+          <p
+            v-if="getCatalogDescription(exercise, locale)"
+            :class="['mt-2 line-clamp-2 text-sm', TEXT_MUTED_CLASS]"
+          >
+            {{ getCatalogDescription(exercise, locale) }}
           </p>
 
           <div class="mt-4 flex flex-col gap-2">
@@ -186,8 +208,8 @@ function closePreview() {
 
     <ExerciseTechniqueModal
       :open="!!previewExercise"
-      :exercise-name="previewExercise?.name ?? ''"
-      :description="previewExercise?.description"
+      :exercise-name="previewName"
+      :description="previewDescription"
       :media-type="previewExercise?.mediaType"
       :media-url="previewExercise?.mediaUrl"
       @close="closePreview"

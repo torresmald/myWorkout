@@ -106,11 +106,11 @@ export const useAuthStore = defineStore('auth', () => {
   let authReadyPromise: Promise<void> | null = null
 
   function ensureAuthReady() {
-    authReadyPromise ??= initAuth().finally(() => {
+    authReadyPromise ??= initAuth()
+
+    return authReadyPromise.finally(() => {
       authReady.value = true
     })
-
-    return authReadyPromise
   }
 
   async function logout() {

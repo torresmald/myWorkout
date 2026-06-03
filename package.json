@@ -15,7 +15,9 @@
     "db:migrate": "npm run migrate --workspace=server",
     "db:migrate:deploy": "npm run migrate:deploy --workspace=server",
     "db:studio": "npm run studio --workspace=server",
-    "db:generate": "npm run generate --workspace=server"
+    "db:generate": "npm run generate --workspace=server",
+    "test": "npm run test --workspace=client",
+    "test:watch": "npm run test:watch --workspace=client"
   },
   "devDependencies": {
     "npm-run-all2": "^8.0.4"

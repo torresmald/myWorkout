@@ -12,10 +12,11 @@ export type CatalogMediaType = 'IMAGE' | 'GIF' | 'VIDEO' | 'YOUTUBE'
 export interface ExerciseCatalogPublic {
   id: number
   slug: string
-  name: string
-  description: string | null
+  nameEs: string
+  nameEn: string
+  descriptionEs: string | null
+  descriptionEn: string | null
   muscleGroup: MuscleGroup
-  muscleGroupLabel: string
   mediaType: CatalogMediaType
   mediaUrl: string | null
   imported: boolean
