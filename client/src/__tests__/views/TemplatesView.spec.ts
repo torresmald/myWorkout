@@ -1,7 +1,8 @@
 import { flushPromises } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { createTemplate } from '@/__tests__/fixtures/template.fixture'
+import { createTemplate, createTemplateExercise } from '@/__tests__/fixtures/template.fixture'
+import { createWorkout } from '@/__tests__/fixtures/workout.fixture'
 import { mountWithPlugins } from '@/__tests__/helpers/mount-test-app'
 import * as templateApi from '@/api/template.api'
 import * as workoutApi from '@/api/workout.api'
@@ -31,7 +32,7 @@ describe('TemplatesView', () => {
     vi.mocked(templateApi.getTemplates).mockResolvedValue([
       createTemplate({ id: 1, name: 'Push template' }),
     ])
-    vi.mocked(templateApi.deleteTemplate).mockResolvedValue(undefined)
+    vi.mocked(templateApi.deleteTemplate).mockResolvedValue(createTemplate({ id: 1 }))
   })
 
   it('lista plantillas', async () => {
@@ -61,19 +62,7 @@ describe('TemplatesView', () => {
   it('inicia entrenamiento desde plantilla', async () => {
     vi.mocked(templateApi.getTemplate).mockResolvedValue({
       ...createTemplate({ id: 1 }),
-      exercises: [
-        {
-          id: 1,
-          templateId: 1,
-          exerciseTypeId: 5,
-          sets: 3,
-          reps: 10,
-          restSeconds: 90,
-          weight: 80,
-          sortOrder: 0,
-          exerciseType: { id: 5, name: 'Press', muscleGroup: 'CHEST' },
-        },
-      ],
+      exercises: [createTemplateExercise({ id: 1, templateId: 1 })],
     })
     vi.mocked(workoutApi.createWorkout).mockResolvedValue({
       id: 99,

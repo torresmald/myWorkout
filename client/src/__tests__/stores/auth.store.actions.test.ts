@@ -52,10 +52,15 @@ describe('auth store - acciones y ciclo de sesión', () => {
     vi.mocked(onSessionRefreshed).mockImplementation(() => {})
     vi.mocked(authApi.login).mockResolvedValue(loginData)
     vi.mocked(authApi.loginWithGoogle).mockResolvedValue(loginData)
-    vi.mocked(authApi.register).mockResolvedValue({ message: 'ok' })
-    vi.mocked(authApi.resendVerification).mockResolvedValue({ message: 'sent' })
+    vi.mocked(authApi.register).mockResolvedValue({
+      messageCode: 'REGISTER_CHECK_EMAIL',
+      email: 'new@example.com',
+    })
+    vi.mocked(authApi.resendVerification).mockResolvedValue({
+      messageCode: 'RESEND_VERIFICATION_SUCCESS',
+    })
     vi.mocked(authApi.getMe).mockResolvedValue(mockUser)
-    vi.mocked(authApi.logout).mockResolvedValue(undefined)
+    vi.mocked(authApi.logout).mockResolvedValue(null)
   })
 
   it('inicia sesión con credenciales', async () => {

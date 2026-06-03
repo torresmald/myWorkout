@@ -39,7 +39,10 @@ describe('AdminCatalogView', () => {
     vi.mocked(adminApi.getExerciseCatalog).mockResolvedValue([mockEntry])
     vi.mocked(adminApi.createExerciseCatalogEntry).mockResolvedValue(mockEntry)
     vi.mocked(adminApi.updateExerciseCatalogEntry).mockResolvedValue(mockEntry)
-    vi.mocked(adminApi.deleteExerciseCatalogEntry).mockResolvedValue({ deleted: true })
+    vi.mocked(adminApi.deleteExerciseCatalogEntry).mockResolvedValue({
+      ...mockEntry,
+      active: false,
+    })
   })
 
   it('lista entradas del catálogo', async () => {

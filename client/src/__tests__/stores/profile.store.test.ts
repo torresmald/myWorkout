@@ -46,10 +46,12 @@ describe('profile store', () => {
     vi.mocked(profileApi.getProfile).mockResolvedValue(mockProfile)
     vi.mocked(profileApi.updateProfile).mockResolvedValue(mockProfile)
     vi.mocked(profileApi.addWeight).mockResolvedValue({
+      entry: mockProfile.weightEntries[0]!,
       profile: mockProfile,
       weightEntries: mockProfile.weightEntries,
     })
     vi.mocked(profileApi.updateWeight).mockResolvedValue({
+      entry: mockProfile.weightEntries[0]!,
       profile: mockProfile,
       weightEntries: mockProfile.weightEntries,
     })

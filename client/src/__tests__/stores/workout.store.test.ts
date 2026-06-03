@@ -89,7 +89,7 @@ describe('workout store', () => {
   })
 
   it('elimina un entrenamiento que no es el activo sin limpiar ejercicios', async () => {
-    vi.mocked(workoutApi.deleteWorkout).mockResolvedValue(undefined)
+    vi.mocked(workoutApi.deleteWorkout).mockResolvedValue(mockWorkout)
     const store = useWorkoutStore()
     store.workouts = [mockWorkout, { ...mockWorkout, id: 2 }]
     store.activeWorkoutId = 2
@@ -102,7 +102,7 @@ describe('workout store', () => {
   })
 
   it('elimina un entrenamiento y limpia ejercicios si era el activo', async () => {
-    vi.mocked(workoutApi.deleteWorkout).mockResolvedValue(undefined)
+    vi.mocked(workoutApi.deleteWorkout).mockResolvedValue(mockWorkout)
     const store = useWorkoutStore()
     store.workouts = [mockWorkout]
     store.activeWorkoutId = 1
@@ -184,7 +184,7 @@ describe('workout store', () => {
   })
 
   it('elimina un ejercicio de entrenamiento', async () => {
-    vi.mocked(workoutApi.deleteWorkoutExercise).mockResolvedValue(undefined)
+    vi.mocked(workoutApi.deleteWorkoutExercise).mockResolvedValue(mockExercise)
     const store = useWorkoutStore()
     store.exercises = [mockExercise, { ...mockExercise, id: 11 }]
 

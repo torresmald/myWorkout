@@ -26,14 +26,11 @@ describe('weight-chart.util', () => {
 
   it('construye opciones del gráfico con tooltip y ticks', () => {
     const options = buildWeightChartOptions(entries, false)
+    const labelCallback = options.plugins?.tooltip?.callbacks?.label
 
-    const tooltip = options.plugins?.tooltip?.callbacks?.label?.({
-      parsed: { y: 80 },
-    } as never)
-    const nullTooltip = options.plugins?.tooltip?.callbacks?.label?.({
-      parsed: { y: null },
-    } as never)
-    const yTick = options.scales?.y?.ticks?.callback?.(80, 0, [])
+    const tooltip = labelCallback?.call({} as never, { parsed: { y: 80 } } as never)
+    const nullTooltip = labelCallback?.call({} as never, { parsed: { y: null } } as never)
+    const yTick = options.scales?.y?.ticks?.callback?.call({} as never, 80, 0, [])
 
     expect(tooltip).toBe('80 kg')
     expect(nullTooltip).toBe('')

@@ -30,7 +30,7 @@ const routes: RouteRecordRaw[] = [
 describe('WorkoutsView', () => {
   beforeEach(() => {
     vi.mocked(workoutApi.getWorkouts).mockResolvedValue([createWorkout({ id: 1, name: 'Push' })])
-    vi.mocked(workoutApi.deleteWorkout).mockResolvedValue(undefined)
+    vi.mocked(workoutApi.deleteWorkout).mockResolvedValue(createWorkout({ id: 1 }))
   })
 
   it('carga y lista entrenamientos', async () => {

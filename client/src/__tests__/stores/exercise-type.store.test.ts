@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import * as exerciseTypeApi from '@/api/exercise-type.api'
+import { createExerciseType } from '@/__tests__/fixtures/exercise-type.fixture'
 import { setupTestPinia } from '@/__tests__/helpers/mount-test-app'
 import { useExerciseTypeStore } from '@/stores/exercise-type.store'
 import type { ExerciseTypePublic } from '@/interfaces/exercise-type.interface'
@@ -73,7 +74,7 @@ describe('exercise-type store', () => {
   })
 
   it('elimina un tipo de ejercicio de la lista local', async () => {
-    vi.mocked(exerciseTypeApi.deleteExerciseType).mockResolvedValue(undefined)
+    vi.mocked(exerciseTypeApi.deleteExerciseType).mockResolvedValue(mockExerciseType)
     const store = useExerciseTypeStore()
     store.exerciseTypes = [mockExerciseType, { ...mockExerciseType, id: 2 }]
 

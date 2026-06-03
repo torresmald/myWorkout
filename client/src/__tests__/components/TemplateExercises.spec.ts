@@ -4,6 +4,7 @@ import { nextTick } from 'vue'
 
 import { createExerciseType } from '@/__tests__/fixtures/exercise-type.fixture'
 import { createTemplateExercise } from '@/__tests__/fixtures/template.fixture'
+import { getExposed } from '@/__tests__/helpers/component-vm'
 import { mountWithPlugins } from '@/__tests__/helpers/mount-test-app'
 import * as exerciseTypeApi from '@/api/exercise-type.api'
 import * as templateApi from '@/api/template.api'
@@ -230,7 +231,7 @@ describe('TemplateExercises', () => {
     it('elimina ejercicio persistido tras confirmar', async () => {
       const { pinia, wrapper } = await mountWithPlugins(TemplateExercises)
       const modalStore = useModalStore(pinia)
-      vi.mocked(templateApi.deleteTemplateExercise).mockResolvedValue(undefined)
+      vi.mocked(templateApi.deleteTemplateExercise).mockResolvedValue(createTemplateExercise())
 
       await wrapper.setProps({ templateId: 1 })
       await flushPromises()
@@ -261,7 +262,7 @@ describe('TemplateExercises', () => {
     it('resetea formulario al eliminar ejercicio en edición', async () => {
       const { pinia, wrapper } = await mountWithPlugins(TemplateExercises)
       const modalStore = useModalStore(pinia)
-      vi.mocked(templateApi.deleteTemplateExercise).mockResolvedValue(undefined)
+      vi.mocked(templateApi.deleteTemplateExercise).mockResolvedValue(createTemplateExercise())
 
       await wrapper.setProps({ templateId: 1 })
       await flushPromises()
@@ -372,7 +373,7 @@ describe('TemplateExercises', () => {
     const { wrapper } = await mountWithPlugins(TemplateExercises)
     await flushPromises()
 
-    wrapper.vm.resetForm()
+    getExposed<{ resetForm: () => void }>(wrapper).resetForm()
     expect(wrapper.text()).toContain(i18n.global.t('templates.exercises.addTitle'))
   })
 })

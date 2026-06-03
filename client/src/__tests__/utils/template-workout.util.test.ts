@@ -32,12 +32,12 @@ describe('template-workout.util', () => {
   })
 
   it('asigna sortOrder por índice cuando falta', () => {
-    const [{ sortOrder }] = exerciseLinesToCreateBody([
+    const result = exerciseLinesToCreateBody([
       { ...line, sortOrder: undefined as unknown as number },
       { ...line, exerciseTypeId: 2, sortOrder: undefined as unknown as number },
     ])
 
-    expect(sortOrder).toBe(0)
+    expect(result[0]!.sortOrder).toBe(0)
   })
 
   it('convierte ejercicios de entrenamiento a plantilla', () => {

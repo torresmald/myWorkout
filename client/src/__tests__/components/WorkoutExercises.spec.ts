@@ -4,6 +4,7 @@ import { nextTick } from 'vue'
 
 import { createExerciseType } from '@/__tests__/fixtures/exercise-type.fixture'
 import { createWorkoutExercise } from '@/__tests__/fixtures/workout.fixture'
+import { getExposed } from '@/__tests__/helpers/component-vm'
 import { mountWithPlugins } from '@/__tests__/helpers/mount-test-app'
 import * as exerciseTypeApi from '@/api/exercise-type.api'
 import * as workoutApi from '@/api/workout.api'
@@ -248,7 +249,7 @@ describe('WorkoutExercises', () => {
     it('elimina ejercicio persistido tras confirmar', async () => {
       const { pinia, wrapper } = await mountWithPlugins(WorkoutExercises)
       const modalStore = useModalStore(pinia)
-      vi.mocked(workoutApi.deleteWorkoutExercise).mockResolvedValue(undefined)
+      vi.mocked(workoutApi.deleteWorkoutExercise).mockResolvedValue(createWorkoutExercise())
 
       await wrapper.setProps({ workoutId: 1 })
       await flushPromises()
@@ -290,7 +291,7 @@ describe('WorkoutExercises', () => {
     it('resetea formulario al eliminar ejercicio en edición', async () => {
       const { pinia, wrapper } = await mountWithPlugins(WorkoutExercises)
       const modalStore = useModalStore(pinia)
-      vi.mocked(workoutApi.deleteWorkoutExercise).mockResolvedValue(undefined)
+      vi.mocked(workoutApi.deleteWorkoutExercise).mockResolvedValue(createWorkoutExercise())
 
       await wrapper.setProps({ workoutId: 1 })
       await flushPromises()
@@ -391,7 +392,7 @@ describe('WorkoutExercises', () => {
     const { wrapper } = await mountWithPlugins(WorkoutExercises)
     await flushPromises()
 
-    wrapper.vm.resetForm()
+    getExposed<{ resetForm: () => void }>(wrapper).resetForm()
     expect(wrapper.text()).toContain(i18n.global.t('workouts.exercises.addTitle'))
   })
 })

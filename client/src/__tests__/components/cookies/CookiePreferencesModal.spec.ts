@@ -88,7 +88,7 @@ describe('CookiePreferencesModal', () => {
 
     store.openPreferences()
     await flushPromises()
-    await wrapper.vm.$nextTick()
+    await nextTick()
 
     const checkboxes = document.body.querySelectorAll('input[type="checkbox"]')
     expect((checkboxes[0] as HTMLInputElement).checked).toBe(true)

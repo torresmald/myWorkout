@@ -1,5 +1,6 @@
 import { vi } from 'vitest'
 
+import { createApiSuccess } from '@/__tests__/helpers/api-response.fixture'
 import type { ApiResponse } from '@/interfaces/api-response.interface'
 
 interface MockFetchOptions {
@@ -30,6 +31,8 @@ export function stubFetchWithResponses(...responses: MockFetchOptions[]) {
 export function stubFetchSuccess<T>(data: T, status = 200) {
   return stubFetchWithResponses({
     status,
-    body: { status: 'ok', data },
+    body: createApiSuccess(data),
   })
 }
+
+export { createApiError, createApiSuccess } from '@/__tests__/helpers/api-response.fixture'

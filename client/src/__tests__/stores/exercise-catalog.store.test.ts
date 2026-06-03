@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import * as exerciseCatalogApi from '@/api/exercise-catalog.api'
+import { createExerciseType } from '@/__tests__/fixtures/exercise-type.fixture'
 import { createCatalogExercise } from '@/__tests__/fixtures/catalog-exercise.fixture'
 import { setupTestPinia } from '@/__tests__/helpers/mount-test-app'
 import { useExerciseCatalogStore } from '@/stores/exercise-catalog.store'
@@ -46,7 +47,9 @@ describe('exercise-catalog store', () => {
   })
 
   it('importa un ejercicio y refresca catálogo y tipos', async () => {
-    vi.mocked(exerciseCatalogApi.importExerciseFromCatalog).mockResolvedValue(undefined)
+    vi.mocked(exerciseCatalogApi.importExerciseFromCatalog).mockResolvedValue(
+      createExerciseType(),
+    )
     const store = useExerciseCatalogStore()
     await store.fetchAll('BACK')
 

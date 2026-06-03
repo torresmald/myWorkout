@@ -46,7 +46,7 @@ describe('LoginView', () => {
     const { pinia, wrapper } = await mountWithPlugins(LoginView)
     const authStore = useAuthStore(pinia)
     vi.spyOn(authStore, 'login').mockRejectedValue(
-      new ApiError('EMAIL_NOT_VERIFIED', 'Email not verified'),
+      new ApiError('EMAIL_NOT_VERIFIED'),
     )
 
     await wrapper.find('#email').setValue('user@example.com')
@@ -61,7 +61,7 @@ describe('LoginView', () => {
     const { pinia, wrapper } = await mountWithPlugins(LoginView)
     const authStore = useAuthStore(pinia)
     vi.spyOn(authStore, 'login').mockRejectedValue(
-      new ApiError('EMAIL_NOT_VERIFIED', 'Email not verified'),
+      new ApiError('EMAIL_NOT_VERIFIED'),
     )
     const resendSpy = vi.spyOn(authStore, 'resendVerification').mockResolvedValue({
       messageCode: 'VERIFICATION_EMAIL_SENT',

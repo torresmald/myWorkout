@@ -3,10 +3,13 @@ import type { VueWrapper } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 
+import { createExerciseType } from '@/__tests__/fixtures/exercise-type.fixture'
 import { createTemplate, createTemplateExercise } from '@/__tests__/fixtures/template.fixture'
+import { getExposed } from '@/__tests__/helpers/component-vm'
 import { mountWithPlugins } from '@/__tests__/helpers/mount-test-app'
 import * as exerciseTypeApi from '@/api/exercise-type.api'
 import * as templateApi from '@/api/template.api'
+import type { WorkoutTemplatePublic } from '@/interfaces/template.interface'
 import TemplateForm from '@/components/TemplateForm.vue'
 import { i18n } from '@/i18n'
 import { useToastStore } from '@/stores/toast.store'
@@ -33,6 +36,12 @@ vi.mock('@/utils/rest-timer-sound.util', () => ({
 
 const mockTemplate = createTemplate()
 const mockExercise = createTemplateExercise()
+
+type TemplateFormExposed = {
+  startEdit: (template: WorkoutTemplatePublic) => Promise<void>
+  resetForm: () => void
+  editingTemplateId: number | null
+}
 
 async function clickFormPrimaryButton(wrapper: VueWrapper) {
   const actionSection = wrapper.findAll('section').at(-1)!
@@ -116,7 +125,9 @@ describe('TemplateForm', () => {
   it('actualiza plantilla en modo edición', async () => {
     const { wrapper } = await mountWithPlugins(TemplateForm)
 
-    await wrapper.vm.startEdit(createTemplate({ id: 1, name: 'Push', description: 'Desc' }))
+    await getExposed<TemplateFormExposed>(wrapper).startEdit(
+      createTemplate({ id: 1, name: 'Push', description: 'Desc' }),
+    )
     await flushPromises()
 
     expect(wrapper.text()).toContain(i18n.global.t('templates.form.editingHint'))
@@ -147,7 +158,7 @@ describe('TemplateForm', () => {
     const { pinia, wrapper } = await mountWithPlugins(TemplateForm)
     const toastStore = useToastStore(pinia)
 
-    await wrapper.vm.startEdit(createTemplate({ id: 1, name: 'Push' }))
+    await getExposed<TemplateFormExposed>(wrapper).startEdit(createTemplate({ id: 1, name: 'Push' }))
     await wrapper.find('#template-name').setValue('Push updated')
     await clickFormPrimaryButton(wrapper)
     await flushPromises()
@@ -158,25 +169,25 @@ describe('TemplateForm', () => {
   it('reinicia formulario al crear nueva plantilla', async () => {
     const { wrapper } = await mountWithPlugins(TemplateForm)
 
-    await wrapper.vm.startEdit(createTemplate({ id: 1, name: 'Push' }))
+    await getExposed<TemplateFormExposed>(wrapper).startEdit(createTemplate({ id: 1, name: 'Push' }))
     const newLabel = i18n.global.t('templates.form.newTemplateButton')
     const newButton = wrapper.findAll('button').find((btn) => btn.text().includes(newLabel))
     await newButton!.trigger('click')
     await flushPromises()
 
     expect(wrapper.text()).toContain(i18n.global.t('templates.form.newTitle'))
-    expect(wrapper.vm.editingTemplateId).toBeNull()
+    expect(getExposed<TemplateFormExposed>(wrapper).editingTemplateId).toBeNull()
   })
 
   it('expone resetForm y editingTemplateId', async () => {
     const { wrapper } = await mountWithPlugins(TemplateForm)
 
-    await wrapper.vm.startEdit(createTemplate({ id: 3, name: 'Legs' }))
-    expect(wrapper.vm.editingTemplateId).toBe(3)
+    await getExposed<TemplateFormExposed>(wrapper).startEdit(createTemplate({ id: 3, name: 'Legs' }))
+    expect(getExposed<TemplateFormExposed>(wrapper).editingTemplateId).toBe(3)
 
-    wrapper.vm.resetForm()
+    getExposed<TemplateFormExposed>(wrapper).resetForm()
     await nextTick()
-    expect(wrapper.vm.editingTemplateId).toBeNull()
+    expect(getExposed<TemplateFormExposed>(wrapper).editingTemplateId).toBeNull()
   })
 
   it('muestra etiqueta con conteo de ejercicios en borrador', async () => {

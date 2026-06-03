@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
 
+import {
+  createApiError,
+  createApiSuccess,
+} from '@/__tests__/helpers/api-response.fixture'
 import { ApiError, throwIfApiError } from '@/utils/api-error.util'
 
 describe('ApiError', () => {
@@ -16,20 +20,20 @@ describe('ApiError', () => {
 describe('throwIfApiError', () => {
   it('no lanza cuando la respuesta es exitosa', () => {
     expect(() =>
-      throwIfApiError({ status: 'ok', data: { id: 1 } }, 200),
+      throwIfApiError(createApiSuccess({ id: 1 }), 200),
     ).not.toThrow()
   })
 
   it('lanza ApiError cuando el status HTTP es 4xx', () => {
     expect(() =>
-      throwIfApiError({ status: 'ok', data: null }, 401),
+      throwIfApiError(createApiSuccess(null), 401),
     ).toThrow(ApiError)
   })
 
   it('lanza ApiError con código y params del body', () => {
     try {
       throwIfApiError(
-        { status: 'error', error: 'VALIDATION_ERROR', errorParams: { field: 'name' } },
+        createApiError('VALIDATION_ERROR', { field: 'name' }),
         200,
       )
     } catch (error) {
@@ -41,7 +45,7 @@ describe('throwIfApiError', () => {
 
   it('usa UNKNOWN_ERROR cuando el body no incluye código', () => {
     try {
-      throwIfApiError({ status: 'error' }, 500)
+      throwIfApiError({ status: 'error', data: null, error: null }, 500)
     } catch (error) {
       expect((error as ApiError).code).toBe('UNKNOWN_ERROR')
     }

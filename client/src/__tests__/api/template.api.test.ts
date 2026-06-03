@@ -83,7 +83,7 @@ describe('template.api', () => {
   })
 
   it('updateTemplateExercise actualiza ejercicio de plantilla', async () => {
-    const body = { orderIndex: 2 }
+    const body = { sortOrder: 2 }
     vi.mocked(api).mockResolvedValue({})
 
     await templateApi.updateTemplateExercise(4, 7, body)

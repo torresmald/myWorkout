@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { stubFetchSuccess, stubFetchWithResponses } from '@/__tests__/helpers/mock-fetch'
+import { createApiError } from '@/__tests__/helpers/api-response.fixture'
+import { createUserPublic } from '@/__tests__/fixtures/profile.fixture'
 import { api } from '@/api/client'
 import { ApiError } from '@/utils/api-error.util'
 import * as refreshSession from '@/utils/refresh-session.util'
@@ -92,19 +94,12 @@ describe('api client', () => {
     vi.mocked(refreshSession.refreshAccessToken).mockResolvedValue({
       token: 'new-access',
       refreshToken: 'new-refresh',
-      user: {
-        id: 1,
-        email: 'user@example.com',
-        name: 'User',
-        role: 'USER',
-        emailVerified: true,
-        avatarUrl: null,
-      },
+      user: createUserPublic(),
     })
 
     stubFetchWithResponses(
-      { status: 401, body: { status: 'error', error: 'UNAUTHORIZED' } },
-      { status: 200, body: { status: 'ok', data: { ok: true } } },
+      { status: 401, body: createApiError('UNAUTHORIZED') },
+      { status: 200, body: { status: 'success', data: { ok: true }, error: null } },
     )
 
     const result = await api<{ ok: boolean }>('/workouts')
@@ -117,7 +112,7 @@ describe('api client', () => {
   it('no reintenta si el refresh falla', async () => {
     stubFetchWithResponses({
       status: 401,
-      body: { status: 'error', error: 'UNAUTHORIZED' },
+      body: createApiError('UNAUTHORIZED'),
     })
 
     await expect(api('/workouts')).rejects.toBeInstanceOf(ApiError)
@@ -127,7 +122,7 @@ describe('api client', () => {
   it('no intenta refresh en rutas de autenticación', async () => {
     stubFetchWithResponses({
       status: 401,
-      body: { status: 'error', error: 'INVALID_CREDENTIALS' },
+      body: createApiError('INVALID_CREDENTIALS'),
     })
 
     await expect(api('/auth/login', { method: 'POST', body: '{}' })).rejects.toBeInstanceOf(ApiError)
@@ -139,7 +134,7 @@ describe('api client', () => {
   it('lanza ApiError en respuestas de error', async () => {
     stubFetchWithResponses({
       status: 400,
-      body: { status: 'error', error: 'VALIDATION_ERROR' },
+      body: createApiError('VALIDATION_ERROR'),
     })
 
     await expect(api('/workouts')).rejects.toMatchObject({ code: 'VALIDATION_ERROR' })
@@ -150,7 +145,7 @@ describe('api client', () => {
 
     stubFetchWithResponses({
       status: 500,
-      body: { status: 'error', error: 'INTERNAL_ERROR' },
+      body: createApiError('INTERNAL_ERROR'),
     })
 
     await expect(api('/workouts')).rejects.toBeInstanceOf(ApiError)
@@ -162,7 +157,7 @@ describe('api client', () => {
 
     stubFetchWithResponses({
       status: 404,
-      body: { status: 'error', error: 'NOT_FOUND' },
+      body: createApiError('NOT_FOUND'),
     })
 
     await expect(api('/workouts')).rejects.toBeInstanceOf(ApiError)

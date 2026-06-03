@@ -34,7 +34,9 @@ describe('ExerciseTypesView', () => {
     vi.mocked(exerciseTypeApi.updateExerciseType).mockResolvedValue(
       createExerciseType({ id: 1, name: 'Actualizado' }),
     )
-    vi.mocked(exerciseTypeApi.deleteExerciseType).mockResolvedValue(undefined)
+    vi.mocked(exerciseTypeApi.deleteExerciseType).mockResolvedValue(
+      createExerciseType({ id: 1, name: 'Press banca' }),
+    )
   })
 
   it('lista tipos de ejercicio', async () => {

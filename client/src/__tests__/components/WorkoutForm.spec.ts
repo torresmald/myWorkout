@@ -5,10 +5,12 @@ import { nextTick } from 'vue'
 
 import { createExerciseType } from '@/__tests__/fixtures/exercise-type.fixture'
 import { createWorkout, createWorkoutExercise } from '@/__tests__/fixtures/workout.fixture'
+import { getExposed } from '@/__tests__/helpers/component-vm'
 import { mountWithPlugins } from '@/__tests__/helpers/mount-test-app'
 import * as exerciseTypeApi from '@/api/exercise-type.api'
 import * as templateApi from '@/api/template.api'
 import * as workoutApi from '@/api/workout.api'
+import type { WorkoutPublic } from '@/interfaces/workout.interface'
 import WorkoutForm from '@/components/WorkoutForm.vue'
 import { i18n } from '@/i18n'
 import { useModalStore } from '@/stores/modal.store'
@@ -49,6 +51,12 @@ vi.mock('@/utils/rest-timer-sound.util', () => ({
 const mockExerciseType = createExerciseType()
 const mockWorkout = createWorkout()
 const mockExercise = createWorkoutExercise()
+
+type WorkoutFormExposed = {
+  startEdit: (workout: WorkoutPublic) => Promise<void>
+  resetForm: () => void
+  editingWorkoutId: number | null
+}
 
 async function clickFormPrimaryButton(wrapper: VueWrapper) {
   const actionSection = wrapper.findAll('section').at(-1)!
@@ -148,7 +156,7 @@ describe('WorkoutForm', () => {
   it('actualiza un entrenamiento en modo edición', async () => {
     const { wrapper } = await mountWithPlugins(WorkoutForm)
 
-    await wrapper.vm.startEdit(createWorkout({ id: 1, name: 'Push', notes: 'Notas' }))
+    await getExposed<WorkoutFormExposed>(wrapper).startEdit(createWorkout({ id: 1, name: 'Push', notes: 'Notas' }))
     await flushPromises()
 
     expect(wrapper.text()).toContain(i18n.global.t('workouts.form.editingHint'))
@@ -179,7 +187,7 @@ describe('WorkoutForm', () => {
     const { pinia, wrapper } = await mountWithPlugins(WorkoutForm)
     const toastStore = useToastStore(pinia)
 
-    await wrapper.vm.startEdit(createWorkout({ id: 1, name: 'Push' }))
+    await getExposed<WorkoutFormExposed>(wrapper).startEdit(createWorkout({ id: 1, name: 'Push' }))
     await wrapper.find('#workout-name').setValue('Push updated')
     await clickFormPrimaryButton(wrapper)
     await flushPromises()
@@ -190,14 +198,14 @@ describe('WorkoutForm', () => {
   it('reinicia el formulario al crear nuevo entrenamiento', async () => {
     const { wrapper } = await mountWithPlugins(WorkoutForm)
 
-    await wrapper.vm.startEdit(createWorkout({ id: 1, name: 'Push' }))
+    await getExposed<WorkoutFormExposed>(wrapper).startEdit(createWorkout({ id: 1, name: 'Push' }))
     const newWorkoutLabel = i18n.global.t('workouts.form.newWorkoutButton')
     const newButton = wrapper.findAll('button').find((btn) => btn.text().includes(newWorkoutLabel))
     await newButton!.trigger('click')
     await flushPromises()
 
     expect(wrapper.text()).toContain(i18n.global.t('workouts.form.newTitle'))
-    expect(wrapper.vm.editingWorkoutId).toBeNull()
+    expect(getExposed<WorkoutFormExposed>(wrapper).editingWorkoutId).toBeNull()
   })
 
   it('guarda como plantilla cuando hay ejercicios y el usuario confirma', async () => {
@@ -206,7 +214,7 @@ describe('WorkoutForm', () => {
     const modalStore = useModalStore(pinia)
     const toastStore = useToastStore(pinia)
 
-    await wrapper.vm.startEdit(createWorkout({ id: 1, name: 'Push' }))
+    await getExposed<WorkoutFormExposed>(wrapper).startEdit(createWorkout({ id: 1, name: 'Push' }))
     workoutStore.hydrateExercises(1, [mockExercise])
     await nextTick()
 
@@ -230,7 +238,7 @@ describe('WorkoutForm', () => {
     const workoutStore = useWorkoutStore(pinia)
     const modalStore = useModalStore(pinia)
 
-    await wrapper.vm.startEdit(createWorkout({ id: 1, name: 'Push' }))
+    await getExposed<WorkoutFormExposed>(wrapper).startEdit(createWorkout({ id: 1, name: 'Push' }))
     workoutStore.hydrateExercises(1, [mockExercise])
     await nextTick()
 
@@ -255,7 +263,7 @@ describe('WorkoutForm', () => {
     const modalStore = useModalStore(pinia)
     const toastStore = useToastStore(pinia)
 
-    await wrapper.vm.startEdit(createWorkout({ id: 1, name: 'Push' }))
+    await getExposed<WorkoutFormExposed>(wrapper).startEdit(createWorkout({ id: 1, name: 'Push' }))
     workoutStore.hydrateExercises(1, [mockExercise])
     await nextTick()
 
@@ -276,12 +284,12 @@ describe('WorkoutForm', () => {
   it('expone resetForm y editingWorkoutId', async () => {
     const { wrapper } = await mountWithPlugins(WorkoutForm)
 
-    await wrapper.vm.startEdit(createWorkout({ id: 5, name: 'Pull' }))
-    expect(wrapper.vm.editingWorkoutId).toBe(5)
+    await getExposed<WorkoutFormExposed>(wrapper).startEdit(createWorkout({ id: 5, name: 'Pull' }))
+    expect(getExposed<WorkoutFormExposed>(wrapper).editingWorkoutId).toBe(5)
 
-    wrapper.vm.resetForm()
+    getExposed<WorkoutFormExposed>(wrapper).resetForm()
     await nextTick()
-    expect(wrapper.vm.editingWorkoutId).toBeNull()
+    expect(getExposed<WorkoutFormExposed>(wrapper).editingWorkoutId).toBeNull()
   })
 
   it('muestra etiqueta con conteo de ejercicios en borrador', async () => {
@@ -313,7 +321,7 @@ describe('WorkoutForm', () => {
 
     const { wrapper } = await mountWithPlugins(WorkoutForm)
 
-    await wrapper.vm.startEdit(createWorkout({ id: 1, name: 'Push' }))
+    await getExposed<WorkoutFormExposed>(wrapper).startEdit(createWorkout({ id: 1, name: 'Push' }))
     await wrapper.find('#workout-name').setValue('Push updated')
     await clickFormPrimaryButton(wrapper)
     await nextTick()

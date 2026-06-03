@@ -1,4 +1,4 @@
-import { mount, type VueWrapper } from '@vue/test-utils'
+import { mount, type Stubs, type VueWrapper } from '@vue/test-utils'
 import { createPinia, setActivePinia, type Pinia } from 'pinia'
 import type { Component } from 'vue'
 import { createRouter, createWebHistory, type RouteRecordRaw, type Router } from 'vue-router'
@@ -66,7 +66,7 @@ interface MountWithPluginsOptions {
   initialRoute?: string
   props?: Record<string, unknown>
   attachTo?: HTMLElement
-  stubs?: Record<string, unknown | boolean>
+  stubs?: Stubs
 }
 
 export async function mountWithPlugins(

@@ -88,7 +88,7 @@ describe('template store', () => {
   })
 
   it('elimina una plantilla que no es la activa sin limpiar ejercicios', async () => {
-    vi.mocked(templateApi.deleteTemplate).mockResolvedValue(undefined)
+    vi.mocked(templateApi.deleteTemplate).mockResolvedValue(mockTemplate)
     const store = useTemplateStore()
     store.templates = [mockTemplate, { ...mockTemplate, id: 2 }]
     store.activeTemplateId = 2
@@ -101,7 +101,7 @@ describe('template store', () => {
   })
 
   it('elimina una plantilla y limpia ejercicios si era la activa', async () => {
-    vi.mocked(templateApi.deleteTemplate).mockResolvedValue(undefined)
+    vi.mocked(templateApi.deleteTemplate).mockResolvedValue(mockTemplate)
     const store = useTemplateStore()
     store.templates = [mockTemplate]
     store.activeTemplateId = 1
@@ -183,7 +183,7 @@ describe('template store', () => {
   })
 
   it('elimina un ejercicio de plantilla', async () => {
-    vi.mocked(templateApi.deleteTemplateExercise).mockResolvedValue(undefined)
+    vi.mocked(templateApi.deleteTemplateExercise).mockResolvedValue(mockExercise)
     const store = useTemplateStore()
     store.exercises = [mockExercise, { ...mockExercise, id: 11 }]
 

@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 
 import { createCatalogExercise } from '@/__tests__/fixtures/catalog-exercise.fixture'
+import { createExerciseType } from '@/__tests__/fixtures/exercise-type.fixture'
 import { mountWithPlugins, setupTestPinia } from '@/__tests__/helpers/mount-test-app'
 import { catalogRoutes } from '@/__tests__/helpers/test-routes'
 import * as exerciseCatalogApi from '@/api/exercise-catalog.api'
@@ -87,7 +88,9 @@ describe('ExerciseCatalogView - ver técnica', () => {
 describe('ExerciseCatalogView - filtros e importación', () => {
   beforeEach(() => {
     vi.mocked(exerciseCatalogApi.getExerciseCatalog).mockResolvedValue([createCatalogExercise()])
-    vi.mocked(exerciseCatalogApi.importExerciseFromCatalog).mockResolvedValue(undefined)
+    vi.mocked(exerciseCatalogApi.importExerciseFromCatalog).mockResolvedValue(
+      createExerciseType(),
+    )
     vi.mocked(exerciseTypeApi.getExerciseTypes).mockResolvedValue([])
   })
 
@@ -147,7 +150,7 @@ describe('ExerciseCatalogView - filtros e importación', () => {
 
   it('muestra ejercicio sin media', async () => {
     vi.mocked(exerciseCatalogApi.getExerciseCatalog).mockResolvedValue([
-      createCatalogExercise({ mediaUrl: null, mediaType: null }),
+      createCatalogExercise({ mediaUrl: null }),
     ])
 
     const { wrapper } = await mountWithPlugins(ExerciseCatalogView, {

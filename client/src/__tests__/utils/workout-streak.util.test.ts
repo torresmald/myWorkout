@@ -1,17 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import type { WorkoutPublic } from '@/interfaces/workout.interface'
+import { createWorkout } from '@/__tests__/fixtures/workout.fixture'
 import { computeWeeklyStreak, getLatestWorkout } from '@/utils/workout-streak.util'
 
-function workout(date: string, id = 1): WorkoutPublic {
-  return {
-    id,
-    name: 'Test',
-    date,
-    notes: null,
-    createdAt: date,
-    updatedAt: date,
-  }
+function workout(date: string, id = 1) {
+  return createWorkout({ id, date, createdAt: date, updatedAt: date })
 }
 
 describe('workout-streak.util', () => {

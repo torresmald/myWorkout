@@ -35,7 +35,10 @@ describe('admin-catalog store', () => {
     vi.mocked(adminApi.getExerciseCatalog).mockResolvedValue([mockEntry])
     vi.mocked(adminApi.createExerciseCatalogEntry).mockResolvedValue(mockEntry)
     vi.mocked(adminApi.updateExerciseCatalogEntry).mockResolvedValue(mockEntry)
-    vi.mocked(adminApi.deleteExerciseCatalogEntry).mockResolvedValue({ deleted: true })
+    vi.mocked(adminApi.deleteExerciseCatalogEntry).mockResolvedValue({
+      ...mockEntry,
+      active: false,
+    })
   })
 
   it('carga las entradas del catálogo de administración', async () => {
@@ -76,7 +79,7 @@ describe('admin-catalog store', () => {
     const result = await store.remove(1)
 
     expect(adminApi.deleteExerciseCatalogEntry).toHaveBeenCalledWith(1)
-    expect(result).toEqual({ deleted: true })
+    expect(result).toEqual({ ...mockEntry, active: false })
     expect(store.deletingId).toBeNull()
   })
 })

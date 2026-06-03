@@ -2,6 +2,7 @@ import { flushPromises } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { createUserProfile } from '@/__tests__/fixtures/profile.fixture'
+import { createSpotifyPlaylist } from '@/__tests__/fixtures/spotify.fixture'
 import { profileRoutes } from '@/__tests__/helpers/test-routes'
 import { mountWithPlugins, setupTestPinia } from '@/__tests__/helpers/mount-test-app'
 import * as profileApi from '@/api/profile.api'
@@ -59,7 +60,7 @@ describe('SpotifyWorkoutSettings', () => {
       workoutPlaylistName: 'Workout Mix',
     })
     vi.mocked(spotifyApi.getPlaylists).mockResolvedValue([
-      { id: 'abc1234567890123456789', name: 'Workout Mix', trackCount: 20 },
+      createSpotifyPlaylist({ id: 'abc1234567890123456789', name: 'Workout Mix', trackCount: 20 }),
     ])
 
     const { wrapper } = await mountWithPlugins(SpotifyWorkoutSettings, { routes: profileRoutes })
@@ -139,7 +140,7 @@ describe('SpotifyWorkoutSettings', () => {
       workoutPlaylistName: null,
     })
     vi.mocked(spotifyApi.getPlaylists).mockResolvedValue([
-      { id: 'abc1234567890123456789', name: 'Mix', trackCount: 10 },
+      createSpotifyPlaylist({ id: 'abc1234567890123456789', name: 'Mix', trackCount: 10 }),
     ])
     vi.mocked(spotifyApi.setWorkoutPlaylist).mockResolvedValue({
       connected: true,

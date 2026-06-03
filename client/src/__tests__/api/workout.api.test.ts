@@ -75,7 +75,7 @@ describe('workout.api', () => {
   })
 
   it('updateWorkoutExercise actualiza un ejercicio', async () => {
-    const body = { orderIndex: 1 }
+    const body = { sortOrder: 1 }
     vi.mocked(api).mockResolvedValue({})
 
     await workoutApi.updateWorkoutExercise(2, 3, body)

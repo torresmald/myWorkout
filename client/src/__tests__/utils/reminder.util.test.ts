@@ -163,7 +163,7 @@ describe('reminder.util', () => {
       vi.stubGlobal('window', { ...window, focus, location: { assign } })
 
       showWorkoutReminderNotification('Entrena', 'Hace días que no entrenas', '/workouts')
-      createdNotification?.onclick?.()
+      createdNotification!.onclick?.()
 
       expect(focus).toHaveBeenCalled()
       expect(assign).toHaveBeenCalledWith('/workouts')

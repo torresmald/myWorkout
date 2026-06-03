@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { createUserPublic } from '@/__tests__/fixtures/profile.fixture'
+import { createApiSuccess } from '@/__tests__/helpers/api-response.fixture'
 import type { LoginData } from '@/interfaces/auth.interface'
 import { onSessionRefreshed, refreshAccessToken } from '@/utils/refresh-session.util'
 import { setTokens } from '@/utils/storage.util'
@@ -7,14 +9,7 @@ import { setTokens } from '@/utils/storage.util'
 const loginData: LoginData = {
   token: 'new-access',
   refreshToken: 'new-refresh',
-  user: {
-    id: 1,
-    email: 'user@example.com',
-    name: 'User',
-    role: 'USER',
-    emailVerified: true,
-    avatarUrl: null,
-  },
+  user: createUserPublic(),
 }
 
 describe('refresh-session.util', () => {
@@ -36,7 +31,7 @@ describe('refresh-session.util', () => {
       'fetch',
       vi.fn().mockResolvedValue({
         ok: true,
-        json: async () => ({ status: 'ok', data: loginData }),
+        json: async () => createApiSuccess(loginData),
       }),
     )
 
@@ -79,7 +74,7 @@ describe('refresh-session.util', () => {
 
     resolveFetch({
       ok: true,
-      json: async () => ({ status: 'ok', data: loginData }),
+      json: async () => createApiSuccess(loginData),
     })
 
     const [resultA, resultB] = await Promise.all([first, second])

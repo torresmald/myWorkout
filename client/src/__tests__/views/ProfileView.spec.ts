@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
   createUserProfile,
+  createUserPublic,
   createWeightEntry,
 } from '@/__tests__/fixtures/profile.fixture'
 import { adminRoutes } from '@/__tests__/helpers/test-routes'
@@ -68,11 +69,13 @@ describe('ProfileView', () => {
       return { ...current, ...body, name: body.name ?? current.name }
     })
     vi.mocked(profileApi.addWeight).mockResolvedValue({
-      profile: createUserProfile(),
+      entry: createWeightEntry(),
+      profile: createUserPublic(),
       weightEntries: [createWeightEntry()],
     })
     vi.mocked(profileApi.updateWeight).mockResolvedValue({
-      profile: createUserProfile(),
+      entry: createWeightEntry({ weightKg: 76 }),
+      profile: createUserPublic(),
       weightEntries: [createWeightEntry({ weightKg: 76 })],
     })
     vi.mocked(profileApi.deleteWeight).mockResolvedValue({
