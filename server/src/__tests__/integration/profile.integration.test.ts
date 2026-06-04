@@ -1,9 +1,10 @@
-import { beforeAll, beforeEach, afterAll, describe, expect, it, vi } from 'vitest'
+import { beforeAll, beforeEach, afterAll, describe, expect, it } from 'vitest'
 
 import { createVerifiedTestUser } from '../fixtures/test-user.fixture.js'
 import { INVALID_IMAGE_BUFFER, MINIMAL_PNG_BUFFER } from '../fixtures/test-image.fixture.js'
 import { authHeader } from '../helpers/test-auth.js'
 import { createTestAgent } from '../helpers/test-app.js'
+import { cloudinaryServiceMocks } from '../helpers/mock-cloudinary.js'
 import {
   connectTestDatabase,
   disconnectTestDatabase,
@@ -13,15 +14,6 @@ import {
 import { loginTestUser, loginVerifiedTestUser } from '../helpers/test-session.js'
 import { getAvatarPublicId } from '../../constants/cloudinary.constants.js'
 import { ErrorCode } from '../../constants/error-codes.constants.js'
-
-const uploadAvatarImage = vi.fn()
-const deleteAvatarImage = vi.fn()
-
-vi.mock('../../services/cloudinary.service.js', () => ({
-  uploadAvatarImage: (...args: unknown[]) => uploadAvatarImage(...args),
-  deleteAvatarImage: (...args: unknown[]) => deleteAvatarImage(...args),
-  uploadCatalogMedia: vi.fn(),
-}))
 
 const describeIntegration = hasTestDatabase() ? describe : describe.skip
 
@@ -38,10 +30,10 @@ describeIntegration('profile API', () => {
 
   beforeEach(async () => {
     await resetTestDatabase()
-    uploadAvatarImage.mockReset()
-    deleteAvatarImage.mockReset()
-    uploadAvatarImage.mockImplementation(async (userId: number) => getAvatarPublicId(userId))
-    deleteAvatarImage.mockResolvedValue(undefined)
+    cloudinaryServiceMocks.uploadAvatarImage.mockImplementation(async (userId: number) =>
+      getAvatarPublicId(userId),
+    )
+    cloudinaryServiceMocks.deleteAvatarImage.mockResolvedValue(undefined)
   })
 
   describe('autenticación', () => {
@@ -213,13 +205,13 @@ describeIntegration('profile API', () => {
         })
 
       expect(uploaded.status).toBe(200)
-      expect(uploadAvatarImage).toHaveBeenCalledOnce()
+      expect(cloudinaryServiceMocks.uploadAvatarImage).toHaveBeenCalledOnce()
       expect(uploaded.body.data.profileImageUrl).toContain('myworkout/avatars')
 
       const deleted = await agent.delete('/api/profile/avatar').set(authHeader(session.token))
 
       expect(deleted.status).toBe(200)
-      expect(deleteAvatarImage).toHaveBeenCalledOnce()
+      expect(cloudinaryServiceMocks.deleteAvatarImage).toHaveBeenCalledOnce()
       expect(deleted.body.data.profileImageUrl).toBeNull()
     })
   })

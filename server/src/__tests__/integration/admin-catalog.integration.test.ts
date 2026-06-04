@@ -1,9 +1,10 @@
-import { beforeAll, beforeEach, afterAll, describe, expect, it, vi } from 'vitest'
+import { beforeAll, beforeEach, afterAll, describe, expect, it } from 'vitest'
 
 import { MINIMAL_PNG_BUFFER } from '../fixtures/test-image.fixture.js'
 import { authHeader } from '../helpers/test-auth.js'
 import { createAdminCatalogEntry, loginAdminTestUser } from '../helpers/test-admin.js'
 import { createTestAgent } from '../helpers/test-app.js'
+import { cloudinaryServiceMocks } from '../helpers/mock-cloudinary.js'
 import {
   connectTestDatabase,
   disconnectTestDatabase,
@@ -12,14 +13,6 @@ import {
 } from '../helpers/test-db.js'
 import { loginVerifiedTestUser } from '../helpers/test-session.js'
 import { ErrorCode } from '../../constants/error-codes.constants.js'
-
-const uploadCatalogMedia = vi.fn()
-
-vi.mock('../../services/cloudinary.service.js', () => ({
-  uploadAvatarImage: vi.fn(),
-  deleteAvatarImage: vi.fn(),
-  uploadCatalogMedia: (...args: unknown[]) => uploadCatalogMedia(...args),
-}))
 
 const describeIntegration = hasTestDatabase() ? describe : describe.skip
 
@@ -36,8 +29,7 @@ describeIntegration('admin exercise-catalog API', () => {
 
   beforeEach(async () => {
     await resetTestDatabase()
-    uploadCatalogMedia.mockReset()
-    uploadCatalogMedia.mockResolvedValue({
+    cloudinaryServiceMocks.uploadCatalogMedia.mockResolvedValue({
       mediaUrl: 'https://res.cloudinary.com/demo/image/upload/v1/myworkout/catalog/test.png',
       mediaType: 'IMAGE',
     })
@@ -207,7 +199,7 @@ describeIntegration('admin exercise-catalog API', () => {
         })
 
       expect(response.status).toBe(201)
-      expect(uploadCatalogMedia).toHaveBeenCalledOnce()
+      expect(cloudinaryServiceMocks.uploadCatalogMedia).toHaveBeenCalledOnce()
       expect(response.body.data.mediaUrl).toContain('cloudinary.com')
       expect(response.body.data.mediaType).toBe('IMAGE')
     })

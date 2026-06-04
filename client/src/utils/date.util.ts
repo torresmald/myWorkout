@@ -13,7 +13,7 @@ export function todayDateInputValue(): string {
 }
 
 export function dateInputToIso(date: string): string {
-  return new Date(`${date}T12:00:00`).toISOString()
+  return `${date}T12:00:00.000Z`
 }
 
 export function formatWorkoutDate(iso: string): string {
@@ -25,7 +25,7 @@ export function formatWorkoutDate(iso: string): string {
 }
 
 export function formatWeekLabel(iso: string): string {
-  return new Date(`${iso}T12:00:00`).toLocaleDateString(getDateLocale(), {
+  return new Date(`${iso}T12:00:00.000Z`).toLocaleDateString(getDateLocale(), {
     day: 'numeric',
     month: 'short',
   })

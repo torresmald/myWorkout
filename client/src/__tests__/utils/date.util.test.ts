@@ -23,7 +23,7 @@ describe('date.util', () => {
   })
 
   it('convierte input date a ISO al mediodía UTC', () => {
-    expect(dateInputToIso('2026-05-30')).toBe('2026-05-30T10:00:00.000Z')
+    expect(dateInputToIso('2026-05-30')).toBe('2026-05-30T12:00:00.000Z')
   })
 
   it('formatea fecha de entrenamiento según locale ES', () => {
