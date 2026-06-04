@@ -1,48 +1,48 @@
 import type { RouteRecordRaw } from 'vue-router'
 
-export const adminRoutes: RouteRecordRaw[] = [
-  { path: '/admin', name: 'admin', component: { template: '<div />' } },
-  { path: '/admin/catalog', name: 'admin-catalog', component: { template: '<div />' } },
-]
+const stub = { template: '<div />' }
 
-export const workoutSessionRoutes: RouteRecordRaw[] = [
-  { path: '/workouts', name: 'workouts', component: { template: '<div />' } },
+/** Rutas mínimas alineadas con el router de producción para evitar warnings en tests. */
+export const coreRoutes: RouteRecordRaw[] = [
+  { path: '/', name: 'home', component: stub },
+  { path: '/login', name: 'login', component: stub },
+  { path: '/register', name: 'register', component: stub },
+  { path: '/verify-email', name: 'verify-email', component: stub },
+  { path: '/forgot-password', name: 'forgot-password', component: stub },
+  { path: '/reset-password', name: 'reset-password', component: stub },
+  { path: '/cookies', name: 'cookies', component: stub },
+  { path: '/workouts', name: 'workouts', component: stub },
   {
     path: '/workouts/:id/session',
     name: 'workout-session',
-    component: { template: '<div />' },
+    component: stub,
   },
-]
-
-export const exerciseTypeRoutes: RouteRecordRaw[] = [
-  { path: '/exercise-types', name: 'exercise-types', component: { template: '<div />' } },
+  { path: '/templates', name: 'templates', component: stub },
+  { path: '/stats', name: 'stats', component: stub },
+  { path: '/exercise-types', name: 'exercise-types', component: stub },
   {
-    path: '/exercise-history/:id',
+    path: '/exercise-types/:id/history',
     name: 'exercise-history',
-    component: { template: '<div />' },
+    component: stub,
   },
-  { path: '/exercise-catalog', name: 'exercise-catalog', component: { template: '<div />' } },
-]
-
-export const exerciseHistoryRoutes = exerciseTypeRoutes
-
-export const profileRoutes: RouteRecordRaw[] = [
-  { path: '/profile', name: 'profile', component: { template: '<div />' } },
-]
-
-export const verifyEmailRoutes: RouteRecordRaw[] = [
-  { path: '/verify-email', name: 'verify-email', component: { template: '<div />' } },
-  { path: '/login', name: 'login', component: { template: '<div />' } },
-]
-
-export const catalogRoutes: RouteRecordRaw[] = [
   {
     path: '/exercise-catalog',
     name: 'exercise-catalog',
-    component: { template: '<div />' },
+    component: stub,
     meta: {
       titleKey: 'routes.exerciseCatalog.title',
       pageDescriptionKey: 'routes.exerciseCatalog.description',
     },
   },
+  { path: '/profile', name: 'profile', component: stub },
+  { path: '/admin', name: 'admin', component: stub },
+  { path: '/admin/catalog', name: 'admin-catalog', component: stub },
 ]
+
+export const adminRoutes = coreRoutes
+export const workoutSessionRoutes = coreRoutes
+export const exerciseTypeRoutes = coreRoutes
+export const exerciseHistoryRoutes = coreRoutes
+export const profileRoutes = coreRoutes
+export const verifyEmailRoutes = coreRoutes
+export const catalogRoutes = coreRoutes

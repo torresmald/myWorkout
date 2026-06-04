@@ -42,4 +42,6 @@ export default {
   noValue: '—',
   showPassword: 'Show password',
   hidePassword: 'Hide password',
+  user: 'User',
+  admin: 'Administrator',
 } as const

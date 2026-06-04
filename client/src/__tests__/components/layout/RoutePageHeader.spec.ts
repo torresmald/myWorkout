@@ -3,7 +3,7 @@ import { mount } from '@vue/test-utils'
 
 import RoutePageHeader from '@/components/layout/RoutePageHeader.vue'
 import { i18n } from '@/i18n'
-import { createTestRouter, navigateTo } from '@/__tests__/helpers/mount-test-app'
+import { createTestRouter, navigateTo, prepareTestRouter } from '@/__tests__/helpers/mount-test-app'
 
 describe('RoutePageHeader', () => {
   it('usa props title y description cuando se proporcionan', () => {
@@ -47,20 +47,21 @@ describe('RoutePageHeader', () => {
   })
 
   it('omite descripción cuando la ruta no define pageDescriptionKey', async () => {
-    const router = createTestRouter([
+    const customRoutes = [
       {
         path: '/sin-descripcion',
         name: 'sin-descripcion',
         component: { template: '<div />' },
         meta: { titleKey: 'routes.exerciseCatalog.title' },
       },
-    ])
+    ]
+    const router = createTestRouter(customRoutes)
+
+    await prepareTestRouter(router, customRoutes, '/sin-descripcion')
 
     const wrapper = mount(RoutePageHeader, {
       global: { plugins: [router, i18n] },
     })
-
-    await navigateTo(router, '/sin-descripcion')
 
     expect(wrapper.find('h1').exists()).toBe(true)
     expect(wrapper.find('p').exists()).toBe(false)

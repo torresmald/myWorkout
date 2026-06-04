@@ -42,6 +42,6 @@ describe('PersonalRecordsList', () => {
 
     expect(wrapper.text()).toContain('Sentadilla')
     expect(wrapper.text()).toContain(i18n.global.t('personalRecords.badge'))
-    expect(wrapper.find('a').attributes('href')).toContain('/exercise-history/5')
+    expect(wrapper.find('a').attributes('href')).toContain('/exercise-types/5/history')
   })
 })

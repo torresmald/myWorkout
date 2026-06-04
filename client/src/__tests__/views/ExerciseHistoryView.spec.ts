@@ -25,7 +25,7 @@ describe('ExerciseHistoryView', () => {
   it('carga historial del ejercicio', async () => {
     const { wrapper } = await mountWithPlugins(ExerciseHistoryView, {
       routes: exerciseHistoryRoutes,
-      initialRoute: '/exercise-history/5',
+      initialRoute: '/exercise-types/5/history',
     })
 
     await flushPromises()
@@ -41,7 +41,7 @@ describe('ExerciseHistoryView', () => {
 
     const { wrapper } = await mountWithPlugins(ExerciseHistoryView, {
       routes: exerciseHistoryRoutes,
-      initialRoute: '/exercise-history/5',
+      initialRoute: '/exercise-types/5/history',
     })
 
     await flushPromises()
@@ -52,7 +52,7 @@ describe('ExerciseHistoryView', () => {
   it('redirige con id inválido', async () => {
     const { router } = await mountWithPlugins(ExerciseHistoryView, {
       routes: exerciseHistoryRoutes,
-      initialRoute: '/exercise-history/invalid',
+      initialRoute: '/exercise-types/invalid/history',
     })
 
     await flushPromises()

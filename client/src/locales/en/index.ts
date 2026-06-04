@@ -24,6 +24,7 @@ import session from './session'
 import spotify from './spotify'
 import stats from './stats'
 import templates from './templates'
+import toast from './toast'
 import workouts from './workouts'
 
 export default {
@@ -54,4 +55,5 @@ export default {
   onboarding,
   personalRecords,
   cookies,
+  toast,
 }
