@@ -31,6 +31,7 @@ export interface UserPublic {
   heightCm: number | null
   profileImageUrl: string | null
   spotifyPlaylistUrl: string | null
+  allowAutoPlaylist: boolean
   spotifyConnected: boolean
   spotifyDisplayName: string | null
   spotifyPlaylistName: string | null

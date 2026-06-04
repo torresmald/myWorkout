@@ -10,7 +10,13 @@ import {
 } from '../constants/profile.constants.js'
 import { userPublicSelect } from '../constants/auth.constants.js'
 import { AppError } from '../interfaces/app-error.interface.js'
-import type { AddWeightBody, UpdateProfileBody, UpdateWeightBody, UserProfile, WeightEntryPublic } from '../interfaces/profile.interface.js'
+import type {
+  AddWeightBody,
+  UpdateProfileBody,
+  UpdateWeightBody,
+  UserProfile,
+  WeightEntryPublic,
+} from '../interfaces/profile.interface.js'
 import { decimalToNumber } from '../utils/decimal.util.js'
 import { parseAppLocale } from '../utils/locale.util.js'
 import { mapUserToPublic } from '../utils/user-profile.util.js'
@@ -66,7 +72,10 @@ function validateHeightCm(heightCm: number | null | undefined): number | null | 
   }
 
   if (!Number.isFinite(heightCm) || heightCm < MIN_HEIGHT_CM || heightCm > MAX_HEIGHT_CM) {
-    throw new AppError(ErrorCode.HEIGHT_OUT_OF_RANGE, 400, { min: MIN_HEIGHT_CM, max: MAX_HEIGHT_CM })
+    throw new AppError(ErrorCode.HEIGHT_OUT_OF_RANGE, 400, {
+      min: MIN_HEIGHT_CM,
+      max: MAX_HEIGHT_CM,
+    })
   }
 
   return Number(heightCm.toFixed(1))
@@ -78,7 +87,10 @@ function validateWeightKg(weightKg: number | undefined): number {
   }
 
   if (weightKg < MIN_WEIGHT_KG || weightKg > MAX_WEIGHT_KG) {
-    throw new AppError(ErrorCode.WEIGHT_OUT_OF_RANGE, 400, { min: MIN_WEIGHT_KG, max: MAX_WEIGHT_KG })
+    throw new AppError(ErrorCode.WEIGHT_OUT_OF_RANGE, 400, {
+      min: MIN_WEIGHT_KG,
+      max: MAX_WEIGHT_KG,
+    })
   }
 
   return Number(weightKg.toFixed(2))
@@ -188,19 +200,24 @@ export async function getUserProfile(userId: number): Promise<UserProfile> {
   }
 }
 
-export async function updateUserProfile(userId: number, body: UpdateProfileBody): Promise<UserProfile> {
+export async function updateUserProfile(
+  userId: number,
+  body: UpdateProfileBody,
+): Promise<UserProfile> {
   const name = validateName(body.name)
   const heightCm = validateHeightCm(body.heightCm)
   const weightKg = body.weightKg !== undefined ? validateWeightKg(body.weightKg) : undefined
   const locale = body.locale !== undefined ? parseAppLocale(body.locale) : undefined
   const spotifyPlaylistUrl = validateSpotifyPlaylistUrl(body.spotifyPlaylistUrl)
-
+  const allowAutoPlaylist =
+    body.allowAutoPlaylist !== undefined ? body.allowAutoPlaylist : undefined
   if (
     name === undefined &&
     heightCm === undefined &&
     weightKg === undefined &&
     locale === undefined &&
-    spotifyPlaylistUrl === undefined
+    spotifyPlaylistUrl === undefined &&
+    allowAutoPlaylist === undefined
   ) {
     throw new AppError(ErrorCode.NO_DATA_TO_UPDATE, 400)
   }
@@ -214,7 +231,13 @@ export async function updateUserProfile(userId: number, body: UpdateProfileBody)
     throw new AppError(ErrorCode.USER_NOT_FOUND, 404)
   }
 
-  if (name !== undefined || heightCm !== undefined || locale !== undefined || spotifyPlaylistUrl !== undefined) {
+  if (
+    name !== undefined ||
+    heightCm !== undefined ||
+    locale !== undefined ||
+    spotifyPlaylistUrl !== undefined ||
+    allowAutoPlaylist !== undefined
+  ) {
     await prisma.user.update({
       where: { id: userId },
       data: {
@@ -224,6 +247,7 @@ export async function updateUserProfile(userId: number, body: UpdateProfileBody)
         ...(spotifyPlaylistUrl !== undefined
           ? { spotifyPlaylistUrl, spotifyPlaylistName: null }
           : {}),
+        ...(allowAutoPlaylist !== undefined ? { allowAutoPlaylist } : {}),
       },
     })
   }

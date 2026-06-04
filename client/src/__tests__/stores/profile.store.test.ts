@@ -27,6 +27,7 @@ const mockUser: UserPublic = {
   heightCm: 180,
   profileImageUrl: null,
   spotifyPlaylistUrl: null,
+  allowAutoPlaylist: false,
   spotifyConnected: false,
   spotifyDisplayName: null,
   spotifyPlaylistName: null,

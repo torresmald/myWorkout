@@ -17,7 +17,6 @@ export const useProfileStore = defineStore('profile', () => {
   const addingWeight = ref(false)
   const updatingWeightId = ref<number | null>(null)
   const deletingWeightId = ref<number | null>(null)
-
   function syncAuthUser(updated: UserPublic) {
     authStore.setUser(updated)
   }
@@ -56,6 +55,7 @@ export const useProfileStore = defineStore('profile', () => {
     heightCm?: number | null
     weightKg?: number
     spotifyPlaylistUrl?: string | null
+    allowAutoPlaylist?: boolean
   }) {
     saving.value = true
 
@@ -137,6 +137,10 @@ export const useProfileStore = defineStore('profile', () => {
     }
   }
 
+  async function saveAllowAutoPlaylist(value: boolean) {
+    await saveProfile({ allowAutoPlaylist: value })
+  }
+
   return {
     profile,
     loading,
@@ -153,5 +157,6 @@ export const useProfileStore = defineStore('profile', () => {
     removeWeightEntry,
     uploadAvatar,
     removeAvatar,
+    saveAllowAutoPlaylist,
   }
 })

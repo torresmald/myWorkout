@@ -13,6 +13,7 @@ export const userPublicSelect = {
   heightCm: true,
   profileImagePath: true,
   spotifyPlaylistUrl: true,
+  allowAutoPlaylist: true,
   spotifyUserId: true,
   spotifyDisplayName: true,
   spotifyPlaylistName: true,

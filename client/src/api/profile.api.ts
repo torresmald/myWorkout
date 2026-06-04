@@ -17,6 +17,7 @@ export function updateProfile(body: {
   weightKg?: number
   locale?: AppLocale
   spotifyPlaylistUrl?: string | null
+  allowAutoPlaylist?: boolean
 }) {
   return api<UserProfile>('/profile', {
     method: 'PATCH',

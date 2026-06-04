@@ -78,9 +78,14 @@ export default {
     saveManualButton: 'Save manual link',
     openButton: 'Open playlist',
     playButton: 'Play on Spotify',
-    savePlaylistFirst: 'Select a playlist below and tap “Save workout playlist” to enable playback.',
+    savePlaylistFirst:
+      'Select a playlist below and tap “Save workout playlist” to enable playback.',
     saveSuccess: 'Workout playlist saved',
     saveError: 'Could not save workout playlist',
     noChanges: 'No changes to save',
+    allowAutoPlaylist: 'Allow auto playlist',
+    allowAutoPlaylistHint:
+      'When you press play on a workout, your workout playlist will open in Spotify.',
+    autoPlaylistSaveError: 'Could not save auto playlist preference',
   },
 } as const

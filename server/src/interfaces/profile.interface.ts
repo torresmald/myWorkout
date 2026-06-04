@@ -7,6 +7,7 @@ export interface UpdateProfileBody {
   weightKg?: number
   locale?: string
   spotifyPlaylistUrl?: string | null
+  allowAutoPlaylist?: boolean
 }
 
 export interface AddWeightBody {

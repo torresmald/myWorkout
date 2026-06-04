@@ -22,6 +22,7 @@ model User {
   reminderTimeLocal       String                    @default("18:00")
   reminderTimezone        String                    @default("UTC")
   lastEmailReminderSentAt DateTime?
+  allowAutoPlaylist       Boolean                   @default(false)
   spotifyPlaylistUrl      String?
   spotifyUserId           String?                   @unique
   spotifyAccessToken      String?

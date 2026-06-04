@@ -8,19 +8,23 @@ import WorkoutForm from '@/components/WorkoutForm.vue'
 import PageContainer from '@/components/layout/PageContainer.vue'
 import RoutePageHeader from '@/components/layout/RoutePageHeader.vue'
 import type { WorkoutPublic } from '@/interfaces/workout.interface'
+import { useAuthStore } from '@/stores/auth.store'
 import { useModalStore } from '@/stores/modal.store'
 import { useToastStore } from '@/stores/toast.store'
 import { useWorkoutStore } from '@/stores/workout.store'
 import { getErrorMessage } from '@/utils/error.util'
+import { tryAutoOpenWorkoutPlaylist } from '@/utils/workout-playlist.util'
 
 const workoutStore = useWorkoutStore()
 const modalStore = useModalStore()
 const toastStore = useToastStore()
+const authStore = useAuthStore()
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
 
 const { workouts, loading, deletingId } = storeToRefs(workoutStore)
+const { user } = storeToRefs(authStore)
 
 const workoutFormRef = ref<InstanceType<typeof WorkoutForm> | null>(null)
 const openingSessionWorkoutId = ref<number | null>(null)
@@ -60,6 +64,8 @@ function handleEdit(workout: WorkoutPublic) {
 
 async function handleSession(workout: WorkoutPublic) {
   openingSessionWorkoutId.value = workout.id
+
+  tryAutoOpenWorkoutPlaylist(user.value)
 
   try {
     await router.push({ name: 'workout-session', params: { id: String(workout.id) } })

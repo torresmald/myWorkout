@@ -18,6 +18,7 @@ export interface UserProfileRecord {
   heightCm: Decimal | null
   profileImagePath: string | null
   spotifyPlaylistUrl: string | null
+  allowAutoPlaylist: boolean
   spotifyUserId: string | null
   spotifyDisplayName: string | null
   spotifyPlaylistName: string | null
@@ -35,7 +36,10 @@ export function buildProfileImageUrl(profileImagePath: string | null): string | 
   return `${UPLOADS_BASE_PATH}/${profileImagePath}`
 }
 
-export function mapUserToPublic(user: UserProfileRecord, latestWeightKg: number | null): UserPublic {
+export function mapUserToPublic(
+  user: UserProfileRecord,
+  latestWeightKg: number | null,
+): UserPublic {
   const heightCm = decimalToNumber(user.heightCm)
   const { bmi, bmiCategory } = calculateBmi(latestWeightKg, heightCm)
 
@@ -49,6 +53,7 @@ export function mapUserToPublic(user: UserProfileRecord, latestWeightKg: number 
     heightCm,
     profileImageUrl: buildProfileImageUrl(user.profileImagePath),
     spotifyPlaylistUrl: user.spotifyPlaylistUrl,
+    allowAutoPlaylist: user.allowAutoPlaylist,
     spotifyConnected: Boolean(user.spotifyUserId),
     spotifyDisplayName: user.spotifyDisplayName,
     spotifyPlaylistName: user.spotifyPlaylistName,

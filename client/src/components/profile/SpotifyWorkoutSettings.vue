@@ -45,7 +45,9 @@ const {
 const spotifyPlaylistUrl = ref('')
 const selectedPlaylistId = ref('')
 
-const isConnected = computed(() => connection.value?.connected ?? profile.value?.spotifyConnected ?? false)
+const isConnected = computed(
+  () => connection.value?.connected ?? profile.value?.spotifyConnected ?? false,
+)
 const displayName = computed(
   () => connection.value?.displayName ?? profile.value?.spotifyDisplayName ?? null,
 )
@@ -154,6 +156,17 @@ async function handleSavePlaylistSelection() {
   }
 }
 
+async function handleAllowAutoPlaylistChange(event: Event) {
+  const input = event.target as HTMLInputElement
+
+  try {
+    await profileStore.saveAllowAutoPlaylist(input.checked)
+  } catch (error) {
+    input.checked = !input.checked
+    toastStore.error(getErrorMessage(error, t('profile.spotify.autoPlaylistSaveError')))
+  }
+}
+
 async function handleSaveManualUrl() {
   if (!profile.value) {
     return
@@ -210,11 +223,38 @@ async function handleSaveManualUrl() {
         class="mb-4 rounded-lg border border-border-default bg-bg-muted px-4 py-3 text-sm"
       >
         <p class="font-medium text-text-primary">
-          {{ t('profile.spotify.connectedAs', { name: displayName ?? t('profile.spotify.spotifyUser') }) }}
+          {{
+            t('profile.spotify.connectedAs', {
+              name: displayName ?? t('profile.spotify.spotifyUser'),
+            })
+          }}
         </p>
         <p v-if="workoutPlaylistName" :class="['mt-1', TEXT_MUTED_CLASS]">
           {{ t('profile.spotify.currentPlaylist', { name: workoutPlaylistName }) }}
         </p>
+      </div>
+      <div
+        v-if="workoutPlaylistUrl"
+        class="mb-4 rounded-lg border border-border-default bg-bg-muted px-4 py-3 text-sm"
+      >
+        <label for="allowAutoPlaylist" class="flex cursor-pointer items-start gap-3">
+          <input
+            id="allowAutoPlaylist"
+            type="checkbox"
+            :checked="profile?.allowAutoPlaylist ?? false"
+            :disabled="saving"
+            class="mt-0.5 h-5 w-5 shrink-0 rounded border-border-default text-blue-600 focus:ring-blue-500"
+            @change="handleAllowAutoPlaylistChange"
+          />
+          <span>
+            <span class="block text-sm font-medium text-text-primary">
+              {{ t('profile.spotify.allowAutoPlaylist') }}
+            </span>
+            <span :class="['mt-1 block text-xs', TEXT_MUTED_CLASS]">
+              {{ t('profile.spotify.allowAutoPlaylistHint') }}
+            </span>
+          </span>
+        </label>
       </div>
 
       <div class="mb-6 flex flex-col gap-2 sm:flex-row">
@@ -283,7 +323,9 @@ async function handleSaveManualUrl() {
         <h3 class="mb-2 text-sm font-semibold text-text-primary">
           {{ t('profile.spotify.manualTitle') }}
         </h3>
-        <p :class="['mb-4 text-sm', TEXT_MUTED_CLASS]">{{ t('profile.spotify.manualDescription') }}</p>
+        <p :class="['mb-4 text-sm', TEXT_MUTED_CLASS]">
+          {{ t('profile.spotify.manualDescription') }}
+        </p>
 
         <form class="space-y-4" novalidate @submit.prevent="handleSaveManualUrl">
           <div>
@@ -300,7 +342,9 @@ async function handleSaveManualUrl() {
               :class="INPUT_CLASS"
               :placeholder="t('profile.spotify.playlistPlaceholder')"
             />
-            <p :class="['mt-2 text-xs', TEXT_MUTED_CLASS]">{{ t('profile.spotify.playlistHint') }}</p>
+            <p :class="['mt-2 text-xs', TEXT_MUTED_CLASS]">
+              {{ t('profile.spotify.playlistHint') }}
+            </p>
           </div>
 
           <LoadingButton

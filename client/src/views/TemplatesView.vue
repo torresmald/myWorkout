@@ -10,6 +10,7 @@ import TemplateForm from '@/components/TemplateForm.vue'
 import PageContainer from '@/components/layout/PageContainer.vue'
 import RoutePageHeader from '@/components/layout/RoutePageHeader.vue'
 import type { WorkoutTemplatePublic } from '@/interfaces/template.interface'
+import { useAuthStore } from '@/stores/auth.store'
 import { useModalStore } from '@/stores/modal.store'
 import { useTemplateStore } from '@/stores/template.store'
 import { useToastStore } from '@/stores/toast.store'
@@ -17,15 +18,18 @@ import { useWorkoutStore } from '@/stores/workout.store'
 import { dateInputToIso, todayDateInputValue } from '@/utils/date.util'
 import { getErrorMessage } from '@/utils/error.util'
 import { templateExercisesToWorkoutExercises } from '@/utils/template-workout.util'
+import { tryAutoOpenWorkoutPlaylist } from '@/utils/workout-playlist.util'
 
 const templateStore = useTemplateStore()
 const workoutStore = useWorkoutStore()
+const authStore = useAuthStore()
 const modalStore = useModalStore()
 const toastStore = useToastStore()
 const router = useRouter()
 const { t } = useI18n()
 
 const { templates, loading, deletingId } = storeToRefs(templateStore)
+const { user } = storeToRefs(authStore)
 
 const templateFormRef = ref<InstanceType<typeof TemplateForm> | null>(null)
 const startingTemplateId = ref<number | null>(null)
@@ -87,6 +91,7 @@ async function handleStartWorkout(template: WorkoutTemplatePublic) {
     })
 
     toastStore.success(t('templates.startWorkoutSuccess'))
+    tryAutoOpenWorkoutPlaylist(user.value)
     await router.push({ name: 'workout-session', params: { id: String(created.id) } })
   } catch (e) {
     toastStore.error(getErrorMessage(e, t('templates.startWorkoutError')))

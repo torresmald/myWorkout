@@ -17,7 +17,6 @@ export const useSpotifyStore = defineStore('spotify', () => {
   const connecting = ref(false)
   const savingPlaylist = ref(false)
   const disconnecting = ref(false)
-
   function applyConnectionToProfile(next: SpotifyConnectionPublic) {
     connection.value = next
 

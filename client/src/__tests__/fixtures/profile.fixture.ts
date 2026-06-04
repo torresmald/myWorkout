@@ -23,6 +23,7 @@ export function createUserPublic(overrides: Partial<UserPublic> = {}): UserPubli
     heightCm: 180,
     profileImageUrl: null,
     spotifyPlaylistUrl: null,
+    allowAutoPlaylist: false,
     spotifyConnected: false,
     spotifyDisplayName: null,
     spotifyPlaylistName: null,

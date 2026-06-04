@@ -78,9 +78,14 @@ export default {
     saveManualButton: 'Guardar enlace manual',
     openButton: 'Abrir playlist',
     playButton: 'Reproducir en Spotify',
-    savePlaylistFirst: 'Selecciona una playlist abajo y pulsa «Guardar playlist de entreno» para poder reproducirla.',
+    savePlaylistFirst:
+      'Selecciona una playlist abajo y pulsa «Guardar playlist de entreno» para poder reproducirla.',
     saveSuccess: 'Playlist de entreno guardada',
     saveError: 'No se pudo guardar la playlist de entreno',
     noChanges: 'No hay cambios para guardar',
+    allowAutoPlaylist: 'Permitir playlist automática',
+    allowAutoPlaylistHint:
+      'Al pulsar play en un entreno, se abrirá tu playlist de entreno en Spotify.',
+    autoPlaylistSaveError: 'No se pudo guardar la preferencia de playlist automática',
   },
 } as const
