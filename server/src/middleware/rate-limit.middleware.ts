@@ -1,6 +1,11 @@
+import type { RequestHandler } from 'express'
 import rateLimit from 'express-rate-limit'
 
 import { sendError } from '../utils/api-response.util.js'
+
+const noOpLimiter: RequestHandler = (_req, _res, next) => {
+  next()
+}
 
 function createLimiter(windowMs: number, max: number) {
   return rateLimit({
@@ -14,8 +19,12 @@ function createLimiter(windowMs: number, max: number) {
   })
 }
 
+function limiterOrBypass(windowMs: number, max: number): RequestHandler {
+  return process.env.NODE_ENV === 'test' ? noOpLimiter : createLimiter(windowMs, max)
+}
+
 /** Login, registro y Google OAuth */
-export const authActionLimiter = createLimiter(15 * 60 * 1000, 10)
+export const authActionLimiter = limiterOrBypass(15 * 60 * 1000, 10)
 
 /** Forgot password y reenvío de verificación (protege SMTP) */
-export const authEmailLimiter = createLimiter(60 * 60 * 1000, 5)
+export const authEmailLimiter = limiterOrBypass(60 * 60 * 1000, 5)

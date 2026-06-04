@@ -10,14 +10,15 @@ Monorepo con workspaces `client/` (frontend PWA) y `server/` (API REST).
 | ------------- | ------------------------------------------------- |
 | Frontend      | Vue 3, Vite, Pinia, Vue Router, Tailwind CSS, PWA |
 | Backend       | Express 5, Prisma, JWT + refresh token            |
-| Base de datos | PostgreSQL (Neon recomendado)                     |
+| Base de datos | PostgreSQL (Docker en local, Neon en producción)  |
 | Despliegue    | Vercel (client) + Render (API)                    |
 
 ## Requisitos
 
 - Node.js `^20.19.0` o `>=22.12.0`
 - npm (workspaces)
-- Cuenta en [Neon](https://neon.tech), [Render](https://render.com) y [Vercel](https://vercel.com)
+- Cuenta en [Neon](https://neon.tech), [Render](https://render.com) y [Vercel](https://vercel.com) (solo despliegue)
+- [Docker](https://www.docker.com/) (PostgreSQL local en desarrollo)
 
 ## Desarrollo local
 
@@ -38,15 +39,46 @@ cp client/.env.example client/.env
 
 Consulta la sección [Variables de entorno](#variables-de-entorno) para el detalle de cada variable.
 
-### 3. Base de datos
+### 3. Base de datos (Docker local)
 
-Aplica las migraciones contra tu instancia local o de Neon:
+PostgreSQL en local con Docker. Producción sigue en Neon.
 
 ```sh
-npm run db:migrate
+# Arrancar Postgres (dev + test) y aplicar migraciones
+npm run db:local:setup
 ```
 
-En producción se usa `npm run db:migrate:deploy`.
+Esto levanta el contenedor `myworkout-postgres` (PostgreSQL 17) con:
+
+| Base de datos     | Uso                          |
+| ----------------- | ---------------------------- |
+| `myworkout_dev`   | Desarrollo (`DATABASE_URL`)  |
+| `myworkout_test`  | Tests de integración         |
+
+Comandos útiles:
+
+```sh
+npm run db:up          # solo arrancar contenedor
+npm run db:down        # parar contenedor
+npm run db:logs        # logs de Postgres
+npm run db:reset       # borrar volumen y recrear (⚠ pierde datos locales)
+npm run db:studio      # Prisma Studio contra la BD de dev
+```
+
+Credenciales locales (solo Docker): usuario `myworkout`, contraseña `myworkout`, puerto `5432`.
+
+Copia `server/.env.example` → `server/.env` (URLs ya apuntan a Docker) y `server/.env.test.example` → `server/.env.test` para tests.
+
+Si el puerto 5432 está ocupado por otro Postgres, cambia el mapeo en `docker-compose.yml` (p. ej. `5433:5432`) y actualiza las URLs en `.env`.
+
+Migraciones manuales (sin Docker script):
+
+```sh
+npm run db:migrate        # dev: crea/aplica migraciones en myworkout_dev
+npm run db:migrate:deploy # prod o CI
+```
+
+En producción se usa `npm run db:migrate:deploy` contra Neon.
 
 ### 4. Arrancar en desarrollo
 

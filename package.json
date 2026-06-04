@@ -16,8 +16,18 @@
     "db:migrate:deploy": "npm run migrate:deploy --workspace=server",
     "db:studio": "npm run studio --workspace=server",
     "db:generate": "npm run generate --workspace=server",
-    "test": "npm run test --workspace=client",
-    "test:watch": "npm run test:watch --workspace=client"
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:logs": "docker compose logs -f postgres",
+    "db:reset": "docker compose down -v && docker compose up -d",
+    "db:local:setup": "run-s db:up db:local:wait db:migrate:deploy db:test:migrate",
+    "db:local:wait": "docker compose exec -T postgres sh -c 'until pg_isready -U myworkout -d myworkout_dev; do sleep 1; done'",
+    "db:test:migrate": "env DATABASE_URL=postgresql://myworkout:myworkout@localhost:5432/myworkout_test DIRECT_URL=postgresql://myworkout:myworkout@localhost:5432/myworkout_test npm run migrate:deploy --workspace=server",
+    "test": "run-s test:client test:server",
+    "test:client": "npm run test --workspace=client",
+    "test:server": "npm run test --workspace=server",
+    "test:watch": "npm run test:watch --workspace=client",
+    "test:watch:server": "npm run test:watch --workspace=server"
   },
   "devDependencies": {
     "npm-run-all2": "^8.0.4"

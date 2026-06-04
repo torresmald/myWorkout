@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  client:
+    name: Client tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run type-check --workspace=client
+
+      - name: Run tests
+        run: npm run test:client
+
+  server:
+    name: Server tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: myworkout
+          POSTGRES_PASSWORD: myworkout
+          POSTGRES_DB: myworkout_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U myworkout -d myworkout_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      TEST_DATABASE_URL: postgresql://myworkout:myworkout@localhost:5432/myworkout_test
+      JWT_SECRET: test-jwt-secret-with-at-least-32-characters
+      JWT_EXPIRES_IN: 1h
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npm run generate --workspace=server
+
+      - name: Apply migrations (test DB)
+        run: npm run db:test:migrate
+
+      - name: Run tests
+        run: npm run test:server
+
+      - name: Build server
+        run: npm run build:server

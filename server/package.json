@@ -14,7 +14,10 @@
     "studio": "prisma studio --schema=prisma",
     "generate": "prisma generate --schema=prisma",
     "reminders:send": "tsx src/scripts/send-workout-reminders.ts",
-    "seed:catalog-media": "tsx src/scripts/seed-catalog-media.ts"
+    "seed:catalog-media": "tsx src/scripts/seed-catalog-media.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:integration": "vitest run src/**/__tests__/integration/**/*.test.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
@@ -38,6 +41,9 @@
     "typescript": "~5.8.3"
   },
   "devDependencies": {
-    "tsx": "^4.19.4"
+    "@types/supertest": "^6.0.3",
+    "supertest": "^7.1.4",
+    "tsx": "^4.19.4",
+    "vitest": "^4.1.4"
   }
 }
