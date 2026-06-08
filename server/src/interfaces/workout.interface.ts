@@ -7,6 +7,10 @@ export interface CreateWorkoutBody {
 
 export type UpdateWorkoutBody = Omit<CreateWorkoutBody, 'exercises'>
 
+export interface DuplicateWorkoutBody {
+  date?: string
+}
+
 export interface WorkoutPublic {
   id: number
   name: string
@@ -17,6 +21,12 @@ export interface WorkoutPublic {
   completedAt: Date | null
   createdAt: Date
   updatedAt: Date
+}
+
+export interface WorkoutListItem extends WorkoutPublic {
+  exerciseCount: number
+  volumeKg: number
+  exerciseNames: string[]
 }
 
 export interface WorkoutCreateResult extends WorkoutPublic {

@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { createWorkoutListItem } from '@/__tests__/fixtures/workout.fixture'
 import * as workoutApi from '@/api/workout.api'
 import { setupTestPinia } from '@/__tests__/helpers/mount-test-app'
-import type { WorkoutExercisePublic, WorkoutPublic } from '@/interfaces/workout.interface'
+import type { WorkoutExercisePublic } from '@/interfaces/workout.interface'
 import { useWorkoutStore } from '@/stores/workout.store'
 
 vi.mock('@/api/workout.api', () => ({
@@ -16,17 +17,7 @@ vi.mock('@/api/workout.api', () => ({
   deleteWorkoutExercise: vi.fn(),
 }))
 
-const mockWorkout: WorkoutPublic = {
-  id: 1,
-  name: 'Leg day',
-  date: '2026-01-01',
-  notes: null,
-  status: 'PLANNED',
-  startedAt: null,
-  completedAt: null,
-  createdAt: '2026-01-01T00:00:00.000Z',
-  updatedAt: '2026-01-01T00:00:00.000Z',
-}
+const mockWorkout = createWorkoutListItem()
 
 const mockExercise: WorkoutExercisePublic = {
   id: 10,

@@ -1,7 +1,7 @@
 import { Router } from 'express'
 
 import type { AuthenticatedRequest } from '../interfaces/express.interface.js'
-import type { AddWeightBody, UpdateProfileBody, UpdateWeightBody } from '../interfaces/profile.interface.js'
+import type { AddWeightBody, ChangePasswordBody, DeleteAccountBody, UpdateProfileBody, UpdateWeightBody } from '../interfaces/profile.interface.js'
 import { authenticate } from '../middleware/auth.middleware.js'
 import { handleAvatarUpload } from '../middleware/upload.middleware.js'
 import {
@@ -11,6 +11,11 @@ import {
   updateUserProfile,
   updateWeightEntry,
 } from '../services/profile.service.js'
+import { exportUserData } from '../services/profile-export.service.js'
+import { deleteUserAccount } from '../services/profile-delete.service.js'
+import { changeUserPassword } from '../services/profile-password.service.js'
+import { updateUserPreferences } from '../services/user-preferences.service.js'
+import type { UpdateUserPreferencesBody } from '../interfaces/user-preferences.interface.js'
 import {
   deleteProfileAvatar,
   uploadProfileAvatar,
@@ -45,6 +50,67 @@ router.patch('/', async (req, res) => {
   try {
     const profile = await updateUserProfile(userId, req.body as UpdateProfileBody)
     sendSuccess(res, profile)
+  } catch (error) {
+    if (handleServiceError(error, res)) {
+      return
+    }
+
+    throw error
+  }
+})
+
+router.patch('/preferences', async (req, res) => {
+  const { userId } = (req as AuthenticatedRequest).user
+
+  try {
+    const preferences = await updateUserPreferences(userId, req.body as UpdateUserPreferencesBody)
+    sendSuccess(res, preferences)
+  } catch (error) {
+    if (handleServiceError(error, res)) {
+      return
+    }
+
+    throw error
+  }
+})
+
+router.get('/export', async (req, res) => {
+  const { userId } = (req as AuthenticatedRequest).user
+
+  try {
+    const data = await exportUserData(userId)
+    sendSuccess(res, data)
+  } catch (error) {
+    if (handleServiceError(error, res)) {
+      return
+    }
+
+    throw error
+  }
+})
+
+router.delete('/', async (req, res) => {
+  const { userId } = (req as AuthenticatedRequest).user
+
+  try {
+    const { password } = req.body as DeleteAccountBody
+    await deleteUserAccount(userId, password)
+    sendSuccess(res, { messageCode: 'ACCOUNT_DELETED' })
+  } catch (error) {
+    if (handleServiceError(error, res)) {
+      return
+    }
+
+    throw error
+  }
+})
+
+router.patch('/password', async (req, res) => {
+  const { userId } = (req as AuthenticatedRequest).user
+
+  try {
+    const result = await changeUserPassword(userId, req.body as ChangePasswordBody)
+    sendSuccess(res, result)
   } catch (error) {
     if (handleServiceError(error, res)) {
       return

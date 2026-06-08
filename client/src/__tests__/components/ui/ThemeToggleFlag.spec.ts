@@ -24,7 +24,7 @@ describe('ThemeToggleFlag', () => {
   it('muestra aria-label para modo claro cuando el tema es oscuro', () => {
     const pinia = setupTestPinia()
     const themeStore = useThemeStore(pinia)
-    themeStore.preference = 'dark'
+    themeStore.setMode('dark')
 
     const wrapper = mount(ThemeToggleFlag, {
       global: { plugins: [pinia, i18n] },
@@ -39,7 +39,7 @@ describe('ThemeToggleFlag', () => {
   it('muestra aria-label para modo oscuro cuando el tema es claro', () => {
     const pinia = setupTestPinia()
     const themeStore = useThemeStore(pinia)
-    themeStore.preference = 'light'
+    themeStore.setMode('light')
 
     const wrapper = mount(ThemeToggleFlag, {
       global: { plugins: [pinia, i18n] },

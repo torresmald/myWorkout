@@ -4,6 +4,7 @@ import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 
+import { useWeightDisplay } from '@/composables/useWeightDisplay'
 import ExerciseHistoryChart from '@/components/exercise-history/ExerciseHistoryChart.vue'
 import ExerciseHistorySessionCard from '@/components/exercise-history/ExerciseHistorySessionCard.vue'
 import PageContainer from '@/components/layout/PageContainer.vue'
@@ -24,6 +25,7 @@ const router = useRouter()
 const historyStore = useExerciseHistoryStore()
 const toastStore = useToastStore()
 const { t } = useI18n()
+const { formatWeight } = useWeightDisplay()
 
 const exerciseTypeId = computed(() => Number(route.params.id))
 
@@ -82,7 +84,7 @@ onUnmounted(() => {
         {{
           t('personalRecords.repsAtWeight', {
             reps: history.personalRecord.reps,
-            weight: history.personalRecord.maxWeight,
+            weight: formatWeight(history.personalRecord.maxWeight),
           })
         }}
         ·

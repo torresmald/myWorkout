@@ -6,6 +6,8 @@ export default {
   GOOGLE_ACCOUNT_ALREADY_LINKED: 'This account is already linked to another Google sign-in',
   EMAIL_ALREADY_REGISTERED: 'Email is already registered',
   INVALID_CREDENTIALS: 'Invalid credentials',
+  PASSWORD_REQUIRED: 'Password is required',
+  CANNOT_DELETE_LAST_ADMIN: 'Cannot delete the only admin account',
   REFRESH_TOKEN_REQUIRED: 'Refresh token is required',
   INVALID_REFRESH_TOKEN: 'Invalid or expired refresh token',
   INVALID_SPOTIFY_PLAYLIST_URL: 'Invalid Spotify playlist URL',

@@ -5,10 +5,18 @@ export default {
   openNavMenu: 'Open navigation menu',
   openUserMenu: 'Open user menu',
   goToProfile: 'Go to my profile',
+  goToSettings: 'Go to settings',
   switchToLight: 'Switch to light mode',
   switchToDark: 'Switch to dark mode',
   switchToSpanish: 'Cambiar a español',
   switchToEnglish: 'Switch to English',
   languageEs: 'ES',
   languageEn: 'EN',
+  pwaInstall: {
+    title: 'Install myWorkout on your phone',
+    description: 'Quick access from your home screen — perfect for the gym.',
+    manualHint: 'On Safari: Share → Add to Home Screen. On Chrome: menu → Install app.',
+    install: 'Install',
+    dismiss: 'Not now',
+  },
 } as const

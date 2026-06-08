@@ -5,14 +5,16 @@ import * as workoutApi from '@/api/workout.api'
 import type {
   CreateWorkoutBody,
   CreateWorkoutExerciseBody,
+  DuplicateWorkoutBody,
   UpdateWorkoutBody,
   UpdateWorkoutExerciseBody,
   WorkoutExercisePublic,
+  WorkoutListItem,
   WorkoutPublic,
 } from '@/interfaces/workout.interface'
 
 export const useWorkoutStore = defineStore('workout', () => {
-  const workouts = ref<WorkoutPublic[]>([])
+  const workouts = ref<WorkoutListItem[]>([])
   const exercises = ref<WorkoutExercisePublic[]>([])
   const activeWorkoutId = ref<number | null>(null)
 
@@ -20,6 +22,7 @@ export const useWorkoutStore = defineStore('workout', () => {
   const creating = ref(false)
   const updating = ref(false)
   const deletingId = ref<number | null>(null)
+  const duplicatingId = ref<number | null>(null)
 
   const loadingExercises = ref(false)
   const creatingExercise = ref(false)
@@ -69,6 +72,18 @@ export const useWorkoutStore = defineStore('workout', () => {
       return updated
     } finally {
       updating.value = false
+    }
+  }
+
+  async function duplicate(id: number, body?: DuplicateWorkoutBody) {
+    duplicatingId.value = id
+
+    try {
+      const duplicated = await workoutApi.duplicateWorkout(id, body)
+      await fetchAll(true)
+      return duplicated
+    } finally {
+      duplicatingId.value = null
     }
   }
 
@@ -155,6 +170,7 @@ export const useWorkoutStore = defineStore('workout', () => {
     creating,
     updating,
     deletingId,
+    duplicatingId,
     loadingExercises,
     creatingExercise,
     updatingExerciseId,
@@ -163,6 +179,7 @@ export const useWorkoutStore = defineStore('workout', () => {
     create,
     update,
     remove,
+    duplicate,
     fetchExercises,
     clearExercises,
     hydrateExercises,

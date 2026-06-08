@@ -1,4 +1,4 @@
-import type { WorkoutExercisePublic, WorkoutPublic } from '@/interfaces/workout.interface'
+import type { WorkoutExercisePublic, WorkoutListItem, WorkoutPublic } from '@/interfaces/workout.interface'
 
 export function createWorkout(overrides: Partial<WorkoutPublic> = {}): WorkoutPublic {
   return {
@@ -11,6 +11,16 @@ export function createWorkout(overrides: Partial<WorkoutPublic> = {}): WorkoutPu
     completedAt: null,
     createdAt: '2026-01-01T00:00:00.000Z',
     updatedAt: '2026-01-01T00:00:00.000Z',
+    ...overrides,
+  }
+}
+
+export function createWorkoutListItem(overrides: Partial<WorkoutListItem> = {}): WorkoutListItem {
+  return {
+    ...createWorkout(overrides),
+    exerciseCount: 0,
+    volumeKg: 0,
+    exerciseNames: [],
     ...overrides,
   }
 }

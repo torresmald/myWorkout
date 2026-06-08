@@ -28,11 +28,13 @@ vi.mock('@/api/profile.api', () => ({
 vi.mock('@/api/reminder.api', () => ({
   getReminderSettings: vi.fn().mockResolvedValue({
     pushReminderEnabled: false,
-    emailReminderEnabled: false,
-    reminderDays: [],
-    reminderTimeLocal: '18:00',
-    reminderTimezone: 'Europe/Madrid',
-    workoutsLast7Days: 0,
+  emailReminderEnabled: false,
+  plannedWorkoutReminderEnabled: false,
+  reminderDays: [],
+  reminderTimeLocal: '18:00',
+  reminderTimezone: 'Europe/Madrid',
+  workoutsLast7Days: 0,
+  hasPlannedWorkoutToday: false,
   }),
   updateReminderSettings: vi.fn(),
 }))
@@ -86,7 +88,7 @@ describe('ProfileView', () => {
 
   it('carga perfil y muestra secciones principales', async () => {
     const { wrapper } = await mountWithPlugins(ProfileView, {
-      stubs: { SpotifyWorkoutSettings: true, WorkoutReminderSettings: true },
+      stubs: {},
     })
     await flushPromises()
 
@@ -97,7 +99,7 @@ describe('ProfileView', () => {
 
   it('guarda cambios del perfil', async () => {
     const { pinia, wrapper } = await mountWithPlugins(ProfileView, {
-      stubs: { SpotifyWorkoutSettings: true, WorkoutReminderSettings: true },
+      stubs: {},
     })
     const toastStore = useToastStore(pinia)
     const successSpy = vi.spyOn(toastStore, 'success')
@@ -113,7 +115,7 @@ describe('ProfileView', () => {
 
   it('muestra error con altura inválida', async () => {
     const { pinia, wrapper } = await mountWithPlugins(ProfileView, {
-      stubs: { SpotifyWorkoutSettings: true, WorkoutReminderSettings: true },
+      stubs: {},
     })
     const toastStore = useToastStore(pinia)
     const errorSpy = vi.spyOn(toastStore, 'error')
@@ -127,7 +129,7 @@ describe('ProfileView', () => {
 
   it('muestra error sin cambios', async () => {
     const { pinia, wrapper } = await mountWithPlugins(ProfileView, {
-      stubs: { SpotifyWorkoutSettings: true, WorkoutReminderSettings: true },
+      stubs: {},
     })
     const toastStore = useToastStore(pinia)
     const errorSpy = vi.spyOn(toastStore, 'error')
@@ -140,7 +142,7 @@ describe('ProfileView', () => {
 
   it('añade peso desde el modal', async () => {
     const { pinia, wrapper } = await mountWithPlugins(ProfileView, {
-      stubs: { SpotifyWorkoutSettings: true, WorkoutReminderSettings: true },
+      stubs: {},
       attachTo: document.body,
     })
     const toastStore = useToastStore(pinia)
@@ -163,7 +165,7 @@ describe('ProfileView', () => {
   it('edita y elimina entrada de peso', async () => {
     const { pinia, wrapper } = await mountWithPlugins(ProfileView, {
       routes: adminRoutes,
-      stubs: { SpotifyWorkoutSettings: true, WorkoutReminderSettings: true },
+      stubs: {},
     })
     const modalStore = useModalStore(pinia)
     vi.spyOn(modalStore, 'confirm').mockResolvedValue(true)
@@ -197,7 +199,7 @@ describe('ProfileView', () => {
     )
 
     const { wrapper } = await mountWithPlugins(ProfileView, {
-      stubs: { SpotifyWorkoutSettings: true, WorkoutReminderSettings: true },
+      stubs: {},
     })
     await flushPromises()
 

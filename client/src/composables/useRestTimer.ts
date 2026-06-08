@@ -1,8 +1,12 @@
 import { onUnmounted, ref } from 'vue'
+import { storeToRefs } from 'pinia'
 
 import { playRestTimerCompleteSound, unlockRestTimerSound } from '@/utils/rest-timer-sound.util'
+import { useAuthStore } from '@/stores/auth.store'
 
 export function useRestTimer() {
+  const authStore = useAuthStore()
+  const { user } = storeToRefs(authStore)
   const isOpen = ref(false)
   const isPaused = ref(false)
   const isFinished = ref(false)
@@ -47,7 +51,10 @@ export function useRestTimer() {
     isPaused.value = false
     isFinished.value = true
     remainingSeconds.value = 0
-    playRestTimerCompleteSound()
+
+    if (user.value?.restTimerSoundEnabled ?? true) {
+      playRestTimerCompleteSound()
+    }
   }
 
   function start(name: string, totalSecondsParam: number) {

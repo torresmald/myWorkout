@@ -1,7 +1,7 @@
 import { ref, watch } from 'vue'
 import { defineStore } from 'pinia'
 
-import { updateProfile } from '@/api/profile.api'
+import { updatePreferences } from '@/api/profile.api'
 import { type AppLocale } from '@/constants/locale.constants'
 import { i18n } from '@/i18n'
 import { applyLocale, getStoredLocale, isAppLocale } from '@/utils/locale.util'
@@ -42,7 +42,7 @@ export const useLocaleStore = defineStore('locale', () => {
     }
 
     try {
-      await updateProfile({ locale: nextLocale })
+      await updatePreferences({ locale: nextLocale })
     } catch {
       // Keep UI locale even if persistence fails temporarily.
     }

@@ -22,16 +22,10 @@ export const COOKIE_INVENTORY: CookieInventoryItem[] = [
     durationKey: 'cookies.inventory.consentRecord',
   },
   {
-    key: 'myworkout_theme',
-    storage: 'localStorage',
-    category: 'preferences',
-    durationKey: 'cookies.inventory.persistent',
-  },
-  {
     key: 'myworkout_locale',
     storage: 'localStorage',
     category: 'preferences',
-    durationKey: 'cookies.inventory.persistent',
+    durationKey: 'cookies.inventory.guestLocale',
   },
   {
     key: 'myworkout_onboarding_done',

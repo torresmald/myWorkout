@@ -23,6 +23,10 @@ import { useSpotifyStore } from '@/stores/spotify.store'
 import { useToastStore } from '@/stores/toast.store'
 import { getErrorMessage } from '@/utils/error.util'
 
+const { embedded = false } = defineProps<{ embedded?: boolean }>()
+
+const SETTINGS_SUBSECTION_TITLE_CLASS = 'mb-3 text-sm font-semibold text-text-primary sm:text-base'
+
 const profileStore = useProfileStore()
 const spotifyStore = useSpotifyStore()
 const modalStore = useModalStore()
@@ -156,17 +160,6 @@ async function handleSavePlaylistSelection() {
   }
 }
 
-async function handleAllowAutoPlaylistChange(event: Event) {
-  const input = event.target as HTMLInputElement
-
-  try {
-    await profileStore.saveAllowAutoPlaylist(input.checked)
-  } catch (error) {
-    input.checked = !input.checked
-    toastStore.error(getErrorMessage(error, t('profile.spotify.autoPlaylistSaveError')))
-  }
-}
-
 async function handleSaveManualUrl() {
   if (!profile.value) {
     return
@@ -181,7 +174,7 @@ async function handleSaveManualUrl() {
   }
 
   try {
-    await profileStore.saveProfile({
+    await profileStore.savePreferences({
       spotifyPlaylistUrl: nextValue.length > 0 ? nextValue : null,
     })
     syncFromProfile()
@@ -194,8 +187,13 @@ async function handleSaveManualUrl() {
 </script>
 
 <template>
-  <section :class="CARD_BODY_CLASS">
-    <h2 :class="SECTION_TITLE_CLASS">{{ t('profile.spotify.title') }}</h2>
+  <component :is="embedded ? 'div' : 'section'" :class="embedded ? undefined : CARD_BODY_CLASS">
+    <component
+      :is="embedded ? 'h3' : 'h2'"
+      :class="embedded ? SETTINGS_SUBSECTION_TITLE_CLASS : SECTION_TITLE_CLASS"
+    >
+      {{ t('profile.spotify.title') }}
+    </component>
     <p :class="['mb-4 text-sm', TEXT_MUTED_CLASS]">{{ t('profile.spotify.description') }}</p>
 
     <div v-if="loadingConnection" class="mb-4 flex items-center gap-2 text-sm text-text-muted">
@@ -232,29 +230,6 @@ async function handleSaveManualUrl() {
         <p v-if="workoutPlaylistName" :class="['mt-1', TEXT_MUTED_CLASS]">
           {{ t('profile.spotify.currentPlaylist', { name: workoutPlaylistName }) }}
         </p>
-      </div>
-      <div
-        v-if="workoutPlaylistUrl"
-        class="mb-4 rounded-lg border border-border-default bg-bg-muted px-4 py-3 text-sm"
-      >
-        <label for="allowAutoPlaylist" class="flex cursor-pointer items-start gap-3">
-          <input
-            id="allowAutoPlaylist"
-            type="checkbox"
-            :checked="profile?.allowAutoPlaylist ?? false"
-            :disabled="saving"
-            class="mt-0.5 h-5 w-5 shrink-0 rounded border-border-default text-blue-600 focus:ring-blue-500"
-            @change="handleAllowAutoPlaylistChange"
-          />
-          <span>
-            <span class="block text-sm font-medium text-text-primary">
-              {{ t('profile.spotify.allowAutoPlaylist') }}
-            </span>
-            <span :class="['mt-1 block text-xs', TEXT_MUTED_CLASS]">
-              {{ t('profile.spotify.allowAutoPlaylistHint') }}
-            </span>
-          </span>
-        </label>
       </div>
 
       <div class="mb-6 flex flex-col gap-2 sm:flex-row">
@@ -357,5 +332,5 @@ async function handleSaveManualUrl() {
         </form>
       </div>
     </template>
-  </section>
+  </component>
 </template>

@@ -100,18 +100,22 @@ export async function resendVerificationEmail(
 
   const user = await prisma.user.findUnique({
     where: { email: normalizedEmail },
+    include: { preferences: { select: { locale: true } } },
   })
 
   if (!user || !user.password || user.emailVerifiedAt) {
     return { messageCode: MessageCode.RESEND_VERIFICATION_SUCCESS }
   }
 
-  const emailLocale = locale ? parseAppLocale(locale) : parseAppLocale(user.locale)
+  const emailLocale = locale
+    ? parseAppLocale(locale)
+    : parseAppLocale(user.preferences?.locale ?? 'es')
 
   if (locale) {
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { locale: emailLocale },
+    await prisma.userPreferences.upsert({
+      where: { userId: user.id },
+      create: { userId: user.id, locale: emailLocale },
+      update: { locale: emailLocale },
     })
   }
 

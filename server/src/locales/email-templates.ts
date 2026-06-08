@@ -18,6 +18,8 @@ interface EmailTemplate {
   reminderBody: string
   reminderLinkLabel: string
   reminderIgnore: string
+  plannedReminderSubject: string
+  plannedReminderBody: string
 }
 
 const templates: Record<AppLocale, EmailTemplate> = {
@@ -40,6 +42,9 @@ const templates: Record<AppLocale, EmailTemplate> = {
       'Llevás más de una semana sin registrar un entrenamiento. ¿Te apetece retomar la rutina hoy?',
     reminderLinkLabel: 'Ir a mis entrenamientos',
     reminderIgnore: 'Puedes desactivar estos recordatorios en tu perfil.',
+    plannedReminderSubject: 'Tienes un entreno planificado hoy en {appName}',
+    plannedReminderBody:
+      'Hoy tienes un entrenamiento planificado en myWorkout. ¿Lo empezamos?',
   },
   en: {
     verificationSubject: 'Verify your {appName} account',
@@ -60,6 +65,8 @@ const templates: Record<AppLocale, EmailTemplate> = {
       'You have not logged a workout in over a week. Ready to get back on track today?',
     reminderLinkLabel: 'Go to my workouts',
     reminderIgnore: 'You can turn off these reminders in your profile.',
+    plannedReminderSubject: 'You have a planned workout today on {appName}',
+    plannedReminderBody: 'You have a workout scheduled for today in myWorkout. Ready to start?',
   },
 }
 

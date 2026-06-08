@@ -14,7 +14,7 @@ import {
   TEXT_HEADING_CLASS,
 } from '@/constants/ui.constants'
 import type { WorkoutTemplatePublic } from '@/interfaces/template.interface'
-import { formatWorkoutDate } from '@/utils/date.util'
+import { formatListDate } from '@/utils/date.util'
 
 const props = defineProps<{
   templates: WorkoutTemplatePublic[]
@@ -63,7 +63,7 @@ const { t } = useI18n()
             {{ template.description }}
           </p>
           <time class="mt-1 block text-sm text-text-muted" :datetime="template.updatedAt">
-            {{ t('templates.list.updatedAt', { date: formatWorkoutDate(template.updatedAt) }) }}
+            {{ t('templates.list.updatedAt', { date: formatListDate(template.updatedAt) }) }}
           </time>
         </div>
 

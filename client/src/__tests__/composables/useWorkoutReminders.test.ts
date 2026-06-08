@@ -17,6 +17,7 @@ vi.mock('@/utils/reminder.util', async () => {
   return {
     ...actual,
     shouldShowPushReminder: vi.fn(),
+    shouldShowPlannedWorkoutPushReminder: vi.fn(),
     showWorkoutReminderNotification: vi.fn(),
     markPushReminderShownToday: vi.fn(),
     getLocalDateKey: vi.fn(() => '2026-06-03'),
@@ -30,10 +31,14 @@ const mockUser: UserPublic = {
   role: 'USER',
   locale: 'es',
   createdAt: '2026-01-01T00:00:00.000Z',
-  heightCm: null,
-  profileImageUrl: null,
+    heightCm: null,
+    targetWeightKg: null,
+    profileImageUrl: null,
   spotifyPlaylistUrl: null,
   allowAutoPlaylist: false,
+  restTimerSoundEnabled: true,
+  showPrToast: true,
+  confirmIncompleteFinish: true,
   spotifyConnected: false,
   spotifyDisplayName: null,
   spotifyPlaylistName: null,
@@ -45,10 +50,12 @@ const mockUser: UserPublic = {
 const mockSettings: WorkoutReminderSettings = {
   pushReminderEnabled: true,
   emailReminderEnabled: false,
+  plannedWorkoutReminderEnabled: false,
   reminderDays: [1],
   reminderTimeLocal: '09:00',
   reminderTimezone: 'UTC',
   workoutsLast7Days: 0,
+  hasPlannedWorkoutToday: false,
 }
 
 function mountWorkoutReminders() {

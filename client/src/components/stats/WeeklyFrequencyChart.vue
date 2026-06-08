@@ -26,16 +26,16 @@ const props = defineProps<{
 
 const themeStore = useThemeStore()
 const localeStore = useLocaleStore()
-const { preference } = storeToRefs(themeStore)
+const { resolvedTheme } = storeToRefs(themeStore)
 const { locale } = storeToRefs(localeStore)
 
-const isDark = computed(() => preference.value === 'dark')
+const isDark = computed(() => resolvedTheme.value === 'dark')
 const chartData = computed(() => buildWeeklyFrequencyChartData(props.weekly))
 const chartOptions = computed(() => buildWeeklyFrequencyChartOptions(isDark.value))
 </script>
 
 <template>
   <div class="h-64 w-full sm:h-72">
-    <Bar :key="`${preference}-${locale}`" :data="chartData" :options="chartOptions" />
+    <Bar :key="`${resolvedTheme}-${locale}`" :data="chartData" :options="chartOptions" />
   </div>
 </template>

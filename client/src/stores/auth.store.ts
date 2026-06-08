@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 
 import * as authApi from '@/api/auth.api'
 import type { LoginBody, RegisterBody, UserPublic } from '@/interfaces/auth.interface'
+import { syncStoresFromUser } from '@/utils/sync-user-preferences.util'
 import { useLocaleStore } from '@/stores/locale.store'
 import { clearTokens, getAccessToken, getRefreshToken, setTokens } from '@/utils/storage.util'
 import { onSessionRefreshed, refreshAccessToken } from '@/utils/refresh-session.util'
@@ -22,7 +23,7 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = computed(() => !!token.value && !!user.value)
 
   function syncUserLocale(currentUser: UserPublic) {
-    useLocaleStore().syncFromUser(currentUser.locale)
+    syncStoresFromUser(currentUser)
   }
 
   function setSession(accessToken: string, newRefreshToken: string, currentUser: UserPublic) {

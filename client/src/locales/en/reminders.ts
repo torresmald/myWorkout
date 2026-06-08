@@ -6,6 +6,12 @@ export default {
   pushHint: 'Works when the app is open or installed as a PWA. Requires browser permission.',
   emailEnabled: 'Email reminder',
   emailHint: 'Sent to your inbox if you have not trained in the last 7 days.',
+  plannedWorkoutEnabled: 'Planned workout today',
+  plannedWorkoutHint:
+    'Notifies you at the configured time if you have a planned workout scheduled for today.',
+  plannedWorkoutToday: 'You have a workout planned for today.',
+  plannedNotificationTitle: 'Planned workout today',
+  plannedNotificationBody: 'You have a workout planned for today. Ready to start?',
   daysLabel: 'Days of the week',
   timeLabel: 'Time',
   timezoneLabel: 'Timezone',

@@ -17,6 +17,7 @@ import { useToastStore } from '@/stores/toast.store'
 vi.mock('@/api/profile.api', () => ({
   getProfile: vi.fn(),
   updateProfile: vi.fn(),
+  updatePreferences: vi.fn(),
   addWeight: vi.fn(),
   updateWeight: vi.fn(),
   deleteWeight: vi.fn(),
@@ -166,9 +167,18 @@ describe('SpotifyWorkoutSettings', () => {
   it('guarda URL manual de playlist', async () => {
     const profile = createUserProfile({ spotifyPlaylistUrl: null })
     vi.mocked(profileApi.getProfile).mockResolvedValue(profile)
-    vi.mocked(profileApi.updateProfile).mockResolvedValue({
-      ...profile,
+    vi.mocked(profileApi.updatePreferences).mockResolvedValue({
+      locale: 'es',
+      themeMode: 'system',
+      weightUnit: 'kg',
+      allowAutoPlaylist: false,
+      restTimerSoundEnabled: true,
+      showPrToast: true,
+      confirmIncompleteFinish: true,
       spotifyPlaylistUrl: 'https://open.spotify.com/playlist/new123456789012345678',
+      spotifyConnected: false,
+      spotifyDisplayName: null,
+      spotifyPlaylistName: null,
     })
 
     const { wrapper } = await mountWithPlugins(SpotifyWorkoutSettings, { routes: profileRoutes })
@@ -182,6 +192,8 @@ describe('SpotifyWorkoutSettings', () => {
     await wrapper.find('form').trigger('submit.prevent')
     await flushPromises()
 
-    expect(profileApi.updateProfile).toHaveBeenCalled()
+    expect(profileApi.updatePreferences).toHaveBeenCalledWith({
+      spotifyPlaylistUrl: 'https://open.spotify.com/playlist/new123456789012345678',
+    })
   })
 })

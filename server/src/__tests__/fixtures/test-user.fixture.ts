@@ -22,8 +22,12 @@ export async function createVerifiedTestUser(options: CreateVerifiedTestUserOpti
       password: hashedPassword,
       name: options.name ?? 'Test User',
       role: options.role ?? 'USER',
-      locale: options.locale ?? 'es',
       emailVerifiedAt: new Date(),
+      preferences: {
+        create: {
+          locale: options.locale ?? 'es',
+        },
+      },
     },
   })
 

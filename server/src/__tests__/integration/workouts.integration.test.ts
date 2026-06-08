@@ -71,6 +71,82 @@ describeIntegration('workouts API', () => {
       expect(list.body.data).toHaveLength(0)
     })
 
+    it('incluye resumen de ejercicios y volumen en el listado', async () => {
+      const session = await loginVerifiedTestUser(agent)
+      const press = await createTestExerciseType(agent, session.token, { name: 'Press banca' })
+      const row = await createTestExerciseType(agent, session.token, { name: 'Remo' })
+      const workout = await createTestWorkout(agent, session.token, { name: 'Pecho y espalda' })
+
+      await createTestWorkoutExercise(agent, session.token, workout.id, {
+        exerciseTypeId: press.id,
+        sets: 4,
+        reps: 8,
+        weight: 60,
+        sortOrder: 0,
+      })
+      await createTestWorkoutExercise(agent, session.token, workout.id, {
+        exerciseTypeId: row.id,
+        sets: 3,
+        reps: 10,
+        weight: 50,
+        sortOrder: 1,
+      })
+
+      const list = await agent.get('/api/workouts').set(authHeader(session.token))
+
+      expect(list.status).toBe(200)
+      expect(list.body.data).toHaveLength(1)
+      expect(list.body.data[0]).toMatchObject({
+        id: workout.id,
+        name: 'Pecho y espalda',
+        exerciseCount: 2,
+        volumeKg: 3420,
+        exerciseNames: ['Press banca', 'Remo'],
+      })
+    })
+
+    it('duplica un entrenamiento con ejercicios y fecha nueva', async () => {
+      const session = await loginVerifiedTestUser(agent)
+      const exerciseType = await createTestExerciseType(agent, session.token, {
+        name: 'Press banca',
+      })
+      const workout = await createTestWorkout(agent, session.token, {
+        name: 'Pecho',
+        date: '2026-05-20',
+        notes: 'Día A',
+      })
+
+      await createTestWorkoutExercise(agent, session.token, workout.id, {
+        exerciseTypeId: exerciseType.id,
+        sets: 4,
+        reps: 8,
+        restSeconds: 90,
+        weight: 60,
+      })
+
+      const response = await agent
+        .post(`/api/workouts/${workout.id}/duplicate`)
+        .set(authHeader(session.token))
+        .send({ date: '2026-05-30' })
+
+      expect(response.status).toBe(201)
+      expect(response.body.data.id).not.toBe(workout.id)
+      expect(response.body.data.name).toBe('Pecho')
+      expect(response.body.data.notes).toBe('Día A')
+      expect(response.body.data.status).toBe('PLANNED')
+      expect(response.body.data.exercises).toHaveLength(1)
+      expect(response.body.data.exercises[0]).toMatchObject({
+        exerciseTypeId: exerciseType.id,
+        sets: 4,
+        reps: 8,
+        restSeconds: 90,
+        weight: 60,
+      })
+
+      const list = await agent.get('/api/workouts').set(authHeader(session.token))
+      expect(list.body.data).toHaveLength(2)
+    })
+
     it('crea entrenamiento con ejercicios en el mismo payload', async () => {
       const session = await loginVerifiedTestUser(agent)
       const exerciseType = await createTestExerciseType(agent, session.token, {

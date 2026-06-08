@@ -19,6 +19,7 @@ import type { ExerciseEvolutionSeries } from '@/interfaces/stats.interface'
 import { SECTION_TITLE_CLASS, TEXT_MUTED_CLASS } from '@/constants/ui.constants'
 import { useLocaleStore } from '@/stores/locale.store'
 import { useThemeStore } from '@/stores/theme.store'
+import { useWeightUnitStore } from '@/stores/weight-unit.store'
 import {
   buildExerciseEvolutionChartData,
   buildExerciseEvolutionChartOptions,
@@ -36,8 +37,10 @@ const props = defineProps<{
 
 const themeStore = useThemeStore()
 const localeStore = useLocaleStore()
-const { preference } = storeToRefs(themeStore)
+const weightUnitStore = useWeightUnitStore()
+const { resolvedTheme } = storeToRefs(themeStore)
 const { locale } = storeToRefs(localeStore)
+const { unit } = storeToRefs(weightUnitStore)
 const { t } = useI18n()
 
 const chartSeries = computed<ExerciseEvolutionSeries>(() => ({
@@ -57,10 +60,12 @@ const chartSeries = computed<ExerciseEvolutionSeries>(() => ({
     })),
 }))
 
-const isDark = computed(() => preference.value === 'dark')
-const chartData = computed(() => buildExerciseEvolutionChartData(chartSeries.value, isDark.value))
+const isDark = computed(() => resolvedTheme.value === 'dark')
+const chartData = computed(() =>
+  buildExerciseEvolutionChartData(chartSeries.value, isDark.value, unit.value),
+)
 const chartOptions = computed(() =>
-  buildExerciseEvolutionChartOptions(chartSeries.value, isDark.value),
+  buildExerciseEvolutionChartOptions(chartSeries.value, isDark.value, unit.value),
 )
 const usesWeight = computed(() => exerciseSeriesUsesWeight(chartSeries.value))
 const hasEnoughData = computed(() => props.sessions.length >= 2)
@@ -76,7 +81,7 @@ const hasEnoughData = computed(() => props.sessions.length >= 2)
 
     <div v-else class="h-64 w-full sm:h-80">
       <Line
-        :key="`${preference}-${locale}-${exerciseTypeId}`"
+        :key="`${resolvedTheme}-${locale}-${unit}-${exerciseTypeId}`"
         :data="chartData"
         :options="chartOptions"
       />

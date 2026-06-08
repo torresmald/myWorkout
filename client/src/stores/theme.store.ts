@@ -1,54 +1,91 @@
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { defineStore } from 'pinia'
 
-import { THEME_STORAGE_KEY, type ThemePreference } from '@/constants/theme.constants'
+import { updatePreferences } from '@/api/profile.api'
+import {
+  THEME_MODES,
+  type ResolvedTheme,
+  type ThemeMode,
+} from '@/constants/theme.constants'
+import { useAuthStore } from '@/stores/auth.store'
+import { getAccessToken } from '@/utils/storage.util'
 
-function getStoredTheme(): ThemePreference | null {
-  const stored = localStorage.getItem(THEME_STORAGE_KEY)
-
-  if (stored === 'light' || stored === 'dark') {
-    return stored
-  }
-
-  return null
-}
-
-function getSystemTheme(): ThemePreference {
+function getSystemTheme(): ResolvedTheme {
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 
-function applyTheme(theme: ThemePreference): void {
+function applyTheme(theme: ResolvedTheme): void {
   document.documentElement.classList.toggle('dark', theme === 'dark')
   document.documentElement.style.colorScheme = theme
 }
 
 export const useThemeStore = defineStore('theme', () => {
-  const preference = ref<ThemePreference>(getStoredTheme() ?? getSystemTheme())
+  const systemTheme = ref<ResolvedTheme>(getSystemTheme())
+  const mode = ref<ThemeMode>('system')
+  const syncingFromServer = ref(false)
 
-  applyTheme(preference.value)
+  const resolvedTheme = computed<ResolvedTheme>(() =>
+    mode.value === 'system' ? systemTheme.value : mode.value,
+  )
 
-  watch(preference, (theme) => {
-    localStorage.setItem(THEME_STORAGE_KEY, theme)
+  applyTheme(resolvedTheme.value)
+
+  watch(resolvedTheme, (theme) => {
     applyTheme(theme)
   })
 
+  watch(mode, async (nextMode) => {
+    if (syncingFromServer.value) {
+      return
+    }
+
+    if (!getAccessToken()) {
+      return
+    }
+
+    try {
+      const prefs = await updatePreferences({ themeMode: nextMode })
+      const authStore = useAuthStore()
+
+      if (authStore.user) {
+        authStore.setUser({ ...authStore.user, ...prefs })
+      }
+    } catch {
+      // Keep UI theme even if persistence fails temporarily.
+    }
+  })
+
+  function setMode(nextMode: ThemeMode): void {
+    mode.value = nextMode
+  }
+
+  function syncFromUser(themeMode: ThemeMode): void {
+    if (!(THEME_MODES as readonly string[]).includes(themeMode)) {
+      return
+    }
+
+    syncingFromServer.value = true
+    mode.value = themeMode
+    syncingFromServer.value = false
+  }
+
   function toggleTheme(): void {
-    preference.value = preference.value === 'dark' ? 'light' : 'dark'
+    setMode(resolvedTheme.value === 'dark' ? 'light' : 'dark')
   }
 
   function initSystemListener(): void {
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (event) => {
-      if (getStoredTheme()) {
-        return
-      }
-
-      preference.value = event.matches ? 'dark' : 'light'
+      systemTheme.value = event.matches ? 'dark' : 'light'
     })
   }
 
   return {
-    preference,
-    isDark: () => preference.value === 'dark',
+    mode,
+    resolvedTheme,
+    preference: resolvedTheme,
+    isDark: () => resolvedTheme.value === 'dark',
+    setMode,
+    syncFromUser,
     toggleTheme,
     initSystemListener,
   }

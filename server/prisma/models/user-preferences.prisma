@@ -1,0 +1,29 @@
+model UserPreferences {
+  id                      Int       @id @default(autoincrement())
+  userId                  Int       @unique
+  locale                  String    @default("es")
+  themeMode               String    @default("system")
+  weightUnit              String    @default("kg")
+  pushReminderEnabled     Boolean   @default(false)
+  emailReminderEnabled    Boolean   @default(false)
+  reminderDays            Int[]     @default([])
+  reminderTimeLocal       String    @default("18:00")
+  reminderTimezone        String    @default("UTC")
+  lastEmailReminderSentAt DateTime?
+  allowAutoPlaylist       Boolean   @default(false)
+  restTimerSoundEnabled   Boolean   @default(true)
+  showPrToast             Boolean   @default(true)
+  confirmIncompleteFinish Boolean   @default(true)
+  plannedWorkoutReminderEnabled Boolean @default(false)
+  lastPlannedEmailReminderSentAt DateTime?
+  spotifyPlaylistUrl      String?
+  spotifyUserId           String?   @unique
+  spotifyAccessToken      String?
+  spotifyRefreshToken     String?
+  spotifyTokenExpiresAt   DateTime?
+  spotifyDisplayName      String?
+  spotifyPlaylistName     String?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+  user                    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

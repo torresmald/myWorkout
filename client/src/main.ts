@@ -4,7 +4,7 @@ import { registerSW } from 'virtual:pwa-register'
 
 import App from './App.vue'
 import { captureSentryException, initSentry, isSentryEnabled } from './config/sentry'
-import { i18n, setTheme } from './i18n'
+import { i18n } from './i18n'
 import router from './router'
 import { useCookieConsentStore } from './stores/cookie-consent.store'
 import { useThemeStore } from './stores/theme.store'
@@ -30,8 +30,6 @@ cookieConsentStore.$subscribe((_mutation, state) => {
 
 const themeStore = useThemeStore()
 themeStore.initSystemListener()
-
-setTheme()
 
 registerSW({ immediate: true })
 

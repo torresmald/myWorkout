@@ -3,8 +3,8 @@ export default {
   description: 'Your heaviest logged weight per exercise.',
   empty: 'No weighted records yet. Complete sets with weight in a live session.',
   achievedAt: 'Achieved on {date}',
-  repsAtWeight: '{reps} reps × {weight} kg',
-  newRecord: 'New personal record! {weight} kg',
-  newRecordWithPrevious: 'New record! {weight} kg (was {previous} kg)',
+  repsAtWeight: '{reps} reps × {weight}',
+  newRecord: 'New personal record! {weight}',
+  newRecordWithPrevious: 'New record! {weight} (was {previous})',
   badge: 'PR',
 } as const

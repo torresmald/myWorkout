@@ -2,6 +2,7 @@ import { api } from '@/api/client'
 import type { ApiResponse } from '@/interfaces/api-response.interface'
 import type { UserPublic } from '@/interfaces/auth.interface'
 import type { UserProfile, WeightEntryPublic } from '@/interfaces/profile.interface'
+import type { UpdateUserPreferencesBody, UserPreferencesPublic } from '@/interfaces/user-preferences.interface'
 import { throwIfApiError } from '@/utils/api-error.util'
 import { getAccessToken } from '@/utils/storage.util'
 
@@ -9,17 +10,38 @@ export function getProfile() {
   return api<UserProfile>('/profile')
 }
 
-import type { AppLocale } from '@/constants/locale.constants'
-
 export function updateProfile(body: {
   name?: string
   heightCm?: number | null
   weightKg?: number
-  locale?: AppLocale
-  spotifyPlaylistUrl?: string | null
-  allowAutoPlaylist?: boolean
+  targetWeightKg?: number | null
 }) {
   return api<UserProfile>('/profile', {
+    method: 'PATCH',
+    body: JSON.stringify(body),
+  })
+}
+
+export function updatePreferences(body: UpdateUserPreferencesBody) {
+  return api<UserPreferencesPublic>('/profile/preferences', {
+    method: 'PATCH',
+    body: JSON.stringify(body),
+  })
+}
+
+export function exportUserData() {
+  return api<Record<string, unknown>>('/profile/export')
+}
+
+export function deleteAccount(body: { password?: string } = {}) {
+  return api<{ messageCode: string }>('/profile', {
+    method: 'DELETE',
+    body: JSON.stringify(body),
+  })
+}
+
+export function changePassword(body: { currentPassword?: string; newPassword: string }) {
+  return api<{ messageCode: string }>('/profile/password', {
     method: 'PATCH',
     body: JSON.stringify(body),
   })

@@ -7,6 +7,8 @@ export default {
     'Esta cuenta ya está vinculada a otro inicio de sesión de Google',
   EMAIL_ALREADY_REGISTERED: 'El email ya está registrado',
   INVALID_CREDENTIALS: 'Credenciales inválidas',
+  PASSWORD_REQUIRED: 'La contraseña es obligatoria',
+  CANNOT_DELETE_LAST_ADMIN: 'No se puede eliminar la única cuenta de administrador',
   REFRESH_TOKEN_REQUIRED: 'El token de refresco es obligatorio',
   INVALID_REFRESH_TOKEN: 'Token de refresco inválido o expirado',
   INVALID_SPOTIFY_PLAYLIST_URL: 'URL de playlist de Spotify inválida',

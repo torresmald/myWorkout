@@ -62,6 +62,7 @@ export default {
     refreshSession: 'Renovación de sesión',
     consentRecord: '12 meses',
     persistent: 'Persistente',
+    guestLocale: 'Hasta iniciar sesión (preferencia en servidor tras login)',
     analyticsSession: 'Sesión / según Sentry',
     thirdPartySession: 'Según Google',
   },

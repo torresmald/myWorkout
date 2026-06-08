@@ -7,6 +7,12 @@ export default {
     'Funciona cuando tienes la app abierta o instalada como PWA. Necesita permiso del navegador.',
   emailEnabled: 'Recordatorio por email',
   emailHint: 'Se envía a tu correo si no has entrenado en los últimos 7 días.',
+  plannedWorkoutEnabled: 'Entreno planificado hoy',
+  plannedWorkoutHint:
+    'Te avisa a la hora configurada si tienes un entrenamiento con estado planificado para hoy.',
+  plannedWorkoutToday: 'Tienes un entrenamiento planificado para hoy.',
+  plannedNotificationTitle: 'Entreno planificado hoy',
+  plannedNotificationBody: 'Tienes un entrenamiento planificado para hoy. ¿Lo empezamos?',
   daysLabel: 'Días de la semana',
   timeLabel: 'Hora',
   timezoneLabel: 'Zona horaria',

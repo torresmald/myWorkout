@@ -2,6 +2,7 @@
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
+import { useWeightDisplay } from '@/composables/useWeightDisplay'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import SkeletonList from '@/components/ui/SkeletonList.vue'
 import {
@@ -21,6 +22,7 @@ defineProps<{
 }>()
 
 const { t } = useI18n()
+const { formatWeight } = useWeightDisplay()
 </script>
 
 <template>
@@ -64,7 +66,7 @@ const { t } = useI18n()
             {{
               t('personalRecords.repsAtWeight', {
                 reps: record.reps,
-                weight: record.maxWeight,
+                weight: formatWeight(record.maxWeight),
               })
             }}
           </p>

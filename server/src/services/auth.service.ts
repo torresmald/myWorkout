@@ -16,6 +16,7 @@ import {
 } from './email-verification.service.js'
 import { verifyGoogleIdToken } from './google-auth.service.js'
 import { getLatestWeightKg } from './profile.service.js'
+import { ensureUserPreferences } from './user-preferences.service.js'
 import { mapUserToPublic } from '../utils/user-profile.util.js'
 
 function validateRegisterBody(body: RegisterBody): {
@@ -63,12 +64,18 @@ async function createUserSession(user: {
   const refreshToken = buildRefreshToken(user.id)
   const refreshTokenHash = await bcrypt.hash(refreshToken, SALT_ROUNDS)
 
-  const updatedUser = await prisma.user.update({
+  await prisma.user.update({
     where: { id: user.id },
     data: {
       refreshTokenHash,
       lastLoginAt: new Date(),
     },
+  })
+
+  await ensureUserPreferences(user.id)
+
+  const fullUser = await prisma.user.findUniqueOrThrow({
+    where: { id: user.id },
     select: userPublicSelect,
   })
 
@@ -82,7 +89,7 @@ async function createUserSession(user: {
   return {
     token,
     refreshToken,
-    user: mapUserToPublic(updatedUser, latestWeightKg),
+    user: mapUserToPublic(fullUser, latestWeightKg),
   }
 }
 
@@ -126,8 +133,10 @@ async function findOrCreateGoogleUser(
       email: profile.email,
       googleId: profile.googleId,
       name: profile.name,
-      locale,
       emailVerifiedAt: new Date(),
+      preferences: {
+        create: { locale },
+      },
     },
   })
 }
@@ -159,8 +168,10 @@ export async function registerUser(body: RegisterBody): Promise<RegisterResponse
       email,
       password: hashedPassword,
       name,
-      locale,
       emailVerifiedAt: null,
+      preferences: {
+        create: { locale },
+      },
     },
   })
 
@@ -253,6 +264,8 @@ export async function logoutUser(refreshToken: string | undefined): Promise<void
 }
 
 export async function getUserById(userId: number): Promise<UserPublic> {
+  await ensureUserPreferences(userId)
+
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: userPublicSelect,

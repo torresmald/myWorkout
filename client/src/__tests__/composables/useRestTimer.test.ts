@@ -2,7 +2,10 @@ import { defineComponent, onMounted } from 'vue'
 import { mount } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { createUserPublic } from '@/__tests__/fixtures/profile.fixture'
+import { setupTestPinia } from '@/__tests__/helpers/mount-test-app'
 import { useRestTimer } from '@/composables/useRestTimer'
+import { useAuthStore } from '@/stores/auth.store'
 import * as restTimerSound from '@/utils/rest-timer-sound.util'
 
 vi.mock('@/utils/rest-timer-sound.util', () => ({
@@ -10,8 +13,10 @@ vi.mock('@/utils/rest-timer-sound.util', () => ({
   playRestTimerCompleteSound: vi.fn(),
 }))
 
-function mountRestTimer() {
+function mountRestTimer(userOverrides: Parameters<typeof createUserPublic>[0] = {}) {
   let timer!: ReturnType<typeof useRestTimer>
+  const pinia = setupTestPinia()
+  useAuthStore(pinia).setUser(createUserPublic(userOverrides))
 
   const TestComponent = defineComponent({
     setup() {
@@ -21,13 +26,19 @@ function mountRestTimer() {
     template: '<div />',
   })
 
-  mount(TestComponent)
+  mount(TestComponent, {
+    global: {
+      plugins: [pinia],
+    },
+  })
 
   return timer
 }
 
-function mountRestTimerWithUnmount() {
+function mountRestTimerWithUnmount(userOverrides: Parameters<typeof createUserPublic>[0] = {}) {
   let timer!: ReturnType<typeof useRestTimer>
+  const pinia = setupTestPinia()
+  useAuthStore(pinia).setUser(createUserPublic(userOverrides))
 
   const TestComponent = defineComponent({
     setup() {
@@ -37,7 +48,14 @@ function mountRestTimerWithUnmount() {
     template: '<div />',
   })
 
-  return { timer: () => timer, wrapper: mount(TestComponent) }
+  return {
+    timer: () => timer,
+    wrapper: mount(TestComponent, {
+      global: {
+        plugins: [pinia],
+      },
+    }),
+  }
 }
 
 describe('useRestTimer', () => {
@@ -141,6 +159,16 @@ describe('useRestTimer', () => {
     expect(timer.isFinished.value).toBe(true)
     expect(timer.remainingSeconds.value).toBe(0)
     expect(restTimerSound.playRestTimerCompleteSound).toHaveBeenCalled()
+  })
+
+  it('no reproduce sonido si la preferencia está desactivada', () => {
+    const timer = mountRestTimer({ restTimerSoundEnabled: false })
+
+    timer.start('Dominadas', 2)
+    vi.advanceTimersByTime(2_100)
+
+    expect(timer.isFinished.value).toBe(true)
+    expect(restTimerSound.playRestTimerCompleteSound).not.toHaveBeenCalled()
   })
 
   it('cancela y reinicia el estado del temporizador', () => {

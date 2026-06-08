@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { i18n } from '@/i18n'
 import {
   dateInputToIso,
+  formatListDate,
   formatWeekLabel,
   formatWorkoutDate,
   isoToDateInputValue,
@@ -39,6 +40,15 @@ describe('date.util', () => {
     const formatted = formatWorkoutDate('2026-05-30T12:00:00.000Z')
 
     expect(formatted).toContain('2026')
+  })
+
+  it('formatea fechas relativas para hoy y ayer', () => {
+    const todayIso = `${todayDateInputValue()}T12:00:00.000Z`
+    expect(formatListDate(todayIso)).toBe(i18n.global.t('common.dateToday'))
+
+    const yesterday = new Date()
+    yesterday.setDate(yesterday.getDate() - 1)
+    expect(formatListDate(yesterday.toISOString())).toBe(i18n.global.t('common.dateYesterday'))
   })
 
   it('formatea etiqueta de semana sin año', () => {

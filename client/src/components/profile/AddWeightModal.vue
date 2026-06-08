@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 
 import AppModal from '@/components/ui/AppModal.vue'
 import LoadingButton from '@/components/ui/LoadingButton.vue'
+import { useWeightDisplay } from '@/composables/useWeightDisplay'
 import {
   BTN_ACTIONS_CLASS,
   BTN_MOBILE_FULL_CLASS,
@@ -24,15 +25,16 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const { weightFieldLabel, inputBounds, toKg, isValidWeight, unit } = useWeightDisplay()
 
-const weightKg = ref<string | number>('')
+const weightInput = ref<string | number>('')
 const error = ref<string | null>(null)
 
 watch(
   () => props.open,
   (isOpen) => {
     if (isOpen) {
-      weightKg.value = ''
+      weightInput.value = ''
       error.value = null
     }
   },
@@ -47,15 +49,19 @@ function handleClose() {
 }
 
 function handleSubmit() {
-  const parsed = parseOptionalNumber(weightKg.value)
+  const parsed = parseOptionalNumber(weightInput.value)
 
-  if (parsed === null || parsed < 20 || parsed > 500) {
-    error.value = t('profile.weightInvalid')
+  if (parsed === null || !isValidWeight(parsed)) {
+    error.value = t('profile.weightInvalid', {
+      min: inputBounds.value.min,
+      max: inputBounds.value.max,
+      unit: unit.value,
+    })
     return
   }
 
   error.value = null
-  emit('submit', parsed)
+  emit('submit', toKg(parsed))
 }
 </script>
 
@@ -65,14 +71,14 @@ function handleSubmit() {
 
     <form class="space-y-4" novalidate @submit.prevent="handleSubmit">
       <div>
-        <label for="add-weight-kg" :class="LABEL_CLASS">{{ t('common.weightKg') }}</label>
+        <label for="add-weight-input" :class="LABEL_CLASS">{{ weightFieldLabel }}</label>
         <input
-          id="add-weight-kg"
-          v-model="weightKg"
+          id="add-weight-input"
+          v-model="weightInput"
           type="number"
-          min="20"
-          max="500"
-          step="0.1"
+          :min="inputBounds.min"
+          :max="inputBounds.max"
+          :step="inputBounds.step"
           inputmode="decimal"
           autofocus
           :disabled="loading"

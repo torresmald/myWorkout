@@ -5,9 +5,7 @@ export interface UpdateProfileBody {
   name?: string
   heightCm?: number | null
   weightKg?: number
-  locale?: string
-  spotifyPlaylistUrl?: string | null
-  allowAutoPlaylist?: boolean
+  targetWeightKg?: number | null
 }
 
 export interface AddWeightBody {
@@ -23,6 +21,15 @@ export interface WeightEntryPublic {
   id: number
   weightKg: number
   recordedAt: Date
+}
+
+export interface DeleteAccountBody {
+  password?: string
+}
+
+export interface ChangePasswordBody {
+  currentPassword?: string
+  newPassword?: string
 }
 
 export interface UserProfile extends UserPublic {

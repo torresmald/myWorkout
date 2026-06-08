@@ -78,3 +78,11 @@ export function wasEmailReminderSentToday(
 
   return todayKey === sentKey
 }
+
+export function hasPlannedWorkoutOnLocalDate(
+  workoutDate: Date,
+  timezone: string,
+  dateKey: string,
+): boolean {
+  return getLocalTimeParts(timezone, workoutDate).dateKey === dateKey
+}

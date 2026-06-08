@@ -22,7 +22,7 @@ describe('AddWeightModal', () => {
       stubs: { AppModal: modalStub },
     })
 
-    await wrapper.find('#add-weight-kg').setValue('75.5')
+    await wrapper.find('#add-weight-input').setValue('75.5')
     await wrapper.find('form').trigger('submit.prevent')
 
     expect(wrapper.emitted('submit')?.[0]).toEqual([75.5])
@@ -34,10 +34,11 @@ describe('AddWeightModal', () => {
       stubs: { AppModal: modalStub },
     })
 
-    await wrapper.find('#add-weight-kg').setValue('10')
+    await wrapper.find('#add-weight-input').setValue('10')
     await wrapper.find('form').trigger('submit.prevent')
 
-    expect(wrapper.text()).toContain(i18n.global.t('profile.weightInvalid'))
+    expect(wrapper.text()).toContain('20')
+    expect(wrapper.text()).toContain('500')
     expect(wrapper.emitted('submit')).toBeUndefined()
   })
 
@@ -61,7 +62,7 @@ describe('AddWeightModal', () => {
     await wrapper.setProps({ open: true })
     await nextTick()
 
-    expect((wrapper.find('#add-weight-kg').element as HTMLInputElement).value).toBe('')
+    expect((wrapper.find('#add-weight-input').element as HTMLInputElement).value).toBe('')
   })
 
   it('emite close al cancelar', async () => {

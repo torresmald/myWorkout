@@ -9,29 +9,16 @@ model User {
   password                String?
   googleId                String?                   @unique
   name                    String?
-  locale                  String                    @default("es")
   heightCm                Decimal?                  @db.Decimal(5, 2)
+  targetWeightKg          Decimal?                  @db.Decimal(5, 2)
   profileImagePath        String?
   role                    Role                      @default(USER)
   refreshTokenHash        String?                   @unique
   emailVerifiedAt         DateTime?
   lastLoginAt             DateTime?
-  pushReminderEnabled     Boolean                   @default(false)
-  emailReminderEnabled    Boolean                   @default(false)
-  reminderDays            Int[]                     @default([])
-  reminderTimeLocal       String                    @default("18:00")
-  reminderTimezone        String                    @default("UTC")
-  lastEmailReminderSentAt DateTime?
-  allowAutoPlaylist       Boolean                   @default(false)
-  spotifyPlaylistUrl      String?
-  spotifyUserId           String?                   @unique
-  spotifyAccessToken      String?
-  spotifyRefreshToken     String?
-  spotifyTokenExpiresAt   DateTime?
-  spotifyDisplayName      String?
-  spotifyPlaylistName     String?
   createdAt               DateTime                  @default(now())
   updatedAt               DateTime                  @updatedAt
+  preferences             UserPreferences?
   exerciseTypes           ExerciseType[]
   workouts                Workout[]
   workoutTemplates        WorkoutTemplate[]

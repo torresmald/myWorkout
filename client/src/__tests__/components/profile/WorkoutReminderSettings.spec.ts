@@ -25,10 +25,12 @@ vi.mock('@/utils/reminder.util', async (importOriginal) => {
 const mockSettings = {
   pushReminderEnabled: false,
   emailReminderEnabled: true,
+  plannedWorkoutReminderEnabled: false,
   reminderDays: [1, 3, 5],
   reminderTimeLocal: '18:00',
   reminderTimezone: 'Europe/Madrid',
   workoutsLast7Days: 2,
+  hasPlannedWorkoutToday: false,
 }
 
 describe('WorkoutReminderSettings', () => {

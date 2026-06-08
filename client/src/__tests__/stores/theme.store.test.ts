@@ -2,7 +2,20 @@ import { nextTick } from 'vue'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { setupTestPinia } from '@/__tests__/helpers/mount-test-app'
-import { THEME_STORAGE_KEY } from '@/constants/theme.constants'
+import { updatePreferences } from '@/api/profile.api'
+import { createUserPublic } from '@/__tests__/fixtures/profile.fixture'
+import { getAccessToken } from '@/utils/storage.util'
+
+vi.mock('@/api/profile.api', () => ({
+  updatePreferences: vi.fn(),
+}))
+
+vi.mock('@/utils/storage.util', () => ({
+  getAccessToken: vi.fn(),
+  getRefreshToken: vi.fn(),
+  setTokens: vi.fn(),
+  clearTokens: vi.fn(),
+}))
 
 type MediaQueryListener = (event: MediaQueryListEvent) => void
 
@@ -28,53 +41,42 @@ function createMatchMediaMock(initialMatches: boolean) {
 
 async function loadThemeStore() {
   vi.resetModules()
-  setupTestPinia()
+  const pinia = setupTestPinia()
+  const { useAuthStore } = await import('@/stores/auth.store')
   const { useThemeStore } = await import('@/stores/theme.store')
-  return useThemeStore()
+  useAuthStore(pinia).setUser(createUserPublic())
+  return useThemeStore(pinia)
 }
 
 describe('theme store', () => {
   beforeEach(() => {
-    localStorage.clear()
+    vi.clearAllMocks()
     document.documentElement.classList.remove('dark')
     document.documentElement.style.colorScheme = ''
   })
 
-  it('usa el tema almacenado en localStorage', async () => {
-    localStorage.setItem(THEME_STORAGE_KEY, 'dark')
+  it('usa system por defecto', async () => {
     const matchMedia = createMatchMediaMock(false)
     vi.stubGlobal('matchMedia', vi.fn().mockReturnValue(matchMedia))
 
     const store = await loadThemeStore()
 
-    expect(store.preference).toBe('dark')
-    expect(document.documentElement.classList.contains('dark')).toBe(true)
+    expect(store.mode).toBe('system')
+    expect(store.resolvedTheme).toBe('light')
   })
 
-  it('usa el tema del sistema cuando no hay preferencia almacenada', async () => {
-    const matchMedia = createMatchMediaMock(true)
+  it('sincroniza el modo desde el usuario autenticado', async () => {
+    const matchMedia = createMatchMediaMock(false)
     vi.stubGlobal('matchMedia', vi.fn().mockReturnValue(matchMedia))
 
     const store = await loadThemeStore()
+    store.syncFromUser('dark')
 
-    expect(store.preference).toBe('dark')
+    expect(store.mode).toBe('dark')
+    expect(store.resolvedTheme).toBe('dark')
   })
 
-  it('alterna de dark a light cuando el tema actual es oscuro', async () => {
-    localStorage.setItem(THEME_STORAGE_KEY, 'dark')
-    const matchMedia = createMatchMediaMock(true)
-    vi.stubGlobal('matchMedia', vi.fn().mockReturnValue(matchMedia))
-
-    const store = await loadThemeStore()
-    store.toggleTheme()
-    await nextTick()
-
-    expect(store.preference).toBe('light')
-    expect(store.isDark()).toBe(false)
-  })
-
-  it('alterna el tema y lo persiste en localStorage', async () => {
-    localStorage.setItem(THEME_STORAGE_KEY, 'light')
+  it('alterna el tema resuelto y fija un modo explícito', async () => {
     const matchMedia = createMatchMediaMock(false)
     vi.stubGlobal('matchMedia', vi.fn().mockReturnValue(matchMedia))
 
@@ -82,22 +84,37 @@ describe('theme store', () => {
     store.toggleTheme()
     await nextTick()
 
-    expect(store.preference).toBe('dark')
-    expect(store.isDark()).toBe(true)
-    expect(localStorage.getItem(THEME_STORAGE_KEY)).toBe('dark')
+    expect(store.mode).toBe('dark')
+    expect(store.resolvedTheme).toBe('dark')
   })
 
-  it('ignora valores inválidos en localStorage y usa el tema del sistema', async () => {
-    localStorage.setItem(THEME_STORAGE_KEY, 'invalid')
-    const matchMedia = createMatchMediaMock(true)
+  it('persiste el tema en el servidor cuando hay token de acceso', async () => {
+    vi.mocked(getAccessToken).mockReturnValue('access-token')
+    vi.mocked(updatePreferences).mockResolvedValue({
+      locale: 'es',
+      themeMode: 'dark',
+      weightUnit: 'kg',
+      allowAutoPlaylist: false,
+      restTimerSoundEnabled: true,
+      showPrToast: true,
+      confirmIncompleteFinish: true,
+      spotifyPlaylistUrl: null,
+      spotifyConnected: false,
+      spotifyDisplayName: null,
+      spotifyPlaylistName: null,
+    })
+
+    const matchMedia = createMatchMediaMock(false)
     vi.stubGlobal('matchMedia', vi.fn().mockReturnValue(matchMedia))
 
     const store = await loadThemeStore()
+    store.setMode('dark')
+    await nextTick()
 
-    expect(store.preference).toBe('dark')
+    expect(updatePreferences).toHaveBeenCalledWith({ themeMode: 'dark' })
   })
 
-  it('actualiza el tema según el sistema si no hay preferencia guardada', async () => {
+  it('actualiza el tema resuelto en modo system cuando cambia el sistema', async () => {
     const matchMedia = createMatchMediaMock(false)
     vi.stubGlobal('matchMedia', vi.fn().mockReturnValue(matchMedia))
 
@@ -106,31 +123,6 @@ describe('theme store', () => {
 
     matchMedia.emitChange(true)
 
-    expect(store.preference).toBe('dark')
-  })
-
-  it('cambia a light cuando el sistema deja de preferir oscuro', async () => {
-    const matchMedia = createMatchMediaMock(true)
-    vi.stubGlobal('matchMedia', vi.fn().mockReturnValue(matchMedia))
-
-    const store = await loadThemeStore()
-    store.initSystemListener()
-
-    matchMedia.emitChange(false)
-
-    expect(store.preference).toBe('light')
-  })
-
-  it('no cambia el tema del sistema si hay preferencia guardada', async () => {
-    localStorage.setItem(THEME_STORAGE_KEY, 'light')
-    const matchMedia = createMatchMediaMock(false)
-    vi.stubGlobal('matchMedia', vi.fn().mockReturnValue(matchMedia))
-
-    const store = await loadThemeStore()
-    store.initSystemListener()
-
-    matchMedia.emitChange(true)
-
-    expect(store.preference).toBe('light')
+    expect(store.resolvedTheme).toBe('dark')
   })
 })

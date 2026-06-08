@@ -26,16 +26,10 @@ import type {
 } from '../interfaces/spotify.interface.js'
 import { buildSpotifyPlaylistUrl, parseSpotifyPlaylistId } from '../utils/spotify.util.js'
 
-const spotifyUserSelect = {
-  id: true,
-  spotifyUserId: true,
-  spotifyAccessToken: true,
-  spotifyRefreshToken: true,
-  spotifyTokenExpiresAt: true,
-  spotifyDisplayName: true,
-  spotifyPlaylistName: true,
-  spotifyPlaylistUrl: true,
-} as const
+import { userPreferencesSpotifySelect } from '../constants/user-preferences.constants.js'
+import { ensureUserPreferences } from './user-preferences.service.js'
+
+const spotifyUserSelect = userPreferencesSpotifySelect
 
 function getJwtSecret(): string {
   const secret = process.env.JWT_SECRET
@@ -126,14 +120,16 @@ async function saveSpotifyTokens(
   tokenResponse: SpotifyTokenResponse,
   profile: SpotifyUserProfileResponse,
 ): Promise<void> {
-  const existing = await prisma.user.findUnique({
-    where: { id: userId },
+  await ensureUserPreferences(userId)
+
+  const existing = await prisma.userPreferences.findUnique({
+    where: { userId },
     select: { spotifyRefreshToken: true },
   })
   const expiresAt = new Date(Date.now() + tokenResponse.expires_in * 1000)
 
-  await prisma.user.update({
-    where: { id: userId },
+  await prisma.userPreferences.update({
+    where: { userId },
     data: {
       spotifyUserId: profile.id,
       spotifyDisplayName: profile.display_name,
@@ -145,16 +141,18 @@ async function saveSpotifyTokens(
 }
 
 async function getSpotifyUser(userId: number) {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
+  await ensureUserPreferences(userId)
+
+  const preferences = await prisma.userPreferences.findUnique({
+    where: { userId },
     select: spotifyUserSelect,
   })
 
-  if (!user) {
+  if (!preferences) {
     throw new AppError(ErrorCode.USER_NOT_FOUND, 404)
   }
 
-  return user
+  return preferences
 }
 
 async function refreshSpotifyAccessToken(userId: number, refreshToken: string): Promise<string> {
@@ -167,8 +165,8 @@ async function refreshSpotifyAccessToken(userId: number, refreshToken: string): 
 
   const expiresAt = new Date(Date.now() + tokenResponse.expires_in * 1000)
 
-  await prisma.user.update({
-    where: { id: userId },
+  await prisma.userPreferences.update({
+    where: { userId },
     data: {
       spotifyAccessToken: tokenResponse.access_token,
       spotifyTokenExpiresAt: expiresAt,
@@ -331,8 +329,8 @@ export async function setSpotifyWorkoutPlaylist(
 
   const playlist = await spotifyApiFetch<SpotifyPlaylistItemResponse>(userId, `/playlists/${playlistId}`)
 
-  const updated = await prisma.user.update({
-    where: { id: userId },
+  const updated = await prisma.userPreferences.update({
+    where: { userId },
     data: {
       spotifyPlaylistUrl: buildSpotifyPlaylistUrl(playlist.id),
       spotifyPlaylistName: playlist.name,
@@ -344,8 +342,8 @@ export async function setSpotifyWorkoutPlaylist(
 }
 
 export async function disconnectSpotifyAccount(userId: number): Promise<SpotifyConnectionPublic> {
-  const updated = await prisma.user.update({
-    where: { id: userId },
+  const updated = await prisma.userPreferences.update({
+    where: { userId },
     data: {
       spotifyUserId: null,
       spotifyAccessToken: null,
@@ -363,5 +361,5 @@ export async function disconnectSpotifyAccount(userId: number): Promise<SpotifyC
 
 export function getSpotifyProfileRedirectUrl(status: 'connected' | 'error'): string {
   const appUrl = process.env.APP_URL?.trim() || 'http://localhost:5173'
-  return `${appUrl.replace(/\/$/, '')}/profile?spotify=${status}`
+  return `${appUrl.replace(/\/$/, '')}/settings?spotify=${status}`
 }

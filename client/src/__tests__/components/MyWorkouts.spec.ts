@@ -2,17 +2,18 @@ import { flushPromises } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
 import type { VueWrapper } from '@vue/test-utils'
 
-import { createWorkout } from '@/__tests__/fixtures/workout.fixture'
+import { createWorkout, createWorkoutListItem } from '@/__tests__/fixtures/workout.fixture'
 import { mountWithPlugins } from '@/__tests__/helpers/mount-test-app'
 import MyWorkouts from '@/components/MyWorkouts.vue'
 import { i18n } from '@/i18n'
-import type { WorkoutPublic } from '@/interfaces/workout.interface'
+import type { WorkoutListItem } from '@/interfaces/workout.interface'
 
 const defaultProps = {
-  workouts: [] as WorkoutPublic[],
+  workouts: [] as WorkoutListItem[],
   loading: false,
   editingWorkoutId: null as number | null,
   deletingWorkoutId: null as number | null,
+  duplicatingWorkoutId: null as number | null,
   openingSessionWorkoutId: null as number | null,
 }
 
@@ -37,9 +38,9 @@ describe('MyWorkouts', () => {
 
   it('renderiza entrenamientos con estados y notas', async () => {
     const workouts = [
-      createWorkout({ id: 1, name: 'Push', status: 'PLANNED', notes: 'Nota push' }),
-      createWorkout({ id: 2, name: 'Pull', status: 'IN_PROGRESS' }),
-      createWorkout({ id: 3, name: 'Legs', status: 'COMPLETED' }),
+      createWorkoutListItem({ id: 1, name: 'Push', status: 'PLANNED', notes: 'Nota push' }),
+      createWorkoutListItem({ id: 2, name: 'Pull', status: 'IN_PROGRESS' }),
+      createWorkoutListItem({ id: 3, name: 'Legs', status: 'COMPLETED' }),
     ]
 
     const { wrapper } = await mountMyWorkouts({ workouts })
@@ -51,16 +52,35 @@ describe('MyWorkouts', () => {
     expect(wrapper.text()).toContain(i18n.global.t('session.status.completed'))
   })
 
+  it('muestra resumen de ejercicios y volumen', async () => {
+    const workouts = [
+      createWorkoutListItem({
+        id: 1,
+        name: 'Push',
+        exerciseCount: 2,
+        volumeKg: 3420,
+        exerciseNames: ['Press banca', 'Remo'],
+      }),
+      createWorkoutListItem({ id: 2, name: 'Cardio', exerciseCount: 0 }),
+    ]
+
+    const { wrapper } = await mountMyWorkouts({ workouts })
+
+    expect(wrapper.text()).toContain('Press banca, Remo')
+    expect(wrapper.text()).toContain('3420 kg')
+    expect(wrapper.text()).toContain(i18n.global.t('workouts.list.noExercises'))
+  })
+
   it('resalta el entrenamiento en edición', async () => {
-    const workouts = [createWorkout({ id: 1, name: 'Push' })]
+    const workouts = [createWorkoutListItem({ id: 1, name: 'Push' })]
 
     const { wrapper } = await mountMyWorkouts({ workouts, editingWorkoutId: 1 })
 
     expect(wrapper.find('li').classes()).toContain('bg-nav-active-bg')
   })
 
-  it('emite session, edit y delete al interactuar', async () => {
-    const workout = createWorkout({ id: 1, name: 'Push', status: 'PLANNED' })
+  it('emite session, duplicate, edit y delete al interactuar', async () => {
+    const workout = createWorkoutListItem({ id: 1, name: 'Push', status: 'PLANNED' })
 
     const { wrapper } = await mountMyWorkouts({ workouts: [workout] })
 
@@ -69,6 +89,12 @@ describe('MyWorkouts', () => {
     )
     await sessionButton.trigger('click')
     expect(wrapper.emitted('session')?.[0]).toEqual([workout])
+
+    const duplicateButton = wrapper.find(
+      `[aria-label="${i18n.global.t('workouts.list.duplicate')}"]`,
+    )
+    await duplicateButton.trigger('click')
+    expect(wrapper.emitted('duplicate')?.[0]).toEqual([workout])
 
     const actions = wrapper.findComponent({ name: 'ListItemIconActions' })
     actions.vm.$emit('edit')
@@ -80,7 +106,7 @@ describe('MyWorkouts', () => {
   })
 
   it('oculta botón de sesión en entrenamientos completados', async () => {
-    const workout = createWorkout({ id: 1, status: 'COMPLETED' })
+    const workout = createWorkoutListItem({ id: 1, status: 'COMPLETED' })
 
     const { wrapper } = await mountMyWorkouts({ workouts: [workout] })
 
@@ -93,7 +119,7 @@ describe('MyWorkouts', () => {
   })
 
   it('muestra spinner al abrir sesión y usa etiqueta de reanudar en progreso', async () => {
-    const workout = createWorkout({ id: 1, status: 'IN_PROGRESS' })
+    const workout = createWorkoutListItem({ id: 1, status: 'IN_PROGRESS' })
 
     const { wrapper } = await mountMyWorkouts({
       workouts: [workout],

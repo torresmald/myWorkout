@@ -194,6 +194,14 @@ onUnmounted(() => {
             >
               {{ t('layout.goToProfile') }}
             </RouterLink>
+            <RouterLink
+              to="/settings"
+              class="block px-4 py-2.5 text-sm font-medium text-text-secondary transition hover:bg-bg-muted hover:text-text-primary"
+              role="menuitem"
+              @click="closeUserMenu"
+            >
+              {{ t('layout.goToSettings') }}
+            </RouterLink>
             <button
               type="button"
               class="block w-full px-4 py-2.5 text-left text-sm font-medium text-red-600 transition hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"

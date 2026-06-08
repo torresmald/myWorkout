@@ -9,7 +9,7 @@ import { useThemeStore } from '@/stores/theme.store'
 describe('WeeklyFrequencyChart', () => {
   it('renderiza gráfico de frecuencia semanal', async () => {
     const pinia = setupTestPinia()
-    useThemeStore(pinia).preference = 'light'
+    useThemeStore(pinia).setMode('light')
     useLocaleStore(pinia).setLocale('es')
 
     const { wrapper } = await mountWithPlugins(WeeklyFrequencyChart, {

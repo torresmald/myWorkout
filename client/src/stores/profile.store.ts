@@ -54,8 +54,7 @@ export const useProfileStore = defineStore('profile', () => {
     name?: string
     heightCm?: number | null
     weightKg?: number
-    spotifyPlaylistUrl?: string | null
-    allowAutoPlaylist?: boolean
+    targetWeightKg?: number | null
   }) {
     saving.value = true
 
@@ -137,8 +136,21 @@ export const useProfileStore = defineStore('profile', () => {
     }
   }
 
-  async function saveAllowAutoPlaylist(value: boolean) {
-    await saveProfile({ allowAutoPlaylist: value })
+  async function savePreferences(body: Parameters<typeof profileApi.updatePreferences>[0]) {
+    saving.value = true
+
+    try {
+      const prefs = await profileApi.updatePreferences(body)
+      if (authStore.user) {
+        authStore.setUser({ ...authStore.user, ...prefs })
+      }
+      if (profile.value) {
+        profile.value = { ...profile.value, ...prefs }
+      }
+      return prefs
+    } finally {
+      saving.value = false
+    }
   }
 
   return {
@@ -157,6 +169,6 @@ export const useProfileStore = defineStore('profile', () => {
     removeWeightEntry,
     uploadAvatar,
     removeAvatar,
-    saveAllowAutoPlaylist,
+    savePreferences,
   }
 })

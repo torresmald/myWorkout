@@ -18,9 +18,8 @@ import type {
   WeightEntryPublic,
 } from '../interfaces/profile.interface.js'
 import { decimalToNumber } from '../utils/decimal.util.js'
-import { parseAppLocale } from '../utils/locale.util.js'
 import { mapUserToPublic } from '../utils/user-profile.util.js'
-import { normalizeSpotifyPlaylistUrl } from '../utils/spotify.util.js'
+import { ensureUserPreferences } from './user-preferences.service.js'
 
 async function getLatestWeightKg(userId: number): Promise<number | null> {
   const entry = await prisma.weightEntry.findFirst({
@@ -60,6 +59,20 @@ function validateName(name: string | undefined): string | null | undefined {
   }
 
   return trimmed
+}
+
+function validateTargetWeightKg(
+  targetWeightKg: number | null | undefined,
+): number | null | undefined {
+  if (targetWeightKg === undefined) {
+    return undefined
+  }
+
+  if (targetWeightKg === null) {
+    return null
+  }
+
+  return validateWeightKg(targetWeightKg)
 }
 
 function validateHeightCm(heightCm: number | null | undefined): number | null | undefined {
@@ -116,26 +129,6 @@ function validateRecordedAt(recordedAt: string | undefined): Date | undefined {
   return parsed
 }
 
-function validateSpotifyPlaylistUrl(
-  spotifyPlaylistUrl: string | null | undefined,
-): string | null | undefined {
-  if (spotifyPlaylistUrl === undefined) {
-    return undefined
-  }
-
-  if (spotifyPlaylistUrl === null || !spotifyPlaylistUrl.trim()) {
-    return null
-  }
-
-  const normalized = normalizeSpotifyPlaylistUrl(spotifyPlaylistUrl)
-
-  if (!normalized) {
-    throw new AppError(ErrorCode.INVALID_SPOTIFY_PLAYLIST_URL, 400)
-  }
-
-  return normalized
-}
-
 async function getWeightEntriesForUser(userId: number): Promise<WeightEntryPublic[]> {
   const weightEntries = await prisma.weightEntry.findMany({
     where: { userId },
@@ -151,6 +144,8 @@ async function getWeightEntriesForUser(userId: number): Promise<WeightEntryPubli
 }
 
 async function buildWeightChangeResult(userId: number) {
+  await ensureUserPreferences(userId)
+
   const user = await prisma.user.findUniqueOrThrow({
     where: { id: userId },
     select: userPublicSelect,
@@ -180,6 +175,8 @@ async function findWeightEntryForUser(userId: number, entryId: number) {
 }
 
 export async function getUserProfile(userId: number): Promise<UserProfile> {
+  await ensureUserPreferences(userId)
+
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: userPublicSelect,
@@ -206,18 +203,14 @@ export async function updateUserProfile(
 ): Promise<UserProfile> {
   const name = validateName(body.name)
   const heightCm = validateHeightCm(body.heightCm)
+  const targetWeightKg = validateTargetWeightKg(body.targetWeightKg)
   const weightKg = body.weightKg !== undefined ? validateWeightKg(body.weightKg) : undefined
-  const locale = body.locale !== undefined ? parseAppLocale(body.locale) : undefined
-  const spotifyPlaylistUrl = validateSpotifyPlaylistUrl(body.spotifyPlaylistUrl)
-  const allowAutoPlaylist =
-    body.allowAutoPlaylist !== undefined ? body.allowAutoPlaylist : undefined
+
   if (
     name === undefined &&
     heightCm === undefined &&
-    weightKg === undefined &&
-    locale === undefined &&
-    spotifyPlaylistUrl === undefined &&
-    allowAutoPlaylist === undefined
+    targetWeightKg === undefined &&
+    weightKg === undefined
   ) {
     throw new AppError(ErrorCode.NO_DATA_TO_UPDATE, 400)
   }
@@ -231,23 +224,13 @@ export async function updateUserProfile(
     throw new AppError(ErrorCode.USER_NOT_FOUND, 404)
   }
 
-  if (
-    name !== undefined ||
-    heightCm !== undefined ||
-    locale !== undefined ||
-    spotifyPlaylistUrl !== undefined ||
-    allowAutoPlaylist !== undefined
-  ) {
+  if (name !== undefined || heightCm !== undefined || targetWeightKg !== undefined) {
     await prisma.user.update({
       where: { id: userId },
       data: {
         ...(name !== undefined ? { name } : {}),
         ...(heightCm !== undefined ? { heightCm } : {}),
-        ...(locale !== undefined ? { locale } : {}),
-        ...(spotifyPlaylistUrl !== undefined
-          ? { spotifyPlaylistUrl, spotifyPlaylistName: null }
-          : {}),
-        ...(allowAutoPlaylist !== undefined ? { allowAutoPlaylist } : {}),
+        ...(targetWeightKg !== undefined ? { targetWeightKg } : {}),
       },
     })
   }

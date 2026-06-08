@@ -19,11 +19,17 @@ export interface UserPublic {
   name: string | null
   role: UserRole
   locale: AppLocale
+  themeMode: 'light' | 'dark' | 'system'
+  weightUnit: 'kg' | 'lb'
   createdAt: string
   heightCm: number | null
+  targetWeightKg: number | null
   profileImageUrl: string | null
   spotifyPlaylistUrl: string | null
   allowAutoPlaylist: boolean
+  restTimerSoundEnabled: boolean
+  showPrToast: boolean
+  confirmIncompleteFinish: boolean
   spotifyConnected: boolean
   spotifyDisplayName: string | null
   spotifyPlaylistName: string | null

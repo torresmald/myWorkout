@@ -1,4 +1,5 @@
 const PUSH_REMINDER_STORAGE_PREFIX = 'myworkout_push_reminder_'
+const PLANNED_PUSH_REMINDER_STORAGE_PREFIX = 'myworkout_push_planned_reminder_'
 
 export function getBrowserTimezone(): string {
   return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
@@ -14,6 +15,18 @@ export function wasPushReminderShownToday(dateKey: string): boolean {
 
 export function markPushReminderShownToday(dateKey: string) {
   localStorage.setItem(getPushReminderStorageKey(dateKey), '1')
+}
+
+function getPlannedPushReminderStorageKey(dateKey: string): string {
+  return `${PLANNED_PUSH_REMINDER_STORAGE_PREFIX}${dateKey}`
+}
+
+export function wasPlannedPushReminderShownToday(dateKey: string): boolean {
+  return localStorage.getItem(getPlannedPushReminderStorageKey(dateKey)) === '1'
+}
+
+export function markPlannedPushReminderShownToday(dateKey: string) {
+  localStorage.setItem(getPlannedPushReminderStorageKey(dateKey), '1')
 }
 
 export function isNotificationSupported(): boolean {
@@ -126,4 +139,36 @@ export function shouldShowPushReminder(
   const dateKey = getLocalDateKey(settings.reminderTimezone, now)
 
   return !wasPushReminderShownToday(dateKey)
+}
+
+export function shouldShowPlannedWorkoutPushReminder(
+  settings: {
+    plannedWorkoutReminderEnabled: boolean
+    reminderDays: number[]
+    reminderTimeLocal: string
+    reminderTimezone: string
+    hasPlannedWorkoutToday: boolean
+  },
+  now = new Date(),
+): boolean {
+  if (!settings.plannedWorkoutReminderEnabled || !settings.hasPlannedWorkoutToday) {
+    return false
+  }
+
+  const weekday = getLocalWeekdayIndex(settings.reminderTimezone, now)
+
+  if (!settings.reminderDays.includes(weekday)) {
+    return false
+  }
+
+  const [targetHour = 0, targetMinute = 0] = settings.reminderTimeLocal.split(':').map(Number)
+  const { hour, minute } = getLocalHourMinute(settings.reminderTimezone, now)
+
+  if (hour !== targetHour || minute < targetMinute) {
+    return false
+  }
+
+  const dateKey = getLocalDateKey(settings.reminderTimezone, now)
+
+  return !wasPlannedPushReminderShownToday(dateKey)
 }

@@ -9,7 +9,7 @@ import { useThemeStore } from '@/stores/theme.store'
 describe('WeightEvolutionChart', () => {
   it('renderiza el gráfico de evolución de peso', async () => {
     const pinia = setupTestPinia()
-    useThemeStore(pinia).preference = 'dark'
+    useThemeStore(pinia).setMode('dark')
     useLocaleStore(pinia).setLocale('en')
 
     const { wrapper } = await mountWithPlugins(WeightEvolutionChart, {

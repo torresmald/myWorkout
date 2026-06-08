@@ -2,18 +2,19 @@ import { beforeAll, beforeEach, afterAll, describe, expect, it } from 'vitest'
 
 import { createVerifiedTestUser } from '../fixtures/test-user.fixture.js'
 import { INVALID_IMAGE_BUFFER, MINIMAL_PNG_BUFFER } from '../fixtures/test-image.fixture.js'
-import { authHeader } from '../helpers/test-auth.js'
+import { authHeader, createTestAccessToken } from '../helpers/test-auth.js'
 import { createTestAgent } from '../helpers/test-app.js'
 import { cloudinaryServiceMocks } from '../helpers/mock-cloudinary.js'
 import {
   connectTestDatabase,
   disconnectTestDatabase,
+  getTestPrisma,
   hasTestDatabase,
   resetTestDatabase,
 } from '../helpers/test-db.js'
 import { loginTestUser, loginVerifiedTestUser } from '../helpers/test-session.js'
 import { getAvatarPublicId } from '../../constants/cloudinary.constants.js'
-import { ErrorCode } from '../../constants/error-codes.constants.js'
+import { ErrorCode, MessageCode } from '../../constants/error-codes.constants.js'
 
 const describeIntegration = hasTestDatabase() ? describe : describe.skip
 
@@ -165,6 +166,88 @@ describeIntegration('profile API', () => {
 
       expect(response.status).toBe(404)
       expect(response.body.error).toBe(ErrorCode.WEIGHT_ENTRY_NOT_FOUND)
+    })
+  })
+
+  describe('PATCH /api/profile/password', () => {
+    it('cambia la contraseña con la actual correcta', async () => {
+      const { email, password } = await createVerifiedTestUser({ password: 'oldpass1' })
+      const session = await loginTestUser(agent, email, password)
+
+      const response = await agent
+        .patch('/api/profile/password')
+        .set(authHeader(session.token))
+        .send({ currentPassword: password, newPassword: 'newpass1' })
+
+      expect(response.status).toBe(200)
+      expect(response.body.data.messageCode).toBe(MessageCode.PASSWORD_RESET_SUCCESS)
+
+      const loginOld = await agent.post('/api/auth/login').send({ email, password })
+      expect(loginOld.status).toBe(401)
+
+      const loginNew = await agent.post('/api/auth/login').send({ email, password: 'newpass1' })
+      expect(loginNew.status).toBe(200)
+    })
+
+    it('rechaza contraseña actual incorrecta', async () => {
+      const session = await loginVerifiedTestUser(agent)
+
+      const response = await agent
+        .patch('/api/profile/password')
+        .set(authHeader(session.token))
+        .send({ currentPassword: 'wrongpass', newPassword: 'newpass1' })
+
+      expect(response.status).toBe(401)
+      expect(response.body.error).toBe(ErrorCode.INVALID_CREDENTIALS)
+    })
+
+    it('rechaza nueva contraseña demasiado corta', async () => {
+      const session = await loginVerifiedTestUser(agent)
+
+      const response = await agent
+        .patch('/api/profile/password')
+        .set(authHeader(session.token))
+        .send({ currentPassword: session.password, newPassword: '12345' })
+
+      expect(response.status).toBe(400)
+      expect(response.body.error).toBe(ErrorCode.PASSWORD_MIN_LENGTH)
+    })
+
+    it('rechaza falta de contraseña actual si la cuenta tiene contraseña', async () => {
+      const session = await loginVerifiedTestUser(agent)
+
+      const response = await agent
+        .patch('/api/profile/password')
+        .set(authHeader(session.token))
+        .send({ newPassword: 'newpass1' })
+
+      expect(response.status).toBe(400)
+      expect(response.body.error).toBe(ErrorCode.PASSWORD_REQUIRED)
+    })
+
+    it('permite establecer contraseña en cuenta solo Google', async () => {
+      const email = `google-${crypto.randomUUID()}@example.com`
+      const user = await getTestPrisma().user.create({
+        data: {
+          email,
+          googleId: `google-${crypto.randomUUID()}`,
+          emailVerifiedAt: new Date(),
+          preferences: { create: { locale: 'es' } },
+        },
+      })
+
+      const token = createTestAccessToken({ userId: user.id, email })
+
+      const response = await agent
+        .patch('/api/profile/password')
+        .set(authHeader(token))
+        .send({ newPassword: 'newpass1' })
+
+      expect(response.status).toBe(200)
+      expect(response.body.data.messageCode).toBe(MessageCode.PASSWORD_RESET_SUCCESS)
+
+      const login = await agent.post('/api/auth/login').send({ email, password: 'newpass1' })
+      expect(login.status).toBe(200)
     })
   })
 

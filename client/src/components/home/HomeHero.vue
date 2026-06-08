@@ -5,7 +5,7 @@ import { useI18n } from 'vue-i18n'
 
 import Skeleton from '@/components/ui/Skeleton.vue'
 import type { WorkoutPublic } from '@/interfaces/workout.interface'
-import { formatWorkoutDate } from '@/utils/date.util'
+import { formatListDate } from '@/utils/date.util'
 
 const props = defineProps<{
   loading: boolean
@@ -70,7 +70,7 @@ const streakLabel = computed(() =>
           <template v-if="lastWorkout">
             <p class="mt-1 truncate font-semibold">{{ lastWorkout.name }}</p>
             <time class="mt-1 block text-sm text-blue-100" :datetime="lastWorkout.date">
-              {{ formatWorkoutDate(lastWorkout.date) }}
+              {{ formatListDate(lastWorkout.date) }}
             </time>
           </template>
           <p v-else class="mt-2 text-sm text-blue-100">{{ t('home.hero.noWorkoutsYet') }}</p>

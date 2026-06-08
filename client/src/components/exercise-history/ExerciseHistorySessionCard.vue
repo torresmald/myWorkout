@@ -2,25 +2,36 @@
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import { useWeightDisplay } from '@/composables/useWeightDisplay'
 import type { ExerciseHistorySession } from '@/interfaces/exercise-history.interface'
 import {
   CARD_COMPACT_CLASS,
   LIST_ITEM_CONTENT_CLASS,
   TEXT_HEADING_CLASS,
 } from '@/constants/ui.constants'
-import { formatWorkoutDate } from '@/utils/date.util'
+import { formatListDate } from '@/utils/date.util'
+import { convertWeightFromKg } from '@/utils/weight-unit.util'
 
 defineProps<{
   session: ExerciseHistorySession
 }>()
 
 const { t } = useI18n()
+const { formatWeight, unit } = useWeightDisplay()
 const expanded = ref(false)
 
 function formatSetWeight(weight: number | null) {
   return weight !== null && weight > 0
-    ? t('exerciseHistory.setDetailWeight', { weight })
+    ? t('exerciseHistory.setDetailWeight', { weight: formatWeight(weight) })
     : ''
+}
+
+function formatVolume(volumeKg: number) {
+  const value =
+    unit.value === 'lb'
+      ? Math.round(convertWeightFromKg(volumeKg, 'lb'))
+      : Math.round(volumeKg)
+  return t('exerciseHistory.volume', { volume: `${value} ${unit.value}` })
 }
 </script>
 
@@ -39,18 +50,18 @@ function formatSetWeight(weight: number | null) {
         </div>
 
         <time class="mt-1 block text-sm text-text-muted" :datetime="session.workoutDate">
-          {{ formatWorkoutDate(session.workoutDate) }}
+          {{ formatListDate(session.workoutDate) }}
         </time>
 
         <p class="mt-2 text-sm text-text-primary">
           {{ t('exerciseHistory.setsSummary', { sets: session.sets, reps: session.reps }) }}
           <span v-if="session.maxWeight !== null">
-            · {{ t('exerciseHistory.maxWeight', { weight: session.maxWeight }) }}
+            · {{ t('exerciseHistory.maxWeight', { weight: formatWeight(session.maxWeight) }) }}
           </span>
         </p>
 
         <p class="mt-1 text-sm text-text-muted">
-          {{ t('exerciseHistory.volume', { volume: Math.round(session.volumeKg) }) }}
+          {{ formatVolume(session.volumeKg) }}
           ·
           {{
             session.source === 'LIVE'

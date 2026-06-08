@@ -4,10 +4,13 @@ import { prisma } from '../config/prisma.js'
 import { AppError } from '../interfaces/app-error.interface.js'
 import type {
   CreateWorkoutBody,
+  DuplicateWorkoutBody,
   UpdateWorkoutBody,
   WorkoutCreateResult,
+  WorkoutListItem,
   WorkoutPublic,
 } from '../interfaces/workout.interface.js'
+import { buildWorkoutListSummary } from '../utils/workout-summary.util.js'
 import { buildWorkoutExerciseCreateData } from '../utils/workout-exercise.util.js'
 import { assertUserOwnsExerciseTypes } from '../utils/exercise-type.util.js'
 import { findUserWorkout } from '../utils/workout.util.js'
@@ -40,12 +43,40 @@ function parseWorkoutDate(date?: string): Date {
   return parsed
 }
 
-export async function getWorkoutsByUser(userId: number): Promise<WorkoutPublic[]> {
-  return prisma.workout.findMany({
+export async function getWorkoutsByUser(userId: number): Promise<WorkoutListItem[]> {
+  const workouts = await prisma.workout.findMany({
     where: { userId },
-    select: workoutSelect,
+    select: {
+      ...workoutSelect,
+      exercises: {
+        select: {
+          sets: true,
+          reps: true,
+          weight: true,
+          sortOrder: true,
+          exerciseType: {
+            select: {
+              name: true,
+            },
+          },
+          workoutSets: {
+            select: {
+              reps: true,
+              weight: true,
+              completedAt: true,
+            },
+          },
+        },
+        orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }],
+      },
+    },
     orderBy: [{ date: 'desc' }, { name: 'asc' }],
   })
+
+  return workouts.map(({ exercises, ...workout }) => ({
+    ...workout,
+    ...buildWorkoutListSummary(workout.status, exercises),
+  }))
 }
 
 export async function createWorkout(userId: number, body: CreateWorkoutBody): Promise<WorkoutCreateResult> {
@@ -153,4 +184,88 @@ export async function deleteWorkout(userId: number, id: string): Promise<Workout
   })
 
   return existing
+}
+
+export async function duplicateWorkout(
+  userId: number,
+  id: string,
+  body: DuplicateWorkoutBody = {},
+): Promise<WorkoutCreateResult> {
+  const workoutId = Number(id)
+
+  if (!Number.isInteger(workoutId) || workoutId <= 0) {
+    throw new AppError(ErrorCode.WORKOUT_NOT_FOUND, 404)
+  }
+
+  const source = await prisma.workout.findFirst({
+    where: { id: workoutId, userId },
+    select: {
+      name: true,
+      notes: true,
+      exercises: {
+        select: {
+          exerciseTypeId: true,
+          sets: true,
+          reps: true,
+          restSeconds: true,
+          weight: true,
+          sortOrder: true,
+        },
+        orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }],
+      },
+    },
+  })
+
+  if (!source) {
+    throw new AppError(ErrorCode.WORKOUT_NOT_FOUND, 404)
+  }
+
+  const parsedDate = parseWorkoutDate(body.date)
+  const exercisePayloads = source.exercises.map((exercise, index) => ({
+    exerciseTypeId: exercise.exerciseTypeId,
+    sets: exercise.sets,
+    reps: exercise.reps,
+    restSeconds: exercise.restSeconds,
+    weight: exercise.weight,
+    sortOrder: exercise.sortOrder ?? index,
+  }))
+
+  if (exercisePayloads.length > 0) {
+    const uniqueExerciseTypeIds = [
+      ...new Set(exercisePayloads.map((exercise) => exercise.exerciseTypeId)),
+    ]
+    await assertUserOwnsExerciseTypes(userId, uniqueExerciseTypeIds)
+  }
+
+  return prisma.$transaction(async (tx) => {
+    const workout = await tx.workout.create({
+      data: {
+        userId,
+        name: source.name,
+        date: parsedDate,
+        notes: source.notes,
+        status: 'PLANNED',
+        exercises:
+          exercisePayloads.length > 0
+            ? {
+                create: exercisePayloads,
+              }
+            : undefined,
+      },
+      select: {
+        ...workoutSelect,
+        exercises: {
+          select: workoutExerciseSelect,
+          orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }],
+        },
+      },
+    })
+
+    const { exercises, ...workoutData } = workout
+
+    return {
+      ...workoutData,
+      exercises,
+    }
+  })
 }

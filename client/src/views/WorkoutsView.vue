@@ -23,7 +23,7 @@ const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
 
-const { workouts, loading, deletingId } = storeToRefs(workoutStore)
+const { workouts, loading, deletingId, duplicatingId } = storeToRefs(workoutStore)
 const { user } = storeToRefs(authStore)
 
 const workoutFormRef = ref<InstanceType<typeof WorkoutForm> | null>(null)
@@ -74,6 +74,16 @@ async function handleSession(workout: WorkoutPublic) {
   }
 }
 
+async function handleDuplicate(workout: WorkoutPublic) {
+  try {
+    const duplicated = await workoutStore.duplicate(workout.id)
+    toastStore.success(t('workouts.duplicateSuccess'))
+    await workoutFormRef.value?.startEdit(duplicated)
+  } catch (e) {
+    toastStore.error(getErrorMessage(e, t('workouts.duplicateError')))
+  }
+}
+
 async function handleDelete(workout: WorkoutPublic) {
   const confirmed = await modalStore.confirm({
     title: t('modals.deleteWorkout.title'),
@@ -110,8 +120,10 @@ async function handleDelete(workout: WorkoutPublic) {
       :loading="loading"
       :editing-workout-id="editingWorkoutId"
       :deleting-workout-id="deletingId"
+      :duplicating-workout-id="duplicatingId"
       :opening-session-workout-id="openingSessionWorkoutId"
       @edit="handleEdit"
+      @duplicate="handleDuplicate"
       @delete="handleDelete"
       @session="handleSession"
     />

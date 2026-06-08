@@ -1,6 +1,6 @@
 import { Router } from 'express'
 
-import type { CreateWorkoutBody, UpdateWorkoutBody } from '../interfaces/workout.interface.js'
+import type { CreateWorkoutBody, DuplicateWorkoutBody, UpdateWorkoutBody } from '../interfaces/workout.interface.js'
 import type { AuthenticatedRequest } from '../interfaces/express.interface.js'
 import { authenticate } from '../middleware/auth.middleware.js'
 import workoutExerciseRoutes from './workout-exercise.routes.js'
@@ -8,6 +8,7 @@ import workoutSessionRoutes from './workout-session.routes.js'
 import {
   createWorkout,
   deleteWorkout,
+  duplicateWorkout,
   getWorkoutsByUser,
   updateWorkout,
 } from '../services/workout.service.js'
@@ -58,6 +59,22 @@ router.put('/:id', async (req, res) => {
   try {
     const workout = await updateWorkout(userId, id, req.body as UpdateWorkoutBody)
     sendSuccess(res, workout)
+  } catch (error) {
+    if (handleServiceError(error, res)) {
+      return
+    }
+
+    throw error
+  }
+})
+
+router.post('/:id/duplicate', async (req, res) => {
+  const { userId } = (req as unknown as AuthenticatedRequest).user
+  const { id } = req.params
+
+  try {
+    const workout = await duplicateWorkout(userId, id, req.body as DuplicateWorkoutBody)
+    sendSuccess(res, workout, 201)
   } catch (error) {
     if (handleServiceError(error, res)) {
       return

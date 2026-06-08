@@ -4,6 +4,7 @@ import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRouter } from 'vue-router'
 
+import { useWeightDisplay } from '@/composables/useWeightDisplay'
 import PageContainer from '@/components/layout/PageContainer.vue'
 import RoutePageHeader from '@/components/layout/RoutePageHeader.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
@@ -35,6 +36,7 @@ const modalStore = useModalStore()
 const toastStore = useToastStore()
 const router = useRouter()
 const { t } = useI18n()
+const { formatWeight } = useWeightDisplay()
 const { exerciseTypes, loading, creating, updating, deletingId } = storeToRefs(exerciseTypeStore)
 const { records: personalRecords } = storeToRefs(personalRecordStore)
 
@@ -250,7 +252,7 @@ function handleViewHistory(exercise: ExerciseTypePublic) {
               {{
                 t('personalRecords.repsAtWeight', {
                   reps: recordByExerciseId.get(exercise.id)!.reps,
-                  weight: recordByExerciseId.get(exercise.id)!.maxWeight,
+                  weight: formatWeight(recordByExerciseId.get(exercise.id)!.maxWeight),
                 })
               }}
               · {{ t('personalRecords.badge') }}

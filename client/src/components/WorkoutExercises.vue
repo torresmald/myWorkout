@@ -9,6 +9,7 @@ import ListItemIconActions from '@/components/ui/ListItemIconActions.vue'
 import SkeletonList from '@/components/ui/SkeletonList.vue'
 import RestTimerModal from '@/components/workout/RestTimerModal.vue'
 import { useRestTimer } from '@/composables/useRestTimer'
+import { useWeightDisplay } from '@/composables/useWeightDisplay'
 import type {
   DraftWorkoutExercise,
   WorkoutExercisePublic,
@@ -50,6 +51,7 @@ const exerciseTypeStore = useExerciseTypeStore()
 const modalStore = useModalStore()
 const toastStore = useToastStore()
 const { t } = useI18n()
+const { formatWeight, weightFieldLabel, inputBounds, toDisplayValue, toKg } = useWeightDisplay()
 
 const {
   isOpen: isRestTimerOpen,
@@ -108,7 +110,7 @@ function startEditExercise(exercise: WorkoutExercisePublic | DraftWorkoutExercis
   sets.value = exercise.sets
   reps.value = exercise.reps
   restSeconds.value = exercise.restSeconds
-  weight.value = exercise.weight ?? ''
+  weight.value = exercise.weight !== null ? toDisplayValue(exercise.weight) : ''
   sortOrder.value = exercise.sortOrder
 }
 
@@ -122,7 +124,7 @@ function formatExerciseDetails(
   }
 
   if (exercise.weight !== null) {
-    parts.push(`${exercise.weight} kg`)
+    parts.push(formatWeight(exercise.weight))
   }
 
   return parts.join(' · ')
@@ -134,7 +136,7 @@ function buildExerciseBody() {
     sets: sets.value,
     reps: reps.value,
     restSeconds: restSeconds.value,
-    weight: weight.value === '' ? null : Number(weight.value),
+    weight: weight.value === '' ? null : toKg(Number(weight.value)),
     sortOrder: sortOrder.value,
   }
 }
@@ -483,13 +485,13 @@ defineExpose({ resetForm })
         </div>
 
         <div>
-          <label for="weight" :class="LABEL_CLASS">{{ t('common.weightKg') }}</label>
+          <label for="weight" :class="LABEL_CLASS">{{ weightFieldLabel }}</label>
           <input
             id="weight"
             v-model.number="weight"
             type="number"
             min="0"
-            step="0.5"
+            :step="inputBounds.step"
             :class="INPUT_CLASS"
             :placeholder="t('common.optional')"
           />

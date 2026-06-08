@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AppFooter from '@/components/layout/AppFooter.vue'
 import AppHeader from '@/components/layout/AppHeader.vue'
+import PwaInstallBanner from '@/components/layout/PwaInstallBanner.vue'
 import { useWorkoutReminders } from '@/composables/useWorkoutReminders'
 
 useWorkoutReminders()
@@ -9,6 +10,7 @@ useWorkoutReminders()
 <template>
   <div class="app-shell flex min-h-dvh flex-col bg-bg-page">
     <AppHeader />
+    <PwaInstallBanner />
 
     <main class="mx-auto w-full max-w-5xl flex-1">
       <RouterView />

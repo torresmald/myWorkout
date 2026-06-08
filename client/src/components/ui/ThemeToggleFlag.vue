@@ -6,11 +6,11 @@ import { storeToRefs } from 'pinia'
 import { useThemeStore } from '@/stores/theme.store'
 
 const themeStore = useThemeStore()
-const { preference } = storeToRefs(themeStore)
+const { resolvedTheme } = storeToRefs(themeStore)
 const { t } = useI18n()
 
 const ariaLabel = computed(() =>
-  preference.value === 'dark' ? t('layout.switchToLight') : t('layout.switchToDark'),
+  resolvedTheme.value === 'dark' ? t('layout.switchToLight') : t('layout.switchToDark'),
 )
 </script>
 
@@ -24,7 +24,7 @@ const ariaLabel = computed(() =>
     <span class="theme-toggle__scene">
       <span
         class="theme-toggle__card"
-        :class="{ 'theme-toggle__card--dark': preference === 'dark' }"
+        :class="{ 'theme-toggle__card--dark': resolvedTheme === 'dark' }"
       >
         <span class="theme-toggle__face theme-toggle__face--front">
           <img

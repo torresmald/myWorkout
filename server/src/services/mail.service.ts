@@ -157,3 +157,48 @@ export async function sendWorkoutReminderEmail(
     ...content,
   })
 }
+
+function buildPlannedWorkoutReminderEmailContent(
+  workoutsUrl: string,
+  locale: AppLocale,
+  userName: string | null,
+): Pick<Mail.Options, 'subject' | 'text' | 'html'> {
+  const template = getEmailTemplate(locale)
+  const subject = formatEmailTemplate(locale, 'plannedReminderSubject', APP_NAME)
+  const greetingName = userName?.trim() ? ` ${userName.trim()}` : ''
+
+  const text = [
+    formatEmailTemplate(locale, 'reminderIntro', APP_NAME).replace('{userName}', greetingName),
+    '',
+    template.plannedReminderBody,
+    '',
+    workoutsUrl,
+    '',
+    template.reminderIgnore,
+  ].join('\n')
+
+  const html = `
+    <p>${formatEmailTemplate(locale, 'reminderIntro', APP_NAME).replace('{userName}', greetingName)}</p>
+    <p>${template.plannedReminderBody}</p>
+    <p><a href="${workoutsUrl}">${template.reminderLinkLabel}</a></p>
+    <p>${template.reminderIgnore}</p>
+  `.trim()
+
+  return { subject, text, html }
+}
+
+export async function sendPlannedWorkoutReminderEmail(
+  to: string,
+  userName: string | null,
+  workoutsUrl: string,
+  locale: AppLocale,
+): Promise<void> {
+  const config = getSmtpConfig()
+  const content = buildPlannedWorkoutReminderEmailContent(workoutsUrl, locale, userName)
+
+  await getTransporter().sendMail({
+    from: config.from,
+    to,
+    ...content,
+  })
+}

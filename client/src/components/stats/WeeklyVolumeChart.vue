@@ -13,6 +13,7 @@ import { storeToRefs } from 'pinia'
 import type { WeeklyStatPoint } from '@/interfaces/stats.interface'
 import { useLocaleStore } from '@/stores/locale.store'
 import { useThemeStore } from '@/stores/theme.store'
+import { useWeightUnitStore } from '@/stores/weight-unit.store'
 import {
   buildWeeklyVolumeChartData,
   buildWeeklyVolumeChartOptions,
@@ -26,16 +27,18 @@ const props = defineProps<{
 
 const themeStore = useThemeStore()
 const localeStore = useLocaleStore()
-const { preference } = storeToRefs(themeStore)
+const weightUnitStore = useWeightUnitStore()
+const { resolvedTheme } = storeToRefs(themeStore)
 const { locale } = storeToRefs(localeStore)
+const { unit } = storeToRefs(weightUnitStore)
 
-const isDark = computed(() => preference.value === 'dark')
-const chartData = computed(() => buildWeeklyVolumeChartData(props.weekly))
-const chartOptions = computed(() => buildWeeklyVolumeChartOptions(isDark.value))
+const isDark = computed(() => resolvedTheme.value === 'dark')
+const chartData = computed(() => buildWeeklyVolumeChartData(props.weekly, unit.value))
+const chartOptions = computed(() => buildWeeklyVolumeChartOptions(isDark.value, unit.value))
 </script>
 
 <template>
   <div class="h-64 w-full sm:h-72">
-    <Bar :key="`${preference}-${locale}`" :data="chartData" :options="chartOptions" />
+    <Bar :key="`${resolvedTheme}-${locale}-${unit}`" :data="chartData" :options="chartOptions" />
   </div>
 </template>

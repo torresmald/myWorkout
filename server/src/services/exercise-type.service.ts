@@ -97,7 +97,7 @@ export async function importExerciseTypeFromCatalog(
     }),
     prisma.user.findUnique({
       where: { id: userId },
-      select: { locale: true },
+      select: { preferences: { select: { locale: true } } },
     }),
   ])
 
@@ -109,7 +109,7 @@ export async function importExerciseTypeFromCatalog(
     throw new AppError(ErrorCode.USER_NOT_FOUND, 404)
   }
 
-  const locale = parseAppLocale(user.locale)
+  const locale = parseAppLocale(user?.preferences?.locale ?? 'es')
   const name = locale === 'es' ? catalogExercise.nameEs : catalogExercise.nameEn
   const description = locale === 'es' ? catalogExercise.descriptionEs : catalogExercise.descriptionEn
   const muscleGroup = getMuscleGroupLabel(catalogExercise.muscleGroup, locale)

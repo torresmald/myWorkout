@@ -11,10 +11,12 @@ import ForgotPasswordView from '@/views/ForgotPasswordView.vue'
 import HomeView from '@/views/HomeView.vue'
 import LoginView from '@/views/LoginView.vue'
 import ProfileView from '@/views/ProfileView.vue'
+import SettingsView from '@/views/SettingsView.vue'
 import RegisterView from '@/views/RegisterView.vue'
 import ResetPasswordView from '@/views/ResetPasswordView.vue'
 import VerifyEmailView from '@/views/VerifyEmailView.vue'
 import WorkoutsView from '@/views/WorkoutsView.vue'
+import WorkoutDetailView from '@/views/WorkoutDetailView.vue'
 import WorkoutSessionView from '@/views/WorkoutSessionView.vue'
 import StatsView from '@/views/StatsView.vue'
 import TemplatesView from '@/views/TemplatesView.vue'
@@ -92,6 +94,14 @@ const router = createRouter({
           },
         },
         {
+          path: 'workouts/:id',
+          name: 'workout-detail',
+          component: WorkoutDetailView,
+          meta: {
+            titleKey: 'routes.workoutDetail.title',
+          },
+        },
+        {
           path: 'templates',
           name: 'templates',
           component: TemplatesView,
@@ -107,6 +117,15 @@ const router = createRouter({
           meta: {
             titleKey: 'routes.stats.title',
             pageDescriptionKey: 'routes.stats.description',
+          },
+        },
+        {
+          path: 'settings',
+          name: 'settings',
+          component: SettingsView,
+          meta: {
+            titleKey: 'routes.settings.title',
+            pageDescriptionKey: 'routes.settings.description',
           },
         },
         {

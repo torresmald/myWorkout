@@ -2,15 +2,17 @@ import { api } from '@/api/client'
 import type {
   CreateWorkoutBody,
   CreateWorkoutExerciseBody,
+  DuplicateWorkoutBody,
   UpdateWorkoutBody,
   UpdateWorkoutExerciseBody,
   WorkoutCreateResult,
   WorkoutExercisePublic,
+  WorkoutListItem,
   WorkoutPublic,
 } from '@/interfaces/workout.interface'
 
 export function getWorkouts() {
-  return api<WorkoutPublic[]>('/workouts')
+  return api<WorkoutListItem[]>('/workouts')
 }
 
 export function createWorkout(body: CreateWorkoutBody) {
@@ -30,6 +32,13 @@ export function updateWorkout(id: number, body: UpdateWorkoutBody) {
 export function deleteWorkout(id: number) {
   return api<WorkoutPublic>(`/workouts/${id}`, {
     method: 'DELETE',
+  })
+}
+
+export function duplicateWorkout(id: number, body: DuplicateWorkoutBody = {}) {
+  return api<WorkoutCreateResult>(`/workouts/${id}/duplicate`, {
+    method: 'POST',
+    body: JSON.stringify(body),
   })
 }
 

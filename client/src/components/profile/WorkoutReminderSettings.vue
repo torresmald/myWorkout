@@ -22,6 +22,10 @@ import {
   requestNotificationPermission,
 } from '@/utils/reminder.util'
 
+const { embedded = false } = defineProps<{ embedded?: boolean }>()
+
+const SETTINGS_SUBSECTION_TITLE_CLASS = 'mb-3 text-sm font-semibold text-text-primary sm:text-base'
+
 const reminderStore = useReminderStore()
 const toastStore = useToastStore()
 const { t } = useI18n()
@@ -30,6 +34,7 @@ const { settings, loading, saving } = storeToRefs(reminderStore)
 
 const pushReminderEnabled = ref(false)
 const emailReminderEnabled = ref(false)
+const plannedWorkoutReminderEnabled = ref(false)
 const reminderDays = ref<number[]>([])
 const reminderTimeLocal = ref('18:00')
 const reminderTimezone = ref(getBrowserTimezone())
@@ -43,7 +48,10 @@ const dayOptions = computed(() =>
 
 const canSave = computed(
   () =>
-    (!pushReminderEnabled.value && !emailReminderEnabled.value) || reminderDays.value.length > 0,
+    (!pushReminderEnabled.value &&
+      !emailReminderEnabled.value &&
+      !plannedWorkoutReminderEnabled.value) ||
+    reminderDays.value.length > 0,
 )
 
 function syncFromSettings() {
@@ -53,6 +61,7 @@ function syncFromSettings() {
 
   pushReminderEnabled.value = settings.value.pushReminderEnabled
   emailReminderEnabled.value = settings.value.emailReminderEnabled
+  plannedWorkoutReminderEnabled.value = settings.value.plannedWorkoutReminderEnabled
   reminderDays.value = [...settings.value.reminderDays]
   reminderTimeLocal.value = settings.value.reminderTimeLocal
   reminderTimezone.value = settings.value.reminderTimezone || getBrowserTimezone()
@@ -105,6 +114,7 @@ async function handleSave() {
     await reminderStore.saveSettings({
       pushReminderEnabled: pushReminderEnabled.value,
       emailReminderEnabled: emailReminderEnabled.value,
+      plannedWorkoutReminderEnabled: plannedWorkoutReminderEnabled.value,
       reminderDays: reminderDays.value,
       reminderTimeLocal: reminderTimeLocal.value,
       reminderTimezone: reminderTimezone.value,
@@ -127,12 +137,23 @@ onMounted(async () => {
 </script>
 
 <template>
-  <section :class="CARD_BODY_CLASS">
-    <h2 :class="SECTION_TITLE_CLASS">{{ t('reminders.title') }}</h2>
+  <component :is="embedded ? 'div' : 'section'" :class="embedded ? undefined : CARD_BODY_CLASS">
+    <component
+      :is="embedded ? 'h3' : 'h2'"
+      :class="embedded ? SETTINGS_SUBSECTION_TITLE_CLASS : SECTION_TITLE_CLASS"
+    >
+      {{ t('reminders.title') }}
+    </component>
     <p :class="['mb-4', TEXT_MUTED_CLASS]">{{ t('reminders.description') }}</p>
 
     <p v-if="settings" :class="['mb-4 text-sm', TEXT_MUTED_CLASS]">
       {{ t('reminders.workoutsLast7Days', { count: settings.workoutsLast7Days }) }}
+    </p>
+    <p
+      v-if="settings?.hasPlannedWorkoutToday"
+      class="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-100"
+    >
+      {{ t('reminders.plannedWorkoutToday') }}
     </p>
 
     <div v-if="loading && !settings" :class="TEXT_MUTED_CLASS">{{ t('common.loading') }}</div>
@@ -160,6 +181,22 @@ onMounted(async () => {
         <span>
           <span class="block font-medium text-text-primary">{{ t('reminders.emailEnabled') }}</span>
           <span class="mt-1 block text-sm text-text-muted">{{ t('reminders.emailHint') }}</span>
+        </span>
+      </label>
+
+      <label class="flex items-start gap-3">
+        <input
+          v-model="plannedWorkoutReminderEnabled"
+          type="checkbox"
+          class="mt-1 h-4 w-4 rounded border-border-default"
+        />
+        <span>
+          <span class="block font-medium text-text-primary">
+            {{ t('reminders.plannedWorkoutEnabled') }}
+          </span>
+          <span class="mt-1 block text-sm text-text-muted">
+            {{ t('reminders.plannedWorkoutHint') }}
+          </span>
         </span>
       </label>
 
@@ -218,5 +255,5 @@ onMounted(async () => {
         {{ t('common.saveChanges') }}
       </LoadingButton>
     </form>
-  </section>
+  </component>
 </template>

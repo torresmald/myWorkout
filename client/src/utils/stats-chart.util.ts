@@ -1,12 +1,14 @@
 import type { ChartData, ChartOptions } from 'chart.js'
 
 import { CHART_COLORS, getChartTheme } from '@/constants/chart.constants'
+import type { WeightUnit } from '@/constants/weight-unit.constants'
 import { i18n } from '@/i18n'
 import type {
   ExerciseEvolutionSeries,
   WeeklyStatPoint,
 } from '@/interfaces/stats.interface'
 import { formatWeekLabel, formatWorkoutDate } from '@/utils/date.util'
+import { convertWeightFromKg, getWeightUnitSuffix, kgToLb } from '@/utils/weight-unit.util'
 
 function t(key: string): string {
   return i18n.global.t(key)
@@ -59,13 +61,18 @@ export function buildWeeklyFrequencyChartData(
   }
 }
 
-export function buildWeeklyVolumeChartData(weekly: WeeklyStatPoint[]): ChartData<'bar'> {
+export function buildWeeklyVolumeChartData(
+  weekly: WeeklyStatPoint[],
+  unit: WeightUnit = 'kg',
+): ChartData<'bar'> {
   return {
     labels: weekly.map((point) => formatWeekLabel(point.weekStart)),
     datasets: [
       {
-        label: t('charts.volumeKg'),
-        data: weekly.map((point) => Math.round(point.volumeKg)),
+        label: unit === 'lb' ? t('charts.volumeLb') : t('charts.volumeKg'),
+        data: weekly.map((point) =>
+          Math.round(unit === 'lb' ? kgToLb(point.volumeKg) : point.volumeKg),
+        ),
         backgroundColor: CHART_COLORS.secondary,
         borderRadius: 6,
       },
@@ -77,8 +84,11 @@ export function buildWeeklyFrequencyChartOptions(isDark: boolean): ChartOptions<
   return buildBarChartOptions(isDark)
 }
 
-export function buildWeeklyVolumeChartOptions(isDark: boolean): ChartOptions<'bar'> {
-  return buildBarChartOptions(isDark, 'kg')
+export function buildWeeklyVolumeChartOptions(
+  isDark: boolean,
+  unit: WeightUnit = 'kg',
+): ChartOptions<'bar'> {
+  return buildBarChartOptions(isDark, getWeightUnitSuffix(unit))
 }
 
 export function exerciseSeriesUsesWeight(series: ExerciseEvolutionSeries | null): boolean {
@@ -88,6 +98,7 @@ export function exerciseSeriesUsesWeight(series: ExerciseEvolutionSeries | null)
 export function buildExerciseEvolutionChartData(
   series: ExerciseEvolutionSeries | null,
   isDark: boolean,
+  unit: WeightUnit = 'kg',
 ): ChartData<'line'> {
   if (!series) {
     return { labels: [], datasets: [] }
@@ -103,8 +114,8 @@ export function buildExerciseEvolutionChartData(
       labels: pointsWithWeight.map((point) => formatWorkoutDate(point.date)),
       datasets: [
         {
-          label: t('charts.maxWeightKg'),
-          data: pointsWithWeight.map((point) => point.maxWeight),
+          label: unit === 'lb' ? t('charts.maxWeightLb') : t('charts.maxWeightKg'),
+          data: pointsWithWeight.map((point) => convertWeightFromKg(point.maxWeight ?? 0, unit)),
           borderColor: CHART_COLORS.primary,
           backgroundColor: CHART_COLORS.primarySoft,
           pointBackgroundColor: CHART_COLORS.primary,
@@ -140,10 +151,12 @@ export function buildExerciseEvolutionChartData(
 export function buildExerciseEvolutionChartOptions(
   series: ExerciseEvolutionSeries | null,
   isDark: boolean,
+  unit: WeightUnit = 'kg',
 ): ChartOptions<'line'> {
   const { gridColor, tickColor } = getChartTheme(isDark)
   const usesWeight = exerciseSeriesUsesWeight(series)
   const repsShort = t('charts.repsShort')
+  const weightSuffix = getWeightUnitSuffix(unit)
 
   return {
     responsive: true,
@@ -154,7 +167,7 @@ export function buildExerciseEvolutionChartOptions(
         callbacks: {
           label(context) {
             const value = context.parsed.y
-            return value === null ? '' : usesWeight ? `${value} kg` : `${value} ${repsShort}`
+            return value === null ? '' : usesWeight ? `${value} ${weightSuffix}` : `${value} ${repsShort}`
           },
         },
       },
@@ -170,7 +183,7 @@ export function buildExerciseEvolutionChartOptions(
         ticks: {
           color: tickColor,
           callback(value) {
-            return usesWeight ? `${value} kg` : `${value}`
+            return usesWeight ? `${value} ${weightSuffix}` : `${value}`
           },
         },
       },

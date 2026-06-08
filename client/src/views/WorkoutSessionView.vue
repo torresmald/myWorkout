@@ -4,12 +4,14 @@ import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 
+import { useWeightDisplay } from '@/composables/useWeightDisplay'
 import WorkoutSessionExercise from '@/components/workout/WorkoutSessionExercise.vue'
 import SpotifyPlayCard from '@/components/spotify/SpotifyPlayCard.vue'
 import RestTimerModal from '@/components/workout/RestTimerModal.vue'
 import PageContainer from '@/components/layout/PageContainer.vue'
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
 import { useRestTimer } from '@/composables/useRestTimer'
+import { useWakeLock } from '@/composables/useWakeLock'
 import {
   BTN_MOBILE_FULL_CLASS,
   BTN_PRIMARY_CLASS,
@@ -33,6 +35,7 @@ const workoutStore = useWorkoutStore()
 const modalStore = useModalStore()
 const toastStore = useToastStore()
 const { t } = useI18n()
+const { formatWeight } = useWeightDisplay()
 
 const workoutId = computed(() => Number(route.params.id))
 
@@ -63,6 +66,10 @@ const { user } = storeToRefs(authStore)
 
 const isBusy = computed(() => loading.value || starting.value)
 const isCompleted = computed(() => session.value?.status === 'COMPLETED')
+const keepScreenAwake = computed(
+  () => session.value?.status === 'IN_PROGRESS' && !isCompleted.value,
+)
+useWakeLock(keepScreenAwake)
 const canFinish = computed(
   () => session.value?.status === 'IN_PROGRESS' && !finishing.value && !isBusy.value,
 )
@@ -113,14 +120,16 @@ async function handleToggleComplete(payload: {
     if (payload.completed && result.isPersonalRecord && payload.weight !== null) {
       personalRecordSetKeys.value.add(`${payload.exerciseId}-${payload.setNumber}`)
 
-      toastStore.success(
-        result.previousMaxWeight !== null
-          ? t('personalRecords.newRecordWithPrevious', {
-              weight: payload.weight,
-              previous: result.previousMaxWeight,
-            })
-          : t('personalRecords.newRecord', { weight: payload.weight }),
-      )
+      if (user.value?.showPrToast ?? true) {
+        toastStore.success(
+          result.previousMaxWeight !== null
+            ? t('personalRecords.newRecordWithPrevious', {
+                weight: formatWeight(payload.weight),
+                previous: formatWeight(result.previousMaxWeight),
+              })
+            : t('personalRecords.newRecord', { weight: formatWeight(payload.weight) }),
+        )
+      }
     }
 
     if (payload.completed && payload.restSeconds > 0 && !payload.isLastSet) {
@@ -137,14 +146,16 @@ async function handleFinish() {
   }
 
   if (completedSetCount.value < totalSetCount.value) {
-    const confirmed = await modalStore.confirm({
-      title: t('session.incompleteFinishTitle'),
-      message: t('session.incompleteFinishMessage'),
-      confirmLabel: t('session.finishButton'),
-    })
+    if (user.value?.confirmIncompleteFinish ?? true) {
+      const confirmed = await modalStore.confirm({
+        title: t('session.incompleteFinishTitle'),
+        message: t('session.incompleteFinishMessage'),
+        confirmLabel: t('session.finishButton'),
+      })
 
-    if (!confirmed) {
-      return
+      if (!confirmed) {
+        return
+      }
     }
   }
 

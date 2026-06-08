@@ -1,5 +1,6 @@
 import { ErrorCode } from '../constants/error-codes.constants.js'
 import { prisma } from '../config/prisma.js'
+import { userPreferencesReminderSelect } from '../constants/user-preferences.constants.js'
 import { AppError } from '../interfaces/app-error.interface.js'
 import type {
   EmailReminderBatchResult,
@@ -10,26 +11,15 @@ import { parseAppLocale } from '../utils/locale.util.js'
 import {
   getLocalTimeParts,
   getSevenDaysAgo,
+  hasPlannedWorkoutOnLocalDate,
   isReminderDay,
   isReminderHour,
   isValidReminderTime,
   normalizeReminderDays,
   wasEmailReminderSentToday,
 } from '../utils/reminder.util.js'
-import { sendWorkoutReminderEmail } from './mail.service.js'
-
-const reminderUserSelect = {
-  id: true,
-  email: true,
-  name: true,
-  locale: true,
-  pushReminderEnabled: true,
-  emailReminderEnabled: true,
-  reminderDays: true,
-  reminderTimeLocal: true,
-  reminderTimezone: true,
-  lastEmailReminderSentAt: true,
-} as const
+import { sendPlannedWorkoutReminderEmail, sendWorkoutReminderEmail } from './mail.service.js'
+import { ensureUserPreferences } from './user-preferences.service.js'
 
 async function countWorkoutsLast7Days(userId: number): Promise<number> {
   return prisma.workout.count({
@@ -40,33 +30,57 @@ async function countWorkoutsLast7Days(userId: number): Promise<number> {
   })
 }
 
+async function userHasPlannedWorkoutToday(
+  userId: number,
+  timezone: string,
+  now = new Date(),
+): Promise<boolean> {
+  const { dateKey } = getLocalTimeParts(timezone, now)
+  const plannedWorkouts = await prisma.workout.findMany({
+    where: {
+      userId,
+      status: 'PLANNED',
+    },
+    select: { date: true },
+  })
+
+  return plannedWorkouts.some((workout) =>
+    hasPlannedWorkoutOnLocalDate(workout.date, timezone, dateKey),
+  )
+}
+
 function mapReminderSettings(
-  user: {
+  preferences: {
     pushReminderEnabled: boolean
     emailReminderEnabled: boolean
+    plannedWorkoutReminderEnabled: boolean
     reminderDays: number[]
     reminderTimeLocal: string
     reminderTimezone: string
   },
   workoutsLast7Days: number,
+  hasPlannedWorkoutToday: boolean,
 ): WorkoutReminderSettings {
   return {
-    pushReminderEnabled: user.pushReminderEnabled,
-    emailReminderEnabled: user.emailReminderEnabled,
-    reminderDays: user.reminderDays,
-    reminderTimeLocal: user.reminderTimeLocal,
-    reminderTimezone: user.reminderTimezone,
+    pushReminderEnabled: preferences.pushReminderEnabled,
+    emailReminderEnabled: preferences.emailReminderEnabled,
+    plannedWorkoutReminderEnabled: preferences.plannedWorkoutReminderEnabled,
+    reminderDays: preferences.reminderDays,
+    reminderTimeLocal: preferences.reminderTimeLocal,
+    reminderTimezone: preferences.reminderTimezone,
     workoutsLast7Days,
+    hasPlannedWorkoutToday,
   }
 }
 
 function validateReminderPayload(body: UpdateWorkoutReminderBody) {
   const pushEnabled = body.pushReminderEnabled ?? false
   const emailEnabled = body.emailReminderEnabled ?? false
+  const plannedEnabled = body.plannedWorkoutReminderEnabled ?? false
   const days = body.reminderDays !== undefined ? normalizeReminderDays(body.reminderDays) : []
   const time = body.reminderTimeLocal?.trim()
 
-  if ((pushEnabled || emailEnabled) && days.length === 0) {
+  if ((pushEnabled || emailEnabled || plannedEnabled) && days.length === 0) {
     throw new AppError(ErrorCode.REMINDER_DAYS_REQUIRED, 400)
   }
 
@@ -75,7 +89,7 @@ function validateReminderPayload(body: UpdateWorkoutReminderBody) {
   }
 
   if (body.reminderDays !== undefined && normalizeReminderDays(body.reminderDays).length === 0) {
-    if (pushEnabled || emailEnabled) {
+    if (pushEnabled || emailEnabled || plannedEnabled) {
       throw new AppError(ErrorCode.REMINDER_DAYS_REQUIRED, 400)
     }
   }
@@ -89,36 +103,37 @@ function validateReminderPayload(body: UpdateWorkoutReminderBody) {
 export async function getWorkoutReminderSettings(
   userId: number,
 ): Promise<WorkoutReminderSettings> {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: reminderUserSelect,
+  await ensureUserPreferences(userId)
+
+  const preferences = await prisma.userPreferences.findUnique({
+    where: { userId },
+    select: userPreferencesReminderSelect,
   })
 
-  if (!user) {
+  if (!preferences) {
     throw new AppError(ErrorCode.USER_NOT_FOUND, 404)
   }
 
   const workoutsLast7Days = await countWorkoutsLast7Days(userId)
+  const hasPlannedWorkoutToday = await userHasPlannedWorkoutToday(
+    userId,
+    preferences.reminderTimezone,
+  )
 
-  return mapReminderSettings(user, workoutsLast7Days)
+  return mapReminderSettings(preferences, workoutsLast7Days, hasPlannedWorkoutToday)
 }
 
 export async function updateWorkoutReminderSettings(
   userId: number,
   body: UpdateWorkoutReminderBody,
 ): Promise<WorkoutReminderSettings> {
-  const existing = await prisma.user.findUnique({
-    where: { id: userId },
-    select: reminderUserSelect,
-  })
-
-  if (!existing) {
-    throw new AppError(ErrorCode.USER_NOT_FOUND, 404)
-  }
+  const existing = await ensureUserPreferences(userId)
 
   const validated = validateReminderPayload({
     pushReminderEnabled: body.pushReminderEnabled ?? existing.pushReminderEnabled,
     emailReminderEnabled: body.emailReminderEnabled ?? existing.emailReminderEnabled,
+    plannedWorkoutReminderEnabled:
+      body.plannedWorkoutReminderEnabled ?? existing.plannedWorkoutReminderEnabled,
     reminderDays: body.reminderDays ?? existing.reminderDays,
     reminderTimeLocal: body.reminderTimeLocal ?? existing.reminderTimeLocal,
     reminderTimezone: body.reminderTimezone ?? existing.reminderTimezone,
@@ -126,28 +141,38 @@ export async function updateWorkoutReminderSettings(
 
   const pushReminderEnabled = body.pushReminderEnabled ?? existing.pushReminderEnabled
   const emailReminderEnabled = body.emailReminderEnabled ?? existing.emailReminderEnabled
+  const plannedWorkoutReminderEnabled =
+    body.plannedWorkoutReminderEnabled ?? existing.plannedWorkoutReminderEnabled
   const reminderDays =
     body.reminderDays !== undefined ? validated.days : existing.reminderDays
 
-  if ((pushReminderEnabled || emailReminderEnabled) && reminderDays.length === 0) {
+  if (
+    (pushReminderEnabled || emailReminderEnabled || plannedWorkoutReminderEnabled) &&
+    reminderDays.length === 0
+  ) {
     throw new AppError(ErrorCode.REMINDER_DAYS_REQUIRED, 400)
   }
 
-  const updated = await prisma.user.update({
-    where: { id: userId },
+  const updated = await prisma.userPreferences.update({
+    where: { userId },
     data: {
       pushReminderEnabled,
       emailReminderEnabled,
+      plannedWorkoutReminderEnabled,
       reminderDays,
       reminderTimeLocal: validated.time ?? existing.reminderTimeLocal,
       reminderTimezone: body.reminderTimezone?.trim() || existing.reminderTimezone,
     },
-    select: reminderUserSelect,
+    select: userPreferencesReminderSelect,
   })
 
   const workoutsLast7Days = await countWorkoutsLast7Days(userId)
+  const hasPlannedWorkoutToday = await userHasPlannedWorkoutToday(
+    userId,
+    updated.reminderTimezone,
+  )
 
-  return mapReminderSettings(updated, workoutsLast7Days)
+  return mapReminderSettings(updated, workoutsLast7Days, hasPlannedWorkoutToday)
 }
 
 export async function processEmailWorkoutReminders(
@@ -155,43 +180,98 @@ export async function processEmailWorkoutReminders(
 ): Promise<EmailReminderBatchResult> {
   const users = await prisma.user.findMany({
     where: {
-      emailReminderEnabled: true,
       emailVerifiedAt: { not: null },
+      preferences: {
+        OR: [{ emailReminderEnabled: true }, { plannedWorkoutReminderEnabled: true }],
+      },
     },
-    select: reminderUserSelect,
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      preferences: {
+        select: userPreferencesReminderSelect,
+      },
+    },
   })
 
   let sent = 0
   let skipped = 0
 
   for (const user of users) {
-    if (
-      !isReminderDay(user.reminderDays, user.reminderTimezone, now) ||
-      !isReminderHour(user.reminderTimeLocal, user.reminderTimezone, now) ||
-      wasEmailReminderSentToday(user.lastEmailReminderSentAt, user.reminderTimezone, now)
-    ) {
+    const preferences = user.preferences
+
+    if (!preferences) {
       skipped += 1
       continue
     }
 
-    const workoutsLast7Days = await countWorkoutsLast7Days(user.id)
+    const onSchedule =
+      isReminderDay(preferences.reminderDays, preferences.reminderTimezone, now) &&
+      isReminderHour(preferences.reminderTimeLocal, preferences.reminderTimezone, now)
 
-    if (workoutsLast7Days > 0) {
+    if (!onSchedule) {
       skipped += 1
       continue
     }
 
-    const locale = parseAppLocale(user.locale)
+    const locale = parseAppLocale(preferences.locale)
     const appUrl = process.env.APP_URL ?? 'http://localhost:5173'
+    let sentForUser = 0
 
-    await sendWorkoutReminderEmail(user.email, user.name, `${appUrl}/workouts`, locale)
+    if (
+      preferences.plannedWorkoutReminderEnabled &&
+      !wasEmailReminderSentToday(
+        preferences.lastPlannedEmailReminderSentAt,
+        preferences.reminderTimezone,
+        now,
+      )
+    ) {
+      const hasPlannedToday = await userHasPlannedWorkoutToday(
+        user.id,
+        preferences.reminderTimezone,
+        now,
+      )
 
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { lastEmailReminderSentAt: now },
-    })
+      if (hasPlannedToday) {
+        await sendPlannedWorkoutReminderEmail(user.email, user.name, `${appUrl}/workouts`, locale)
 
-    sent += 1
+        await prisma.userPreferences.update({
+          where: { userId: user.id },
+          data: { lastPlannedEmailReminderSentAt: now },
+        })
+
+        sentForUser += 1
+      }
+    }
+
+    if (
+      preferences.emailReminderEnabled &&
+      !wasEmailReminderSentToday(
+        preferences.lastEmailReminderSentAt,
+        preferences.reminderTimezone,
+        now,
+      )
+    ) {
+      const workoutsLast7Days = await countWorkoutsLast7Days(user.id)
+
+      if (workoutsLast7Days === 0) {
+        await sendWorkoutReminderEmail(user.email, user.name, `${appUrl}/workouts`, locale)
+
+        await prisma.userPreferences.update({
+          where: { userId: user.id },
+          data: { lastEmailReminderSentAt: now },
+        })
+
+        sentForUser += 1
+      }
+    }
+
+    sent += sentForUser
+
+    if (sentForUser === 0) {
+      skipped += 1
+    }
   }
 
   return {
@@ -225,4 +305,26 @@ export function shouldTriggerPushReminder(
   }
 
   return true
+}
+
+export function shouldTriggerPlannedWorkoutPushReminder(
+  settings: WorkoutReminderSettings,
+  now = new Date(),
+): boolean {
+  if (!settings.plannedWorkoutReminderEnabled || settings.reminderDays.length === 0) {
+    return false
+  }
+
+  if (!settings.hasPlannedWorkoutToday) {
+    return false
+  }
+
+  const local = getLocalTimeParts(settings.reminderTimezone, now)
+  const [targetHour, targetMinute] = settings.reminderTimeLocal.split(':').map(Number)
+
+  if (!settings.reminderDays.includes(local.weekdayIndex)) {
+    return false
+  }
+
+  return local.hour === targetHour && local.minute >= targetMinute
 }

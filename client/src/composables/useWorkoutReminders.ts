@@ -6,7 +6,9 @@ import { useAuthStore } from '@/stores/auth.store'
 import { useReminderStore } from '@/stores/reminder.store'
 import {
   getLocalDateKey,
+  markPlannedPushReminderShownToday,
   markPushReminderShownToday,
+  shouldShowPlannedWorkoutPushReminder,
   shouldShowPushReminder,
   showWorkoutReminderNotification,
 } from '@/utils/reminder.util'
@@ -39,11 +41,22 @@ export function useWorkoutReminders() {
       return
     }
 
+    const dateKey = getLocalDateKey(settings.value.reminderTimezone)
+
+    if (shouldShowPlannedWorkoutPushReminder(settings.value)) {
+      showWorkoutReminderNotification(
+        t('reminders.plannedNotificationTitle'),
+        t('reminders.plannedNotificationBody'),
+        '/workouts',
+      )
+      markPlannedPushReminderShownToday(dateKey)
+      return
+    }
+
     if (!shouldShowPushReminder(settings.value)) {
       return
     }
 
-    const dateKey = getLocalDateKey(settings.value.reminderTimezone)
     showWorkoutReminderNotification(
       t('reminders.notificationTitle'),
       t('reminders.notificationBody'),

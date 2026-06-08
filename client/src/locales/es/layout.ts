@@ -5,10 +5,18 @@ export default {
   openNavMenu: 'Abrir menú de navegación',
   openUserMenu: 'Abrir menú de usuario',
   goToProfile: 'Ir a mi perfil',
+  goToSettings: 'Ir a ajustes',
   switchToLight: 'Activar modo claro',
   switchToDark: 'Activar modo oscuro',
   switchToSpanish: 'Cambiar a español',
   switchToEnglish: 'Switch to English',
   languageEs: 'ES',
   languageEn: 'EN',
+  pwaInstall: {
+    title: 'Instala myWorkout en tu móvil',
+    description: 'Acceso rápido desde la pantalla de inicio, ideal para el gimnasio.',
+    manualHint: 'En Safari: Compartir → Añadir a pantalla de inicio. En Chrome: menú → Instalar app.',
+    install: 'Instalar',
+    dismiss: 'Ahora no',
+  },
 } as const

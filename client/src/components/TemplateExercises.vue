@@ -11,6 +11,7 @@ import RestTimerModal from '@/components/workout/RestTimerModal.vue'
 import { useRestTimer } from '@/composables/useRestTimer'
 import type { DraftWorkoutExercise } from '@/interfaces/workout.interface'
 import type { TemplateExercisePublic } from '@/interfaces/template.interface'
+import { useWeightDisplay } from '@/composables/useWeightDisplay'
 import {
   BTN_ACTIONS_CLASS,
   BTN_MOBILE_FULL_CLASS,
@@ -48,6 +49,7 @@ const exerciseTypeStore = useExerciseTypeStore()
 const modalStore = useModalStore()
 const toastStore = useToastStore()
 const { t } = useI18n()
+const { formatWeight, weightFieldLabel, inputBounds, toDisplayValue, toKg } = useWeightDisplay()
 
 const {
   isOpen: isRestTimerOpen,
@@ -106,7 +108,7 @@ function startEditExercise(exercise: TemplateExercisePublic | DraftWorkoutExerci
   sets.value = exercise.sets
   reps.value = exercise.reps
   restSeconds.value = exercise.restSeconds
-  weight.value = exercise.weight ?? ''
+  weight.value = exercise.weight !== null ? toDisplayValue(exercise.weight) : ''
   sortOrder.value = exercise.sortOrder
 }
 
@@ -120,7 +122,7 @@ function formatExerciseDetails(
   }
 
   if (exercise.weight !== null) {
-    parts.push(`${exercise.weight} kg`)
+    parts.push(formatWeight(exercise.weight))
   }
 
   return parts.join(' · ')
@@ -132,7 +134,7 @@ function buildExerciseBody() {
     sets: sets.value,
     reps: reps.value,
     restSeconds: restSeconds.value,
-    weight: weight.value === '' ? null : Number(weight.value),
+    weight: weight.value === '' ? null : toKg(Number(weight.value)),
     sortOrder: sortOrder.value,
   }
 }
@@ -479,13 +481,13 @@ defineExpose({ resetForm })
         </div>
 
         <div>
-          <label for="template-weight" :class="LABEL_CLASS">{{ t('common.weightKg') }}</label>
+          <label for="template-weight" :class="LABEL_CLASS">{{ weightFieldLabel }}</label>
           <input
             id="template-weight"
             v-model.number="weight"
             type="number"
             min="0"
-            step="0.5"
+            :step="inputBounds.step"
             :class="INPUT_CLASS"
             :placeholder="t('common.optional')"
           />

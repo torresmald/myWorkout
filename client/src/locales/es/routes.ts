@@ -21,6 +21,9 @@ export default {
   workoutSession: {
     title: 'Sesión en vivo',
   },
+  workoutDetail: {
+    title: 'Detalle del entrenamiento',
+  },
   templates: {
     title: 'Plantillas',
     description: 'Rutinas reutilizables para tus entrenamientos',
@@ -32,6 +35,10 @@ export default {
   profile: {
     title: 'Mi perfil',
     description: 'Gestiona tus datos personales y tu evolución',
+  },
+  settings: {
+    title: 'Ajustes',
+    description: 'Preferencias globales de la aplicación',
   },
   admin: {
     title: 'Administración',

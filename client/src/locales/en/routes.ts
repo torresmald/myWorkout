@@ -21,6 +21,9 @@ export default {
   workoutSession: {
     title: 'Live session',
   },
+  workoutDetail: {
+    title: 'Workout detail',
+  },
   templates: {
     title: 'Templates',
     description: 'Reusable routines for your workouts',
@@ -32,6 +35,10 @@ export default {
   profile: {
     title: 'My profile',
     description: 'Manage your personal data and progress',
+  },
+  settings: {
+    title: 'Settings',
+    description: 'Global app preferences',
   },
   admin: {
     title: 'Administration',

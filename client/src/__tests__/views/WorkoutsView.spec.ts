@@ -2,7 +2,7 @@ import { flushPromises } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { RouteRecordRaw } from 'vue-router'
 
-import { createWorkout } from '@/__tests__/fixtures/workout.fixture'
+import { createWorkout, createWorkoutListItem } from '@/__tests__/fixtures/workout.fixture'
 import { mountWithPlugins, navigateTo } from '@/__tests__/helpers/mount-test-app'
 import * as workoutApi from '@/api/workout.api'
 import WorkoutsView from '@/views/WorkoutsView.vue'
@@ -25,11 +25,18 @@ const routes: RouteRecordRaw[] = [
     name: 'workout-session',
     component: { template: '<div />' },
   },
+  {
+    path: '/workouts/:id',
+    name: 'workout-detail',
+    component: { template: '<div />' },
+  },
 ]
 
 describe('WorkoutsView', () => {
   beforeEach(() => {
-    vi.mocked(workoutApi.getWorkouts).mockResolvedValue([createWorkout({ id: 1, name: 'Push' })])
+    vi.mocked(workoutApi.getWorkouts).mockResolvedValue([
+      createWorkoutListItem({ id: 1, name: 'Push' }),
+    ])
     vi.mocked(workoutApi.deleteWorkout).mockResolvedValue(createWorkout({ id: 1 }))
   })
 

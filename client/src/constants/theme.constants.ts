@@ -1,3 +1,5 @@
-export const THEME_STORAGE_KEY = 'myworkout_theme'
+export type ThemeMode = 'light' | 'dark' | 'system'
 
-export type ThemePreference = 'light' | 'dark'
+export type ResolvedTheme = 'light' | 'dark'
+
+export const THEME_MODES: ThemeMode[] = ['light', 'dark', 'system']

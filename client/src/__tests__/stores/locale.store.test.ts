@@ -2,7 +2,7 @@ import { nextTick } from 'vue'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises } from '@vue/test-utils'
 
-import { updateProfile } from '@/api/profile.api'
+import { updatePreferences } from '@/api/profile.api'
 import { setupTestPinia } from '@/__tests__/helpers/mount-test-app'
 import { applyLocale, getStoredLocale, isAppLocale } from '@/utils/locale.util'
 import { getAccessToken } from '@/utils/storage.util'
@@ -27,7 +27,7 @@ vi.mock('vue', async (importOriginal) => {
 })
 
 vi.mock('@/api/profile.api', () => ({
-  updateProfile: vi.fn(),
+  updatePreferences: vi.fn(),
 }))
 
 vi.mock('@/utils/locale.util', async (importOriginal) => {
@@ -108,12 +108,12 @@ describe('locale store', () => {
     await flushPromises()
 
     expect(store.locale).toBe('en')
-    expect(updateProfile).not.toHaveBeenCalled()
+    expect(updatePreferences).not.toHaveBeenCalled()
   })
 
   it('persiste el locale en el perfil cuando hay token de acceso', async () => {
     vi.mocked(getAccessToken).mockReturnValue('access-token')
-    vi.mocked(updateProfile).mockResolvedValue({} as never)
+    vi.mocked(updatePreferences).mockResolvedValue({} as never)
     const store = await loadLocaleStore()
     store.setLocale('es')
     await nextTick()
@@ -122,12 +122,12 @@ describe('locale store', () => {
     await nextTick()
     await flushPromises()
 
-    expect(updateProfile).toHaveBeenCalledWith({ locale: 'en' })
+    expect(updatePreferences).toHaveBeenCalledWith({ locale: 'en' })
   })
 
   it('mantiene el locale aunque falle la persistencia en el perfil', async () => {
     vi.mocked(getAccessToken).mockReturnValue('access-token')
-    vi.mocked(updateProfile).mockRejectedValue(new Error('network'))
+    vi.mocked(updatePreferences).mockRejectedValue(new Error('network'))
     const store = await loadLocaleStore()
     store.setLocale('es')
     await nextTick()
@@ -153,6 +153,6 @@ describe('locale store', () => {
 
     store.syncFromUser(nextLocale)
 
-    expect(updateProfile).not.toHaveBeenCalled()
+    expect(updatePreferences).not.toHaveBeenCalled()
   })
 })

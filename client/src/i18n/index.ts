@@ -18,13 +18,3 @@ export const i18n = createI18n({
     en,
   },
 })
-
-export function setTheme() {
-  const stored = localStorage.getItem('myworkout_theme')
-  const dark =
-    stored === 'dark' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches)
-  if (dark) {
-    document.documentElement.classList.add('dark')
-    document.documentElement.style.colorScheme = 'dark'
-  }
-}
