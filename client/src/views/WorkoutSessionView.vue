@@ -12,6 +12,7 @@ import PageContainer from '@/components/layout/PageContainer.vue'
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
 import { useRestTimer } from '@/composables/useRestTimer'
 import { useWakeLock } from '@/composables/useWakeLock'
+import { SESSION_REASON } from '@/utils/wake-lock.util'
 import {
   BTN_MOBILE_FULL_CLASS,
   BTN_PRIMARY_CLASS,
@@ -67,9 +68,14 @@ const { user } = storeToRefs(authStore)
 const isBusy = computed(() => loading.value || starting.value)
 const isCompleted = computed(() => session.value?.status === 'COMPLETED')
 const keepScreenAwake = computed(
-  () => session.value?.status === 'IN_PROGRESS' && !isCompleted.value,
+  () =>
+    (session.value?.status === 'IN_PROGRESS' && !isCompleted.value) ||
+    isRestTimerOpen.value,
 )
-useWakeLock(keepScreenAwake)
+const { requestFromUserGesture: requestWakeLockFromGesture } = useWakeLock(
+  keepScreenAwake,
+  SESSION_REASON,
+)
 const canFinish = computed(
   () => session.value?.status === 'IN_PROGRESS' && !finishing.value && !isBusy.value,
 )
@@ -110,6 +116,8 @@ async function handleToggleComplete(payload: {
   isLastSet: boolean
   exerciseName: string
 }) {
+  void requestWakeLockFromGesture()
+
   try {
     const result = await sessionStore.updateSet(workoutId.value, payload.exerciseId, payload.setNumber, {
       reps: payload.reps,
@@ -179,7 +187,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <PageContainer>
+  <PageContainer @pointerdown="requestWakeLockFromGesture">
     <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
       <div>
         <RouterLink

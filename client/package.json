@@ -11,7 +11,7 @@
     "test:watch": "vitest",
     "test:unit": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "build-only": "node scripts/generate-pwa-icons.mjs && vite build",
+    "build-only": "node scripts/generate-pwa-icons.mjs && node scripts/generate-rest-complete-sound.mjs && vite build",
     "type-check": "vue-tsc --build",
     "lint": "run-s lint:*",
     "lint:oxlint": "oxlint . --fix",

@@ -1,73 +1,52 @@
-import { onUnmounted, ref, watch, type Ref } from 'vue'
+import { onMounted, onUnmounted, ref, watch, type Ref } from 'vue'
 
-export function useWakeLock(active: Ref<boolean>) {
+import {
+  acquireWakeLock,
+  releaseWakeLockReason,
+  requestWakeLockFromUserGesture,
+} from '@/utils/wake-lock.util'
+
+export function useWakeLock(active: Ref<boolean>, reason: string) {
   const isSupported = typeof navigator !== 'undefined' && 'wakeLock' in navigator
   const isActive = ref(false)
-  let wakeLock: WakeLockSentinel | null = null
 
-  async function requestWakeLock() {
-    if (!isSupported || !active.value || wakeLock) {
+  async function syncWakeLock() {
+    if (!isSupported) {
+      isActive.value = false
       return
     }
 
-    try {
-      wakeLock = await navigator.wakeLock.request('screen')
+    if (active.value) {
+      await acquireWakeLock(reason)
       isActive.value = true
-
-      wakeLock.addEventListener('release', () => {
-        isActive.value = false
-        wakeLock = null
-      })
-    } catch {
-      isActive.value = false
-      wakeLock = null
-    }
-  }
-
-  async function releaseWakeLock() {
-    if (!wakeLock) {
-      isActive.value = false
       return
     }
 
-    try {
-      await wakeLock.release()
-    } catch {
-      // Ignore release errors.
-    } finally {
-      wakeLock = null
-      isActive.value = false
-    }
+    await releaseWakeLockReason(reason)
+    isActive.value = false
   }
 
   async function handleVisibilityChange() {
     if (document.visibilityState === 'visible' && active.value) {
-      await requestWakeLock()
+      await requestWakeLockFromUserGesture()
     }
   }
 
-  watch(
-    active,
-    async (shouldKeepAwake) => {
-      if (shouldKeepAwake) {
-        await requestWakeLock()
-        document.addEventListener('visibilitychange', handleVisibilityChange)
-        return
-      }
+  watch(active, syncWakeLock, { immediate: true })
 
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-      await releaseWakeLock()
-    },
-    { immediate: true },
-  )
+  onMounted(() => {
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+  })
 
   onUnmounted(async () => {
     document.removeEventListener('visibilitychange', handleVisibilityChange)
-    await releaseWakeLock()
+    await releaseWakeLockReason(reason)
+    isActive.value = false
   })
 
   return {
     isSupported,
     isActive,
+    requestFromUserGesture: requestWakeLockFromUserGesture,
   }
 }

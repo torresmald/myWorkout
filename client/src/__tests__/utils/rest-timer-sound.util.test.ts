@@ -1,45 +1,43 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-function installMockAudioContext(state: AudioContextState = 'running') {
-  let lastContext: {
-    createOscillator: ReturnType<typeof vi.fn>
-    createGain: ReturnType<typeof vi.fn>
-    resume: ReturnType<typeof vi.fn>
-  } | null = null
+function installMockAudio() {
+  const play = vi.fn().mockResolvedValue(undefined)
+  const pause = vi.fn()
+  let currentTime = 0
 
-  class MockAudioContext {
-    state = state
-    currentTime = 0
-    destination = {}
+  class MockAudio {
+    preload = 'auto'
+    volume = 1
+    src = ''
 
-    createOscillator = vi.fn(() => ({
-      type: 'sine',
-      frequency: { value: 0 },
-      connect: vi.fn(),
-      start: vi.fn(),
-      stop: vi.fn(),
-    }))
-
-    createGain = vi.fn(() => ({
-      gain: {
-        setValueAtTime: vi.fn(),
-        exponentialRampToValueAtTime: vi.fn(),
-      },
-      connect: vi.fn(),
-    }))
-
-    resume = vi.fn().mockResolvedValue(undefined)
-
-    constructor() {
-      lastContext = this
+    get currentTime() {
+      return currentTime
     }
+
+    set currentTime(value: number) {
+      currentTime = value
+    }
+
+    play = play
+    pause = pause
   }
 
-  vi.stubGlobal('AudioContext', MockAudioContext)
+  vi.stubGlobal(
+    'Audio',
+    vi.fn(function MockAudioConstructor(this: MockAudio, url?: string) {
+      Object.assign(this, new MockAudio())
+      this.src = url ?? ''
+      return this
+    }),
+  )
 
-  return {
-    getLastContext: () => lastContext,
-  }
+  const vibrate = vi.fn()
+  vi.stubGlobal('navigator', {
+    ...navigator,
+    vibrate,
+  })
+
+  return { play, pause, vibrate }
 }
 
 describe('rest-timer-sound.util', () => {
@@ -51,23 +49,32 @@ describe('rest-timer-sound.util', () => {
     vi.unstubAllGlobals()
   })
 
-  it('desbloquea audio y reanuda contexto suspendido', async () => {
-    installMockAudioContext('suspended')
+  it('desbloquea audio con reproducción silenciosa', async () => {
+    const { play } = installMockAudio()
     const { unlockRestTimerSound } = await import('@/utils/rest-timer-sound.util')
 
     unlockRestTimerSound()
-    unlockRestTimerSound()
 
-    expect(typeof AudioContext).toBe('function')
+    expect(play).toHaveBeenCalled()
   })
 
-  it('reproduce tonos al completar el descanso', async () => {
-    const { getLastContext } = installMockAudioContext('running')
+  it('reproduce el sonido al completar el descanso', async () => {
+    const { play } = installMockAudio()
     const { playRestTimerCompleteSound } = await import('@/utils/rest-timer-sound.util')
 
-    playRestTimerCompleteSound()
+    await playRestTimerCompleteSound()
 
-    expect(getLastContext()?.createOscillator).toHaveBeenCalled()
-    expect(getLastContext()?.createGain).toHaveBeenCalled()
+    expect(play).toHaveBeenCalled()
+  })
+
+  it('vibra si la reproducción falla', async () => {
+    const { play, vibrate } = installMockAudio()
+    play.mockRejectedValueOnce(new Error('blocked'))
+
+    const { playRestTimerCompleteSound } = await import('@/utils/rest-timer-sound.util')
+
+    await playRestTimerCompleteSound()
+
+    expect(vibrate).toHaveBeenCalledWith([200, 100, 200])
   })
 })

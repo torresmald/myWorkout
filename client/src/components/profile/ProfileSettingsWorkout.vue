@@ -5,8 +5,9 @@ import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/stores/auth.store'
 import { useProfileStore } from '@/stores/profile.store'
 import { useToastStore } from '@/stores/toast.store'
-import { TEXT_MUTED_CLASS } from '@/constants/ui.constants'
+import { BTN_SECONDARY_CLASS, TEXT_MUTED_CLASS } from '@/constants/ui.constants'
 import { getErrorMessage } from '@/utils/error.util'
+import { previewRestTimerCompleteSound } from '@/utils/rest-timer-sound.util'
 
 type WorkoutPreferenceKey =
   | 'restTimerSoundEnabled'
@@ -30,6 +31,10 @@ async function handleToggle(key: WorkoutPreferenceKey, event: Event) {
     input.checked = !nextValue
     toastStore.error(getErrorMessage(error, t('profile.settings.workout.saveError')))
   }
+}
+
+async function handleTestRestTimerSound() {
+  await previewRestTimerCompleteSound()
 }
 </script>
 
@@ -78,6 +83,14 @@ async function handleToggle(key: WorkoutPreferenceKey, event: Event) {
           </span>
         </span>
       </label>
+
+      <button
+        type="button"
+        :class="BTN_SECONDARY_CLASS"
+        @click="handleTestRestTimerSound"
+      >
+        {{ t('profile.settings.workout.restTimerSoundTest') }}
+      </button>
 
       <label for="showPrToast" class="flex cursor-pointer items-start gap-3">
         <input

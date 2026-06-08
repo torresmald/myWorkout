@@ -83,6 +83,7 @@ export default {
       description: 'Behavior during live workout sessions.',
       restTimerSound: 'Rest timer sound',
       restTimerSoundHint: 'Plays a beep when the rest timer finishes.',
+      restTimerSoundTest: 'Test sound',
       showPrToast: 'Personal record notification',
       showPrToastHint: 'Shows a message when you beat your best set.',
       confirmIncompleteFinish: 'Confirm finish with pending sets',

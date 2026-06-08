@@ -83,6 +83,7 @@ export default {
       description: 'Comportamiento durante las sesiones en vivo.',
       restTimerSound: 'Sonido al terminar el descanso',
       restTimerSoundHint: 'Reproduce un pitido cuando acaba el temporizador de descanso.',
+      restTimerSoundTest: 'Probar sonido',
       showPrToast: 'Aviso de récord personal',
       showPrToastHint: 'Muestra un mensaje al batir tu mejor marca en una serie.',
       confirmIncompleteFinish: 'Confirmar al finalizar con series pendientes',

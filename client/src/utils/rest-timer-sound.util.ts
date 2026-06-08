@@ -1,49 +1,69 @@
-let audioContext: AudioContext | null = null
+const REST_COMPLETE_SOUND_URL = '/sounds/rest-complete.wav'
+
+let restCompleteAudio: HTMLAudioElement | null = null
+
+function getAudioElement(): HTMLAudioElement | null {
+  if (typeof window === 'undefined') {
+    return null
+  }
+
+  restCompleteAudio ??= new Audio(REST_COMPLETE_SOUND_URL)
+  restCompleteAudio.preload = 'auto'
+
+  return restCompleteAudio
+}
+
+function vibrateRestComplete(): void {
+  if (typeof navigator === 'undefined' || typeof navigator.vibrate !== 'function') {
+    return
+  }
+
+  navigator.vibrate([200, 100, 200])
+}
 
 export function unlockRestTimerSound(): void {
-  if (typeof window === 'undefined') {
+  const audio = getAudioElement()
+
+  if (!audio) {
     return
   }
 
-  audioContext ??= new AudioContext()
+  const previousVolume = audio.volume
+  audio.volume = 0.01
+  audio.currentTime = 0
 
-  if (audioContext.state === 'suspended') {
-    void audioContext.resume()
-  }
+  void audio
+    .play()
+    .then(() => {
+      audio.pause()
+      audio.currentTime = 0
+      audio.volume = previousVolume
+    })
+    .catch(() => {
+      audio.volume = previousVolume
+    })
 }
 
-function playTone(ctx: AudioContext, frequency: number, startAt: number, duration: number): void {
-  const oscillator = ctx.createOscillator()
-  const gain = ctx.createGain()
+export async function playRestTimerCompleteSound(): Promise<void> {
+  const audio = getAudioElement()
 
-  oscillator.type = 'sine'
-  oscillator.frequency.value = frequency
-  gain.gain.setValueAtTime(0.0001, startAt)
-  gain.gain.exponentialRampToValueAtTime(0.35, startAt + 0.02)
-  gain.gain.exponentialRampToValueAtTime(0.0001, startAt + duration)
-
-  oscillator.connect(gain)
-  gain.connect(ctx.destination)
-
-  oscillator.start(startAt)
-  oscillator.stop(startAt + duration)
-}
-
-export function playRestTimerCompleteSound(): void {
-  if (typeof window === 'undefined') {
+  if (!audio) {
+    vibrateRestComplete()
     return
   }
 
-  const ctx = audioContext ?? new AudioContext()
-  audioContext = ctx
+  audio.volume = 1
+  audio.currentTime = 0
 
-  if (ctx.state === 'suspended') {
-    void ctx.resume()
+  try {
+    await audio.play()
+    return
+  } catch {
+    vibrateRestComplete()
   }
+}
 
-  const now = ctx.currentTime
-
-  playTone(ctx, 880, now, 0.18)
-  playTone(ctx, 880, now + 0.28, 0.18)
-  playTone(ctx, 1174.66, now + 0.56, 0.28)
+export function previewRestTimerCompleteSound(): Promise<void> {
+  unlockRestTimerSound()
+  return playRestTimerCompleteSound()
 }

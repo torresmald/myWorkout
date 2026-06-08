@@ -2,6 +2,12 @@ import { onUnmounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 
 import { playRestTimerCompleteSound, unlockRestTimerSound } from '@/utils/rest-timer-sound.util'
+import {
+  acquireWakeLock,
+  releaseWakeLockReason,
+  requestWakeLockFromUserGesture,
+  REST_TIMER_REASON,
+} from '@/utils/wake-lock.util'
 import { useAuthStore } from '@/stores/auth.store'
 
 export function useRestTimer() {
@@ -53,12 +59,14 @@ export function useRestTimer() {
     remainingSeconds.value = 0
 
     if (user.value?.restTimerSoundEnabled ?? true) {
-      playRestTimerCompleteSound()
+      void playRestTimerCompleteSound()
     }
   }
 
   function start(name: string, totalSecondsParam: number) {
     unlockRestTimerSound()
+    void acquireWakeLock(REST_TIMER_REASON)
+    void requestWakeLockFromUserGesture()
 
     exerciseName.value = name
     totalSeconds.value = totalSecondsParam
@@ -106,6 +114,7 @@ export function useRestTimer() {
     exerciseName.value = ''
     remainingSeconds.value = 0
     totalSeconds.value = 0
+    void releaseWakeLockReason(REST_TIMER_REASON)
   }
 
   function closeAfterFinish() {
