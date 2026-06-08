@@ -76,7 +76,7 @@ const exerciseTypeId = ref<number | ''>('')
 const sets = ref(3)
 const reps = ref(10)
 const restSeconds = ref(60)
-const weight = ref<number | ''>('')
+const weight = ref('')
 const sortOrder = ref(0)
 const savingDraftExercise = ref(false)
 
@@ -488,7 +488,7 @@ defineExpose({ resetForm })
           <label for="weight" :class="LABEL_CLASS">{{ weightFieldLabel }}</label>
           <input
             id="weight"
-            v-model.number="weight"
+            v-model="weight"
             type="number"
             min="0"
             :step="inputBounds.step"

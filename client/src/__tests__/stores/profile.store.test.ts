@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import * as profileApi from '@/api/profile.api'
 import { setupTestPinia } from '@/__tests__/helpers/mount-test-app'
+import { createUserPublic } from '@/__tests__/fixtures/profile.fixture'
 import type { UserPublic } from '@/interfaces/auth.interface'
 import type { UserProfile } from '@/interfaces/profile.interface'
 import { useAuthStore } from '@/stores/auth.store'
@@ -17,27 +18,7 @@ vi.mock('@/api/profile.api', () => ({
   deleteAvatar: vi.fn(),
 }))
 
-const mockUser: UserPublic = {
-  id: 1,
-  email: 'user@example.com',
-  name: 'Test User',
-  role: 'USER',
-  locale: 'es',
-  createdAt: '2026-01-01T00:00:00.000Z',
-  heightCm: 180,
-  profileImageUrl: null,
-  spotifyPlaylistUrl: null,
-  allowAutoPlaylist: false,
-  restTimerSoundEnabled: true,
-  showPrToast: true,
-  confirmIncompleteFinish: true,
-  spotifyConnected: false,
-  spotifyDisplayName: null,
-  spotifyPlaylistName: null,
-  latestWeightKg: 75,
-  bmi: 23.1,
-  bmiCategory: 'NORMAL',
-}
+const mockUser: UserPublic = createUserPublic()
 
 const mockProfile: UserProfile = {
   ...mockUser,

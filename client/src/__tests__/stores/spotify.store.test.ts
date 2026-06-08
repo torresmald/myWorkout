@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import * as spotifyApi from '@/api/spotify.api'
 import { setupTestPinia } from '@/__tests__/helpers/mount-test-app'
+import { createUserProfile } from '@/__tests__/fixtures/profile.fixture'
 import type { UserProfile } from '@/interfaces/profile.interface'
 import type { SpotifyConnectionPublic } from '@/interfaces/spotify.interface'
 import { useAuthStore } from '@/stores/auth.store'
@@ -28,29 +29,13 @@ const mockConnection: SpotifyConnectionPublic = {
   workoutPlaylistUrl: 'https://open.spotify.com/playlist/1',
 }
 
-const mockProfile: UserProfile = {
-  id: 1,
-  email: 'user@example.com',
-  name: 'Test User',
-  role: 'USER',
-  locale: 'es',
-  createdAt: '2026-01-01T00:00:00.000Z',
-    heightCm: null,
-    targetWeightKg: null,
-    profileImageUrl: null,
-  spotifyPlaylistUrl: null,
-  allowAutoPlaylist: false,
-  restTimerSoundEnabled: true,
-  showPrToast: true,
-  confirmIncompleteFinish: true,
-  spotifyConnected: false,
-  spotifyDisplayName: null,
-  spotifyPlaylistName: null,
+const mockProfile: UserProfile = createUserProfile({
+  heightCm: null,
   latestWeightKg: null,
   bmi: null,
   bmiCategory: null,
   weightEntries: [],
-}
+})
 
 describe('spotify store', () => {
   beforeEach(() => {

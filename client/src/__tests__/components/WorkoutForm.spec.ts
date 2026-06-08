@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 
 import { createExerciseType } from '@/__tests__/fixtures/exercise-type.fixture'
-import { createWorkout, createWorkoutExercise } from '@/__tests__/fixtures/workout.fixture'
+import { createWorkoutListItem, createWorkout, createWorkoutExercise } from '@/__tests__/fixtures/workout.fixture'
 import { getExposed } from '@/__tests__/helpers/component-vm'
 import { mountWithPlugins } from '@/__tests__/helpers/mount-test-app'
 import * as exerciseTypeApi from '@/api/exercise-type.api'
@@ -49,7 +49,7 @@ vi.mock('@/utils/rest-timer-sound.util', () => ({
 }))
 
 const mockExerciseType = createExerciseType()
-const mockWorkout = createWorkout()
+const mockWorkout = createWorkoutListItem()
 const mockExercise = createWorkoutExercise()
 
 type WorkoutFormExposed = {
@@ -328,7 +328,7 @@ describe('WorkoutForm', () => {
 
     expect(wrapper.text()).toContain(i18n.global.t('common.saving'))
 
-    resolveUpdate!(createWorkout({ id: 1, name: 'Push updated' }))
+    resolveUpdate!(createWorkoutListItem({ id: 1, name: 'Push updated' }))
     await flushPromises()
   })
 

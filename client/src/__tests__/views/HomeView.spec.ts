@@ -1,7 +1,7 @@
 import { flushPromises } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { createWorkout } from '@/__tests__/fixtures/workout.fixture'
+import { createWorkoutListItem } from '@/__tests__/fixtures/workout.fixture'
 import { createUserPublic } from '@/__tests__/fixtures/profile.fixture'
 import { mountWithPlugins, setupTestPinia } from '@/__tests__/helpers/mount-test-app'
 import * as workoutApi from '@/api/workout.api'
@@ -20,7 +20,7 @@ vi.mock('@/api/workout.api', () => ({
 
 describe('HomeView', () => {
   beforeEach(() => {
-    vi.mocked(workoutApi.getWorkouts).mockResolvedValue([createWorkout()])
+    vi.mocked(workoutApi.getWorkouts).mockResolvedValue([createWorkoutListItem()])
   })
 
   it('muestra saludo y enlaces rápidos', async () => {

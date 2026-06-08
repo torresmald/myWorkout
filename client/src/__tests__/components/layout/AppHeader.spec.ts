@@ -9,32 +9,19 @@ import {
   navigateTo,
   setupTestPinia,
 } from '@/__tests__/helpers/mount-test-app'
+import { createUserPublic } from '@/__tests__/fixtures/profile.fixture'
 import type { UserPublic } from '@/interfaces/auth.interface'
 import { useAuthStore } from '@/stores/auth.store'
 import { useToastStore } from '@/stores/toast.store'
 
-const mockUser: UserPublic = {
-  id: 1,
+const mockUser: UserPublic = createUserPublic({
   email: 'ana@test.com',
   name: 'Ana Test',
-  role: 'USER',
-  locale: 'es',
-  createdAt: '2026-01-01T00:00:00.000Z',
-    heightCm: null,
-    targetWeightKg: null,
-    profileImageUrl: null,
-  spotifyPlaylistUrl: null,
-  allowAutoPlaylist: false,
-  restTimerSoundEnabled: true,
-  showPrToast: true,
-  confirmIncompleteFinish: true,
-  spotifyConnected: false,
-  spotifyDisplayName: null,
-  spotifyPlaylistName: null,
+  heightCm: null,
   latestWeightKg: null,
   bmi: null,
   bmiCategory: null,
-}
+})
 
 describe('AppHeader', () => {
   let wrapper: ReturnType<typeof mount> | undefined

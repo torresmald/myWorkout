@@ -1,34 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { setupTestPinia } from '@/__tests__/helpers/mount-test-app'
+import { createUserPublic } from '@/__tests__/fixtures/profile.fixture'
 import router from '@/router/index'
 import { useAuthStore } from '@/stores/auth.store'
 import type { UserPublic } from '@/interfaces/auth.interface'
 import * as storageUtil from '@/utils/storage.util'
 import * as documentTitleUtil from '@/utils/document-title.util'
 
-const mockUser: UserPublic = {
-  id: 1,
-  email: 'user@example.com',
-  name: 'Test User',
-  role: 'USER',
-  locale: 'es',
-  createdAt: '2026-01-01T00:00:00.000Z',
-    heightCm: null,
-    targetWeightKg: null,
-    profileImageUrl: null,
-  spotifyPlaylistUrl: null,
-  allowAutoPlaylist: false,
-  restTimerSoundEnabled: true,
-  showPrToast: true,
-  confirmIncompleteFinish: true,
-  spotifyConnected: false,
-  spotifyDisplayName: null,
-  spotifyPlaylistName: null,
+const mockUser: UserPublic = createUserPublic({
+  heightCm: null,
   latestWeightKg: null,
   bmi: null,
   bmiCategory: null,
-}
+})
 
 function createAdminUser(): UserPublic {
   return { ...mockUser, role: 'ADMIN' }
